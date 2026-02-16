@@ -1,0 +1,50 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual environment
+venv/
+.venv/
+env/
+
+# Environment files
+.env
+.env.local
+.env.production
+
+# Database
+*.db
+*.sqlite3
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+logs/*.log
+
+# Cache
+cache/
+.cache/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Raw data (too large for git, regenerate with fetch_hubspot.py)
+data/raw/
+
+# Test artifacts
+.pytest_cache/
+htmlcov/
+.coverage
+test_*.db
