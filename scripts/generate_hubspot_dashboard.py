@@ -71,6 +71,52 @@ CHART_PALETTE = [
 ]
 
 # ---------------------------------------------------------------------------
+# Module Registry — single source of truth for pages, sidebar, builders
+# ---------------------------------------------------------------------------
+# Each module: id, label (sidebar), group, group_icon, builder function name (resolved later)
+
+MODULES = [
+    {"id": "executive",         "label": "Executive Summary",    "group": "Overview",      "icon": "&#9679;"},
+    {"id": "leads",             "label": "Leads & Sources",      "group": "Sales",         "icon": "&#9733;"},
+    {"id": "funnel",            "label": "Qualified Leads",      "group": "Sales",         "icon": "&#9733;"},
+    {"id": "pipeline",          "label": "Pipeline View",        "group": "Sales",         "icon": "&#9733;"},
+    {"id": "targets",           "label": "Targets & Rev Eng",    "group": "Planning",      "icon": "&#9881;"},
+    {"id": "activities",        "label": "Activity Tracking",    "group": "Activity",      "icon": "&#9993;"},
+    {"id": "contacts",          "label": "Contacts & Co.",       "group": "Activity",      "icon": "&#9993;"},
+    {"id": "insights",          "label": "Insights & Forecast",  "group": "Intelligence",  "icon": "&#10024;"},
+    {"id": "monday-pipeline",   "label": "M&A Pipeline",         "group": "M&A",           "icon": "&#128188;"},
+    {"id": "monday-ic",         "label": "IC Scorecards",        "group": "M&A",           "icon": "&#128188;"},
+    {"id": "monday-workspaces", "label": "Workspaces",           "group": "M&A",           "icon": "&#128188;"},
+    {"id": "ai-roadmap",        "label": "AI Roadmap",           "group": "AI",            "icon": "&#129302;"},
+    {"id": "inbound-queue",     "label": "Inbound Queue",        "group": "Actions",       "icon": "&#9889;"},
+    {"id": "quick-actions",     "label": "Quick Actions",        "group": "Actions",       "icon": "&#9889;"},
+]
+
+# Builder function map — populated after function definitions (see bottom of section builders)
+_MODULE_BUILDERS: Dict[str, Any] = {}
+
+
+def _register_builders() -> None:
+    """Map module IDs to their builder functions. Called once at generation time."""
+    _MODULE_BUILDERS.update({
+        "executive":         _build_executive_summary,
+        "leads":             _build_leads_section,
+        "funnel":            _build_funnel_section,
+        "targets":           _build_target_section,
+        "pipeline":          _build_pipeline_section,
+        "activities":        _build_activity_section,
+        "contacts":          _build_contacts_section,
+        "insights":          _build_insights_section,
+        "monday-pipeline":   _build_monday_pipeline,
+        "monday-ic":         _build_monday_ic,
+        "monday-workspaces": _build_monday_workspaces,
+        "ai-roadmap":        _build_ai_section,
+        "inbound-queue":     _build_inbound_queue,
+        "quick-actions":     _build_quick_actions,
+    })
+
+
+# ---------------------------------------------------------------------------
 # Utility helpers
 # ---------------------------------------------------------------------------
 
@@ -575,27 +621,31 @@ def _stat_card(
     icon: str = "",
     color: str = "#3CB4AD",
     sparkline_values: Optional[List[float]] = None,
+    nav_page: str = "",
 ) -> str:
-    """Metric KPI card with optional sparkline."""
+    """Metric KPI card with optional sparkline and clickable navigation (#40)."""
     spark_html = ""
     if sparkline_values and len(sparkline_values) >= 2:
-        spark_html = f'''<div style="margin-top:8px">
-            {_svg_sparkline(sparkline_values, 130, 32, color)}
+        spark_html = f'''<div style="margin-top:6px">
+            {_svg_sparkline(sparkline_values, 130, 28, color)}
         </div>'''
 
     icon_html = ""
     if icon:
-        icon_html = f'''<div style="width:30px;height:30px;border-radius:8px;
+        icon_html = f'''<div style="width:26px;height:26px;border-radius:6px;
             background:linear-gradient(135deg,{color}22,{color}11);
             display:flex;align-items:center;justify-content:center;
-            font-size:14px;flex-shrink:0;margin-bottom:4px;
+            font-size:13px;flex-shrink:0;margin-bottom:3px;
             border:1px solid {color}33">{icon}</div>'''
 
-    return f'''<div class="stat-card" style="--accent:{color}">
+    nav_attr = f' data-nav-page="{nav_page}"' if nav_page else ""
+    nav_hint = f' title="Click to view {title}"' if nav_page else ""
+
+    return f'''<div class="stat-card" style="--accent:{color}"{nav_attr}{nav_hint}>
         {icon_html}
         <div style="font-size:10px;color:{COLORS['text_muted']};text-transform:uppercase;
-                    letter-spacing:0.05em;margin-bottom:2px">{_esc(title)}</div>
-        <div data-role="stat-value" style="font-size:22px;font-weight:800;color:{COLORS['text']};
+                    letter-spacing:0.05em;margin-bottom:1px">{_esc(title)}</div>
+        <div data-role="stat-value" style="font-size:20px;font-weight:800;color:{COLORS['text']};
                     line-height:1.1;margin-bottom:1px">{_esc(value)}</div>
         <div style="font-size:11px;color:{COLORS['text_muted']}">{_esc(subtitle)}</div>
         {spark_html}
@@ -656,7 +706,7 @@ def _progress_bar(
         value_text = f'''<span style="font-weight:600;color:{COLORS['text']}">
             {_fmt_number(value)} / {_fmt_number(max_val)}</span>'''
 
-    return f'''<div style="margin-bottom:12px">
+    return f'''<div style="margin-bottom:8px">
         <div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:13px">
             <span style="color:{COLORS['text_muted']}">{_esc(label)}</span>
             {value_text}
@@ -724,68 +774,112 @@ def _build_executive_summary(data: dict) -> str:
                            "Key performance indicators at a glance",
                            "\U0001F4CA")
 
-    # Row 1 - Primary KPIs
+    # Row 1 - Primary KPIs (clickable — navigate to relevant pages)
     html += '<div class="kpi-grid">'
     html += _stat_card("Pipeline Value", _fmt_currency(pipeline.get("total_pipeline_value", 0)),
                        f"Weighted: {_fmt_currency(pipeline.get('weighted_pipeline_value', 0))}",
-                       "\U0001F4B0", COLORS['accent'])
+                       "\U0001F4B0", COLORS['accent'], nav_page="pipeline")
     html += _stat_card("Win Rate", _fmt_pct(pipeline.get("win_rate", 0)),
                        f"Won: {pipeline.get('won_deals_count', 0)} | Lost: {pipeline.get('lost_deals_count', 0)}",
-                       "\U0001F3AF", COLORS['accent4'])
+                       "\U0001F3AF", COLORS['accent4'], nav_page="insights")
     html += _stat_card("Open Deals", _fmt_number(pipeline.get("open_deals_count", 0)),
                        f"Avg size: {_fmt_currency(pipeline.get('avg_deal_size', 0))}",
-                       "\U0001F4C1", COLORS['accent2'])
+                       "\U0001F4C1", COLORS['accent2'], nav_page="pipeline")
     html += _stat_card("Total Activities", _fmt_number(activity.get("total_activities", 0)),
                        f"Touches/won deal: {_fmt_number(activity.get('touches_per_won_deal', 0))}",
                        "\u26A1", COLORS['accent3'],
-                       activity_sparkline)
+                       activity_sparkline, nav_page="activities")
     html += '</div>'
 
-    # Row 2 - Secondary KPIs
+    # Row 2 - Secondary KPIs (clickable)
     html += '<div class="kpi-grid">'
     html += _stat_card("Total Contacts", _fmt_number(counts.get("contacts", 0)),
                        f"New 30d: {_fmt_number(_safe_get(contacts, 'new_contacts_30d', default=0))}",
-                       "\U0001F465", COLORS['accent5'])
-    html += _stat_card("Avg Deal Size", _fmt_currency(pipeline.get("avg_deal_size", 0)),
-                       f"Cycle: {_fmt_number(pipeline.get('avg_sales_cycle_days', 0))} days",
-                       "\U0001F4B7", COLORS['accent6'])
+                       "\U0001F465", COLORS['accent5'], nav_page="contacts")
     html += _stat_card("Total Leads", _fmt_number(leads.get("total_leads", 0)),
                        f"New 30d: {_fmt_number(leads.get('new_leads_30d', 0))}",
                        "\U0001F4E5", COLORS['info'],
-                       lead_sparkline)
+                       lead_sparkline, nav_page="leads")
+    html += _stat_card("Avg Deal Size", _fmt_currency(pipeline.get("avg_deal_size", 0)),
+                       f"Cycle: {_fmt_number(pipeline.get('avg_sales_cycle_days', 0))} days",
+                       "\U0001F4B7", COLORS['accent6'], nav_page="targets")
     html += _stat_card("30-Day Forecast", _fmt_currency(forecast.get("days_30", 0)),
                        f"90d: {_fmt_currency(forecast.get('days_90', 0))}",
-                       "\U0001F52E", COLORS['warning'])
+                       "\U0001F52E", COLORS['warning'], nav_page="insights")
     html += '</div>'
 
-    # Dynamic charts row (populated by JS)
-    html += f'''<div class="grid-2" style="margin-top:16px">
+    # Actionable Priorities Panel — surfaces what needs attention right now
+    monday = data.get("monday", {})
+    ma_data = monday.get("ma_metrics", {}) if monday else {}
+    ic_data = monday.get("ic_metrics", {}) if monday else {}
+    stale_projects = ma_data.get("stale_projects", [])
+    ic_items_no_decision = [i for i in ic_data.get("items", []) if not i.get("decisions")]
+    queue_file_path = BASE_DIR / "data" / "processed" / "inbound_queue.json"
+    critical_count = 0
+    if queue_file_path.exists():
+        try:
+            with open(queue_file_path, "r", encoding="utf-8") as qf:
+                q_data = json.load(qf)
+            critical_count = q_data.get("priority_breakdown", {}).get("critical", 0)
+        except Exception:
+            pass
+
+    priorities = []
+    if critical_count > 0:
+        priorities.append(f'<span style="color:{COLORS["danger"]};font-weight:700">{critical_count}</span> critical items in inbound queue')
+    if len(stale_projects) > 0:
+        priorities.append(f'<span style="color:{COLORS["warning"]};font-weight:700">{len(stale_projects)}</span> stale M&A projects need follow-up')
+    if len(ic_items_no_decision) > 0:
+        priorities.append(f'<span style="color:{COLORS["accent2"]};font-weight:700">{len(ic_items_no_decision)}</span> IC items awaiting decision')
+
+    stale_deals = pipeline.get("stale_deals", [])
+    if stale_deals:
+        priorities.append(f'<span style="color:{COLORS["warning"]};font-weight:700">{len(stale_deals)}</span> stale deals in pipeline (>30d in stage)')
+
+    if priorities:
+        priority_items = "".join(
+            f'<div style="display:flex;align-items:center;gap:6px;padding:4px 0;font-size:12px">'
+            f'<span style="color:{COLORS["danger"]}">&#9679;</span> {p}</div>'
+            for p in priorities[:6]
+        )
+        html += f'''<div class="glass-card alert-card" style="margin-top:8px;border-left-color:{COLORS["danger"]}">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+                <div class="card-title" style="margin-bottom:0">&#9888; Action Required</div>
+                <a href="javascript:void(0)" onclick="showPage('inbound-queue')"
+                   style="font-size:11px;color:{COLORS['accent']};text-decoration:none;font-weight:600">
+                   View Inbound Queue &#8594;</a>
+            </div>
+            {priority_items}
+        </div>'''
+
+    # Compact 2x2 trend charts (tighter layout)
+    html += f'''<div class="grid-2" style="margin-top:8px">
         <div class="glass-card">
-            <div class="card-title">Leads Trend <span style="font-size:11px;font-weight:400;color:{COLORS['text_muted']}">(filtered)</span></div>
+            <div class="card-title">Leads Trend <span style="font-size:10px;font-weight:400;color:{COLORS['text_muted']}">(filtered)</span></div>
             <div id="dynamic-leads-sparkline"></div>
         </div>
         <div class="glass-card">
-            <div class="card-title">Revenue Trend <span style="font-size:11px;font-weight:400;color:{COLORS['text_muted']}">(filtered)</span></div>
+            <div class="card-title">Revenue Trend <span style="font-size:10px;font-weight:400;color:{COLORS['text_muted']}">(filtered)</span></div>
             <div id="dynamic-revenue-sparkline"></div>
         </div>
     </div>'''
-    html += f'''<div class="grid-2" style="margin-top:16px">
+    html += f'''<div class="grid-2" style="margin-top:8px">
         <div class="glass-card">
-            <div class="card-title">Deals Created <span style="font-size:11px;font-weight:400;color:{COLORS['text_muted']}">(filtered)</span></div>
+            <div class="card-title">Deals Created <span style="font-size:10px;font-weight:400;color:{COLORS['text_muted']}">(filtered)</span></div>
             <div id="dynamic-deals-sparkline"></div>
         </div>
         <div class="glass-card">
-            <div class="card-title">Activity Trend <span style="font-size:11px;font-weight:400;color:{COLORS['text_muted']}">(filtered)</span></div>
+            <div class="card-title">Activity Trend <span style="font-size:10px;font-weight:400;color:{COLORS['text_muted']}">(filtered)</span></div>
             <div id="dynamic-activity-sparkline"></div>
         </div>
     </div>'''
 
-    # Revenue target progress
+    # Revenue target progress (compact)
     rev_target = _safe_get(rev_eng, "revenue_target", default={})
     monthly_target = rev_target.get("monthly", 100000)
     weighted = pipeline.get("weighted_pipeline_value", 0)
-    html += f'''<div class="glass-card" style="margin-top:16px">
-        <h3 style="font-size:14px;color:{COLORS['text_muted']};margin-bottom:12px;
+    html += f'''<div class="glass-card" style="margin-top:8px">
+        <h3 style="font-size:11px;color:{COLORS['text_muted']};margin-bottom:8px;
             text-transform:uppercase;letter-spacing:0.05em">Revenue Target Progress</h3>
         {_progress_bar(weighted, monthly_target, COLORS['accent4'],
                        f"Weighted Pipeline vs Monthly Target ({_fmt_currency(monthly_target)})")}
@@ -816,7 +910,7 @@ def _build_leads_section(data: dict) -> str:
     html += '</div>'
 
     # Dynamic leads by source (JS-filtered)
-    html += f'''<div class="glass-card" style="margin-top:16px">
+    html += f'''<div class="glass-card" style="margin-top:8px">
         <h3 class="card-title">Leads by Source <span style="font-size:11px;font-weight:400;color:{COLORS['text_muted']}">(filtered by period)</span></h3>
         <div id="dynamic-leads-by-source"></div>
     </div>'''
@@ -825,7 +919,7 @@ def _build_leads_section(data: dict) -> str:
     sources = leads.get("leads_by_source", {})
     if sources:
         source_data = sorted(sources.items(), key=lambda x: x[1], reverse=True)[:12]
-        html += f'''<div class="grid-2" style="margin-top:16px">
+        html += f'''<div class="grid-2" style="margin-top:8px">
             <div class="glass-card">
                 <h3 class="card-title">Leads by Source (All Time)</h3>
                 {_svg_bar_chart(source_data, 500, max(200, len(source_data) * 40))}
@@ -840,7 +934,7 @@ def _build_leads_section(data: dict) -> str:
     leads_over_time = leads.get("leads_over_time", [])
     if leads_over_time:
         trend_data = [(item.get("month", ""), item.get("count", 0)) for item in leads_over_time]
-        html += f'''<div class="glass-card" style="margin-top:16px">
+        html += f'''<div class="glass-card" style="margin-top:8px">
             <h3 class="card-title">New Leads Over Time</h3>
             {_svg_line_chart(trend_data, 700, 250, COLORS['accent'])}
         </div>'''
@@ -848,7 +942,7 @@ def _build_leads_section(data: dict) -> str:
     # Lead status distribution
     status_dist = leads.get("lead_status_distribution", {})
     if status_dist:
-        html += f'''<div class="glass-card" style="margin-top:16px">
+        html += f'''<div class="glass-card" style="margin-top:8px">
             <h3 class="card-title">Lead Status Distribution</h3>'''
         max_status = max(status_dist.values()) if status_dist else 1
         for status, count in sorted(status_dist.items(), key=lambda x: x[1], reverse=True):
@@ -866,7 +960,7 @@ def _build_leads_section(data: dict) -> str:
                 _fmt_number(item.get("mql_count", 0)),
                 _fmt_pct(item.get("conversion_rate", 0)),
             ])
-        html += f'''<div class="glass-card" style="margin-top:16px">
+        html += f'''<div class="glass-card" style="margin-top:8px">
             <h3 class="card-title">Source Effectiveness</h3>
             {_data_table(["Source", "Leads", "MQLs", "Conversion Rate"], rows, "source_eff")}
         </div>'''
@@ -913,7 +1007,7 @@ def _build_funnel_section(data: dict) -> str:
 
     # Conversion rates detail
     if conversion_rates:
-        html += f'''<div class="glass-card" style="margin-top:16px">
+        html += f'''<div class="glass-card" style="margin-top:8px">
             <h3 class="card-title">Stage Conversion Rates</h3>
             <div class="kpi-grid kpi-grid-3">'''
         rate_labels = {
@@ -932,7 +1026,7 @@ def _build_funnel_section(data: dict) -> str:
     # Time in stage
     time_in_stage = leads.get("time_in_stage", {})
     if time_in_stage:
-        html += f'''<div class="glass-card" style="margin-top:16px">
+        html += f'''<div class="glass-card" style="margin-top:8px">
             <h3 class="card-title">Average Time in Stage (days)</h3>'''
         safe_vals = [v for v in time_in_stage.values() if v is not None and v > 0]
         max_days = max(safe_vals) if safe_vals else 1
@@ -978,7 +1072,7 @@ def _build_target_section(data: dict) -> str:
         ("Required Opps", rev_eng.get("required_opps", 0), COLORS['accent5']),
         ("Required Deals", rev_eng.get("required_deals", 0), COLORS['accent4']),
     ]
-    html += '''<div class="glass-card" style="margin-top:16px">
+    html += '''<div class="glass-card" style="margin-top:8px">
         <h3 class="card-title">Required Volume Chain (Monthly)</h3>
         <div class="volume-chain">'''
     for i, (label, val, color) in enumerate(chain_items):
@@ -993,7 +1087,7 @@ def _build_target_section(data: dict) -> str:
     # Gap analysis
     gap = rev_eng.get("gap_analysis", {})
     if gap:
-        html += f'''<div class="glass-card" style="margin-top:16px">
+        html += f'''<div class="glass-card" style="margin-top:8px">
             <h3 class="card-title">Gap Analysis</h3>'''
         for key, val in gap.items():
             label = key.replace("_", " ").title()
@@ -1012,7 +1106,7 @@ def _build_target_section(data: dict) -> str:
     daily = rev_eng.get("daily_requirements", {})
     weekly = rev_eng.get("weekly_requirements", {})
     if daily or weekly:
-        html += '''<div class="grid-2" style="margin-top:16px">'''
+        html += '''<div class="grid-2" style="margin-top:8px">'''
         if daily:
             html += f'''<div class="glass-card">
                 <h3 class="card-title">Daily Requirements</h3>'''
@@ -1048,9 +1142,9 @@ def _build_target_section(data: dict) -> str:
                 _fmt_number(s.get("required_leads", 0)),
                 _fmt_number(s.get("leads_saved", 0)),
             ])
-        html += f'''<div class="glass-card" style="margin-top:16px">
+        html += f'''<div class="glass-card" style="margin-top:8px">
             <h3 class="card-title">What-If Scenarios</h3>
-            <p style="font-size:12px;color:{COLORS['text_muted']};margin-bottom:12px">
+            <p style="font-size:12px;color:{COLORS['text_muted']};margin-bottom:8px">
                 Impact of improving lead-to-MQL conversion rate</p>
             {_data_table(["Improvement", "New Rate", "Leads Needed", "Leads Saved"], rows, "whatif")}
         </div>'''
@@ -1084,7 +1178,7 @@ def _build_pipeline_section(data: dict) -> str:
     # Pipeline velocity
     velocity = pipeline.get("pipeline_velocity", {})
     if velocity and isinstance(velocity, dict):
-        html += f'''<div class="glass-card" style="margin-top:16px">
+        html += f'''<div class="glass-card" style="margin-top:8px">
             <h3 class="card-title">Pipeline Velocity</h3>
             <div class="kpi-grid kpi-grid-3">'''
         for key, val in velocity.items():
@@ -1112,7 +1206,7 @@ def _build_pipeline_section(data: dict) -> str:
                 _fmt_pct(s.get("probability", 0)),
                 _fmt_number(s.get("avg_days_in_stage", 0)),
             ])
-        html += f'''<div class="glass-card" style="margin-top:16px">
+        html += f'''<div class="glass-card" style="margin-top:8px">
             <h3 class="card-title">Deals by Stage</h3>
             {_data_table(["Stage", "Deals", "Value", "Weighted", "Probability", "Avg Days"],
                          rows, "pipeline_stages")}
@@ -1120,7 +1214,7 @@ def _build_pipeline_section(data: dict) -> str:
 
         # Visual stage bars
         max_stage_val = max((s.get("value", 0) for s in stages), default=1) or 1
-        html += f'''<div class="glass-card" style="margin-top:16px">
+        html += f'''<div class="glass-card" style="margin-top:8px">
             <h3 class="card-title">Stage Value Distribution</h3>'''
         for i, s in enumerate(stages):
             html += _svg_horizontal_bar(
@@ -1145,7 +1239,7 @@ def _build_pipeline_section(data: dict) -> str:
                 _fmt_currency(rep.get("avg_deal_size", 0)),
                 _fmt_pct(rep.get("win_rate", 0)),
             ])
-        html += f'''<div class="glass-card" style="margin-top:16px">
+        html += f'''<div class="glass-card" style="margin-top:8px">
             <h3 class="card-title">Pipeline by Rep</h3>
             {_data_table(["Rep", "Deals", "Total Value", "Weighted", "Avg Deal", "Win Rate"],
                          rows, "pipeline_reps")}
@@ -1154,11 +1248,11 @@ def _build_pipeline_section(data: dict) -> str:
     # Stale deals
     stale = pipeline.get("stale_deals", [])
     if stale:
-        html += f'''<div class="glass-card alert-card" style="margin-top:16px;
+        html += f'''<div class="glass-card alert-card" style="margin-top:8px;
             border-color:{COLORS['warning']}44">
             <h3 class="card-title" style="color:{COLORS['warning']}">
                 \u26A0 Stale Deals ({len(stale)})</h3>
-            <p style="font-size:12px;color:{COLORS['text_muted']};margin-bottom:12px">
+            <p style="font-size:12px;color:{COLORS['text_muted']};margin-bottom:8px">
                 Deals with no activity beyond threshold</p>'''
         stale_rows = []
         for d in stale[:20]:
@@ -1177,7 +1271,7 @@ def _build_pipeline_section(data: dict) -> str:
     close_dist = pipeline.get("close_date_distribution", {})
     if close_dist:
         chart_data = [(k, v) for k, v in sorted(close_dist.items())]
-        html += f'''<div class="glass-card" style="margin-top:16px">
+        html += f'''<div class="glass-card" style="margin-top:8px">
             <h3 class="card-title">Expected Close Date Distribution</h3>
             {_svg_line_chart(chart_data, 700, 220, COLORS['accent2'])}
         </div>'''
@@ -1220,7 +1314,7 @@ def _build_activity_section(data: dict) -> str:
     html += '</div>'
 
     # Dynamic activity breakdown (JS-filtered)
-    html += f'''<div class="glass-card" style="margin-top:16px">
+    html += f'''<div class="glass-card" style="margin-top:8px">
         <h3 class="card-title">Activity Breakdown <span style="font-size:11px;font-weight:400;color:{COLORS['text_muted']}">(filtered by period)</span></h3>
         <div id="dynamic-activity-breakdown"></div>
     </div>'''
@@ -1228,13 +1322,13 @@ def _build_activity_section(data: dict) -> str:
     # Activity by type donut
     if by_type:
         type_segments = [(k.title(), v) for k, v in sorted(by_type.items(), key=lambda x: x[1], reverse=True)]
-        html += f'''<div class="grid-2" style="margin-top:16px">
+        html += f'''<div class="grid-2" style="margin-top:8px">
             <div class="glass-card">
                 <h3 class="card-title">Activity Distribution</h3>
                 {_svg_donut(type_segments, 260)}
             </div>'''
     else:
-        html += '<div class="grid-2" style="margin-top:16px"><div></div>'
+        html += '<div class="grid-2" style="margin-top:8px"><div></div>'
 
     # Activity trend
     daily_trend = activity.get("daily_trend", [])
@@ -1262,7 +1356,7 @@ def _build_activity_section(data: dict) -> str:
                 _fmt_number(rep.get("notes", 0)),
                 f'<strong>{_fmt_number(rep.get("total", 0))}</strong>',
             ])
-        html += f'''<div class="glass-card" style="margin-top:16px">
+        html += f'''<div class="glass-card" style="margin-top:8px">
             <h3 class="card-title">Activity by Rep</h3>
             {_data_table(["Rep", "Calls", "Emails", "Meetings", "Tasks", "Notes", "Total"],
                          rows, "activity_reps")}
@@ -1295,7 +1389,7 @@ def _build_contacts_section(data: dict) -> str:
     lifecycle = contacts.get("by_lifecycle", {})
     if lifecycle:
         lc_segments = sorted(lifecycle.items(), key=lambda x: x[1], reverse=True)
-        html += f'''<div class="grid-2" style="margin-top:16px">
+        html += f'''<div class="grid-2" style="margin-top:8px">
             <div class="glass-card">
                 <h3 class="card-title">Lifecycle Distribution</h3>
                 {_svg_donut(lc_segments, 260)}
@@ -1319,7 +1413,7 @@ def _build_contacts_section(data: dict) -> str:
                 _fmt_number(c.get("visits", 0)),
                 _fmt_number(c.get("events", 0)),
             ])
-        html += f'''<div class="glass-card" style="margin-top:16px">
+        html += f'''<div class="glass-card" style="margin-top:8px">
             <h3 class="card-title">Top Engaged Contacts</h3>
             {_data_table(["Name", "Email", "Page Views", "Visits", "Events"],
                          rows, "top_engaged")}
@@ -1330,7 +1424,7 @@ def _build_contacts_section(data: dict) -> str:
     if companies:
         if isinstance(companies, dict):
             # Summary object format: {total, with_deals, by_industry, by_size}
-            html += f'''<div class="glass-card" style="margin-top:16px">
+            html += f'''<div class="glass-card" style="margin-top:8px">
                 <h3 class="card-title">Companies Overview</h3>
                 <div class="kpi-grid kpi-grid-3">'''
             html += _stat_card("Total", _fmt_number(companies.get("total", 0)), "", "", COLORS['accent2'])
@@ -1350,7 +1444,7 @@ def _build_contacts_section(data: dict) -> str:
                     _fmt_number(co.get("deals", 0)),
                     _fmt_currency(co.get("revenue", 0)),
                 ])
-            html += f'''<div class="glass-card" style="margin-top:16px">
+            html += f'''<div class="glass-card" style="margin-top:8px">
                 <h3 class="card-title">Companies Summary</h3>
                 {_data_table(["Company", "Domain", "Contacts", "Deals", "Revenue"],
                              rows, "companies")}
@@ -1382,7 +1476,7 @@ def _build_insights_section(data: dict) -> str:
     # Win/Loss analysis
     wl = insights.get("win_loss_analysis", {})
     if wl:
-        html += f'''<div class="grid-2" style="margin-top:16px">
+        html += f'''<div class="grid-2" style="margin-top:8px">
             <div class="glass-card">
                 <h3 class="card-title">Win/Loss Analysis</h3>
                 {_svg_donut([
@@ -1424,7 +1518,7 @@ def _build_insights_section(data: dict) -> str:
     cycle_trend = insights.get("sales_cycle_trend", [])
     if cycle_trend:
         trend_data = [(item.get("month", ""), item.get("avg_days", 0)) for item in cycle_trend]
-        html += f'''<div class="glass-card" style="margin-top:16px">
+        html += f'''<div class="glass-card" style="margin-top:8px">
             <h3 class="card-title">Sales Cycle Trend (Avg Days)</h3>
             {_svg_line_chart(trend_data, 700, 220, COLORS['accent3'])}
         </div>'''
@@ -1433,7 +1527,7 @@ def _build_insights_section(data: dict) -> str:
     deal_sizes = insights.get("deal_size_distribution", [])
     if deal_sizes:
         size_data = [(item.get("range", ""), item.get("count", 0)) for item in deal_sizes]
-        html += f'''<div class="glass-card" style="margin-top:16px">
+        html += f'''<div class="glass-card" style="margin-top:8px">
             <h3 class="card-title">Deal Size Distribution</h3>
             {_svg_bar_chart(size_data, 600, max(200, len(size_data) * 45))}
         </div>'''
@@ -1453,7 +1547,7 @@ def _build_insights_section(data: dict) -> str:
                 _fmt_currency(rep.get("avg_deal_size", 0)),
                 _fmt_number(rep.get("avg_cycle_days", 0)),
             ])
-        html += f'''<div class="glass-card" style="margin-top:16px">
+        html += f'''<div class="glass-card" style="margin-top:8px">
             <h3 class="card-title">Rep Performance Leaderboard</h3>
             {_data_table(["Rep", "Won", "Lost", "Revenue", "Win Rate", "Avg Deal", "Avg Cycle"],
                          rows, "rep_perf")}
@@ -1472,7 +1566,7 @@ def _build_insights_section(data: dict) -> str:
                 _fmt_number(c.get("became_customer", 0)),
                 _fmt_pct(c.get("conversion_rate", 0)),
             ])
-        html += f'''<div class="glass-card" style="margin-top:16px">
+        html += f'''<div class="glass-card" style="margin-top:8px">
             <h3 class="card-title">Cohort Analysis</h3>
             {_data_table(["Cohort", "Leads", "MQL", "SQL", "Customer", "Conv. Rate"],
                          rows, "cohorts")}
@@ -1630,7 +1724,7 @@ def _build_monday_pipeline(data: dict) -> str:
     html += '</div>'
 
     # ── Search & Filter Bar ──
-    html += f'''<div class="glass-card" style="margin-top:16px;padding:12px 16px">
+    html += f'''<div class="glass-card" style="margin-top:8px;padding:12px 16px">
         <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center">
             <input type="text" id="monday-search" placeholder="Search projects, owners, boards..."
                 style="flex:1;min-width:200px;padding:8px 12px;border:1px solid {COLORS['card_border']};
@@ -1679,7 +1773,7 @@ def _build_monday_pipeline(data: dict) -> str:
                     </div>
                 </div>'''
 
-            html += f'''<div class="glass-card" style="margin-top:16px">
+            html += f'''<div class="glass-card" style="margin-top:8px">
                 <h3 class="card-title" style="display:flex;align-items:center;gap:8px">
                     <span style="color:{MONDAY_PURPLE}">\U0001F3E2</span> Deal Pipeline by Stage
                 </h3>
@@ -1776,7 +1870,7 @@ def _build_monday_pipeline(data: dict) -> str:
                 </button>
             </div>'''
 
-        html += f'''<div class="glass-card" style="margin-top:16px;padding:0;overflow:hidden">
+        html += f'''<div class="glass-card" style="margin-top:8px;padding:0;overflow:hidden">
             <div style="padding:16px 20px;border-bottom:1px solid {COLORS['card_border']}">
                 <h3 class="card-title" style="margin-bottom:0">\U0001F3AF Active M&A Projects
                     <span id="monday-count" style="font-size:13px;font-weight:400;color:{COLORS['text_muted']}">
@@ -1824,7 +1918,7 @@ def _build_monday_pipeline(data: dict) -> str:
                     cursor:pointer">Show all {len(stale)} ({remaining} more)</button>
             </div>'''
 
-        html += f'''<div class="glass-card" style="margin-top:16px;border:1px solid {MONDAY_RED}44">
+        html += f'''<div class="glass-card" style="margin-top:8px;border:1px solid {MONDAY_RED}44">
             <h3 class="card-title" style="color:{MONDAY_RED}">\u26A0\uFE0F Stale Projects ({len(stale)})</h3>
             <p style="font-size:12px;color:{COLORS['text_muted']};margin-bottom:8px">No updates in 14+ days (dormant 5mo+ hidden)</p>
             {stale_html}
@@ -1843,7 +1937,7 @@ def _build_monday_pipeline(data: dict) -> str:
                 _fmt_number(o.get("active_deals", 0)),
                 _fmt_currency(o.get("total_value", 0)),
             ])
-        html += f'''<div class="glass-card" style="margin-top:16px">
+        html += f'''<div class="glass-card" style="margin-top:8px">
             <h3 class="card-title">\U0001F465 M&A by Owner
                 <span style="font-size:12px;font-weight:400;color:{COLORS['text_muted']}">
                     (showing {min(OWNER_LIMIT, len(owner_summary))} of {len(owner_summary)})
@@ -1857,7 +1951,7 @@ def _build_monday_pipeline(data: dict) -> str:
     if stage_dist:
         stage_data = [(k.replace("_", " ").title(), v) for k, v in
                       sorted(stage_dist.items(), key=lambda x: x[1], reverse=True)]
-        html += f'''<div class="glass-card" style="margin-top:16px">
+        html += f'''<div class="glass-card" style="margin-top:8px">
             <h3 class="card-title">\U0001F4CA Stage Distribution</h3>
             {_svg_bar_chart(stage_data, 650, max(200, len(stage_data) * 44))}
         </div>'''
@@ -2052,13 +2146,13 @@ def _build_monday_ic(data: dict) -> str:
         IC_LIMIT = 10
 
         board_html = '<div class="board-container">'
-        board_html += f'''<div class="board-header-row" style="grid-template-columns:2fr 70px 70px 110px 1fr 90px 20px">
+        board_html += f'''<div class="board-header-row" style="grid-template-columns:2fr 70px 110px 1fr 90px 70px 20px">
             <div>Project</div>
-            <div>Total</div>
-            <div>Avg</div>
+            <div>Score</div>
             <div>Status</div>
             <div>Gate Scores</div>
             <div>Owner</div>
+            <div>Updated</div>
             <div></div>
         </div>'''
 
@@ -2078,6 +2172,7 @@ def _build_monday_ic(data: dict) -> str:
             score_color = MONDAY_GREEN if pct >= 70 else (MONDAY_YELLOW if pct >= 40 else MONDAY_RED)
             ic_stage = _classify_ic_stage(item.get("status", ""))
             detail_id = f"ic_detail_{idx}"
+            updated_short = (item.get("updated_at") or "")[:10]
 
             scores = item.get("scores", {})
             gate_html = ""
@@ -2102,14 +2197,15 @@ def _build_monday_ic(data: dict) -> str:
             board_html += (
                 f'<div class="board-row ic-row{extra_cls}" data-ic-stage="{ic_stage}" '
                 f'onclick="toggleICDetail(\'{detail_id}\')" '
-                f'style="grid-template-columns:2fr 70px 70px 110px 1fr 90px 20px'
+                f'style="grid-template-columns:2fr 70px 110px 1fr 90px 70px 20px'
                 f'{";display:none" if idx >= IC_LIMIT else ""}">'
-                f'<div style="font-weight:500;color:{COLORS["text"]}">{name}</div>'
+                f'<div style="font-weight:500;color:{COLORS["text"]}">'
+                f'{name}<span style="font-size:10px;color:{COLORS["text_muted"]};margin-left:6px">(avg {avg:.1f})</span></div>'
                 f'<div>{bar_html}</div>'
-                f'<div style="font-size:12px;color:{COLORS["text_muted"]}">{avg:.1f}</div>'
                 f'<div>{_monday_stage_badge(status) if status else "<span style=\'color:#64748b\'>—</span>"}</div>'
                 f'<div style="display:flex;flex-wrap:wrap;gap:2px">{gate_html}</div>'
                 f'<div style="font-size:11px;color:{COLORS["text_muted"]}">{owner}</div>'
+                f'<div style="font-size:10px;color:{COLORS["text_muted"]}">{updated_short}</div>'
                 f'<div class="ic-expand-arrow" id="{detail_id}_arrow">&#9654;</div>'
                 f'</div>'
             )
@@ -2288,7 +2384,7 @@ def _build_monday_ic(data: dict) -> str:
                 </button>
             </div>'''
 
-        html += f'''<div class="glass-card" style="margin-top:12px;padding:0;overflow:hidden;border-top:3px solid {MONDAY_PURPLE}">
+        html += f'''<div class="glass-card" style="margin-top:8px;padding:0;overflow:hidden;border-top:3px solid {MONDAY_PURPLE}">
             <div style="padding:10px 16px;border-bottom:1px solid {COLORS['card_border']}">
                 <h3 class="card-title" style="margin-bottom:0;display:flex;align-items:center;gap:6px;font-size:13px">
                     <span style="color:{MONDAY_PURPLE}">\U0001F4CB</span> IC Scorecard — Click a project to expand details
@@ -2306,7 +2402,7 @@ def _build_monday_ic(data: dict) -> str:
                     for name, stats in sorted(cat_scores.items(),
                                               key=lambda x: x[1].get("avg", 0), reverse=True)]
         if cat_data:
-            html += f'''<div class="glass-card" style="margin-top:16px">
+            html += f'''<div class="glass-card" style="margin-top:8px">
                 <h3 class="card-title">\U0001F4CA IC Score by Category (Averages)</h3>
                 {_svg_bar_chart(cat_data, 650, max(200, len(cat_data) * 44), MONDAY_PURPLE)}
             </div>'''
@@ -2314,7 +2410,7 @@ def _build_monday_ic(data: dict) -> str:
     # ── Charts row: Trend + Decision Distribution ──
     score_trend = ic.get("score_trend", {})
     if score_trend or decisions:
-        html += '<div class="grid-2" style="margin-top:16px">'
+        html += '<div class="grid-2" style="margin-top:8px">'
         if score_trend:
             trend_data = [(month, stats.get("avg_score", 0))
                           for month, stats in sorted(score_trend.items())]
@@ -2573,7 +2669,7 @@ def _build_monday_workspaces(data: dict) -> str:
                 </button>
             </div>'''
 
-        html += f'''<div class="glass-card" style="margin-top:16px;padding:0;overflow:hidden">
+        html += f'''<div class="glass-card" style="margin-top:8px;padding:0;overflow:hidden">
             <div style="padding:16px 20px;border-bottom:1px solid {COLORS['card_border']}">
                 <h3 class="card-title" style="margin-bottom:0">\U0001F3E2 Active Workspaces
                     <span style="font-size:13px;font-weight:400;color:{COLORS['text_muted']}">
@@ -2850,8 +2946,8 @@ def _build_css() -> str:
             --info:        {COLORS['info']};
             --surface:     {COLORS['surface']};
             --surface2:    {COLORS['surface2']};
-            --radius:      14px;
-            --radius-sm:   8px;
+            --radius:      10px;
+            --radius-sm:   6px;
             --shadow:      0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
             --shadow-lg:   0 4px 16px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04);
             --transition:  all 0.3s cubic-bezier(.25,.1,.25,1);
@@ -3035,14 +3131,14 @@ def _build_css() -> str:
         .main-content {{
             max-width: 1400px;
             margin: 0 auto;
-            padding: 14px 20px;
+            padding: 10px 16px;
         }}
 
         /* ============================================================
            Sections
            ============================================================ */
         .dashboard-section {{
-            margin-bottom: 20px;
+            margin-bottom: 14px;
         }}
 
         @keyframes fade-in-up {{
@@ -3050,18 +3146,18 @@ def _build_css() -> str:
         }}
 
         .section-header {{
-            margin-bottom: 12px;
-            padding-bottom: 8px;
+            margin-bottom: 8px;
+            padding-bottom: 6px;
             border-bottom: 1px solid var(--card-border);
         }}
         .section-title {{
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 800;
             color: var(--text);
             letter-spacing: -0.02em;
         }}
         .section-subtitle {{
-            font-size: 12px;
+            font-size: 11px;
             color: var(--text-muted);
             margin-top: 1px;
         }}
@@ -3073,7 +3169,7 @@ def _build_css() -> str:
             background: var(--card);
             border: 1px solid var(--card-border);
             border-radius: var(--radius);
-            padding: 14px 16px;
+            padding: 10px 14px;
             box-shadow: var(--shadow);
             transition: var(--transition);
         }}
@@ -3082,10 +3178,10 @@ def _build_css() -> str:
             box-shadow: var(--shadow-lg);
         }}
         .card-title {{
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 700;
             color: var(--text);
-            margin-bottom: 10px;
+            margin-bottom: 6px;
             text-transform: uppercase;
             letter-spacing: 0.04em;
         }}
@@ -3099,8 +3195,8 @@ def _build_css() -> str:
         .kpi-grid {{
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-            margin-bottom: 10px;
+            gap: 8px;
+            margin-bottom: 8px;
         }}
         .kpi-grid-3 {{
             grid-template-columns: repeat(3, 1fr);
@@ -3109,7 +3205,7 @@ def _build_css() -> str:
             background: var(--card);
             border: 1px solid var(--card-border);
             border-radius: var(--radius-sm);
-            padding: 12px 14px;
+            padding: 10px 12px;
             transition: var(--transition);
             position: relative;
             overflow: hidden;
@@ -3139,7 +3235,7 @@ def _build_css() -> str:
         .grid-2 {{
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 16px;
+            gap: 10px;
         }}
 
         /* ============================================================
@@ -3202,16 +3298,17 @@ def _build_css() -> str:
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.04em;
-            font-size: 11px;
-            padding: 12px 14px;
+            font-size: 10px;
+            padding: 8px 10px;
             text-align: left;
             border-bottom: 2px solid var(--card-border);
             white-space: nowrap;
         }}
         .data-table td {{
-            padding: 10px 14px;
+            padding: 6px 10px;
             border-bottom: 1px solid var(--card-border);
             color: var(--text);
+            font-size: 12px;
         }}
         .data-table tbody tr {{
             transition: background 0.15s ease;
@@ -3333,6 +3430,40 @@ def _build_css() -> str:
             color: var(--text-muted);
             opacity: 0.7;
         }}
+        /* Data freshness bar (#45) */
+        .freshness-bar {{
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 4px 24px;
+            background: var(--surface2);
+            border-bottom: 1px solid var(--card-border);
+            font-size: 10px;
+        }}
+        .freshness-pill {{
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            background: rgba(60, 180, 173, 0.08);
+            color: var(--text-muted);
+            font-weight: 500;
+            white-space: nowrap;
+        }}
+
+        /* Clickable KPI cards (#40) */
+        .stat-card[data-nav-page] {{
+            cursor: pointer;
+        }}
+        .stat-card[data-nav-page]:hover {{
+            border-color: var(--accent);
+            box-shadow: 0 4px 16px rgba(60, 180, 173, 0.12);
+        }}
+        .stat-card[data-nav-page]:hover::before {{
+            opacity: 1;
+        }}
+
         .yoy-badge {{
             display: inline-flex;
             align-items: center;
@@ -3369,6 +3500,8 @@ def _build_css() -> str:
             body {{ background: white; color: #1a1a1a; display: block; }}
             .sidebar {{ display: none; }}
             .sidebar-toggle {{ display: none; }}
+            .filter-bar {{ display: none; }}
+            .freshness-bar {{ display: none; }}
             .layout-main {{ margin-left: 0; }}
             .glass-card, .stat-card {{
                 background: white;
@@ -3800,8 +3933,21 @@ def _build_js() -> str:
         });
 
         // ------------------------------------------------------------------
-        // Page-based SPA navigation
+        // Page-based SPA navigation with LocalStorage (#51)
         // ------------------------------------------------------------------
+        var LS_KEY = 'ecomplete_dash_prefs';
+        function loadPrefs() {
+            try { return JSON.parse(localStorage.getItem(LS_KEY) || '{}'); }
+            catch(e) { return {}; }
+        }
+        function savePrefs(updates) {
+            try {
+                var p = loadPrefs();
+                for (var k in updates) p[k] = updates[k];
+                localStorage.setItem(LS_KEY, JSON.stringify(p));
+            } catch(e) {}
+        }
+
         window.showPage = function(pageId) {
             // Hide all pages
             document.querySelectorAll('.dash-page').forEach(function(page) {
@@ -3832,11 +3978,25 @@ def _build_js() -> str:
                     }, 50);
                 });
             }
+            // Persist last page (#51)
+            savePrefs({lastPage: pageId});
         };
 
-        // Show first page on load
+        // Clickable KPI card navigation (#40)
+        document.addEventListener('click', function(e) {
+            var card = e.target.closest('.stat-card[data-nav-page]');
+            if (card) {
+                showPage(card.getAttribute('data-nav-page'));
+            }
+        });
+
+        // Restore last page or default to executive (#51)
         document.addEventListener('DOMContentLoaded', function() {
-            showPage('executive');
+            var prefs = loadPrefs();
+            var startPage = prefs.lastPage || 'executive';
+            // Verify the page exists
+            if (!document.getElementById('page-' + startPage)) startPage = 'executive';
+            showPage(startPage);
         });
 
         // ------------------------------------------------------------------
@@ -4118,65 +4278,19 @@ def _build_quick_actions(data: dict) -> str:
 # ---------------------------------------------------------------------------
 
 def _build_sidebar() -> str:
-    """Build the fixed left-hand navy sidebar with grouped sections and page switching."""
-    nav_groups = [
-        {
-            "label": "Overview",
-            "icon": "&#9679;",
-            "items": [("executive", "Executive Summary")],
-        },
-        {
-            "label": "Sales",
-            "icon": "&#9733;",
-            "items": [
-                ("leads", "Leads & Sources"),
-                ("funnel", "Qualified Leads"),
-                ("pipeline", "Pipeline View"),
-            ],
-        },
-        {
-            "label": "Planning",
-            "icon": "&#9881;",
-            "items": [("targets", "Targets & Rev Eng")],
-        },
-        {
-            "label": "Activity",
-            "icon": "&#9993;",
-            "items": [
-                ("activities", "Activity Tracking"),
-                ("contacts", "Contacts & Co."),
-            ],
-        },
-        {
-            "label": "Intelligence",
-            "icon": "&#10024;",
-            "items": [("insights", "Insights & Forecast")],
-        },
-        {
-            "label": "M&A",
-            "icon": "&#128188;",
-            "items": [
-                ("monday-pipeline", "M&A Pipeline"),
-                ("monday-ic", "IC Scorecards"),
-                ("monday-workspaces", "Workspaces"),
-            ],
-        },
-        {
-            "label": "AI",
-            "icon": "&#129302;",
-            "items": [("ai-roadmap", "AI Roadmap")],
-        },
-        {
-            "label": "Actions",
-            "icon": "&#9889;",
-            "items": [
-                ("inbound-queue", "Inbound Queue"),
-                ("quick-actions", "Quick Actions"),
-            ],
-        },
-    ]
+    """Build the fixed left-hand navy sidebar with grouped sections and page switching.
+    Uses MODULES registry as single source of truth."""
+    # Build nav groups from MODULES
+    from collections import OrderedDict
+    nav_groups: Dict[str, dict] = OrderedDict()
+    for mod in MODULES:
+        grp = mod["group"]
+        if grp not in nav_groups:
+            nav_groups[grp] = {"label": grp, "icon": mod["icon"], "items": []}
+        nav_groups[grp]["items"].append((mod["id"], mod["label"]))
+
     groups_html = ''
-    for g in nav_groups:
+    for g in nav_groups.values():
         items_html = ''.join(
             f'<a href="javascript:void(0)" onclick="showPage(\'{sid}\')" '
             f'class="sidebar-link" data-page="{sid}">{lbl}</a>'
@@ -4207,6 +4321,7 @@ def _build_sidebar() -> str:
 def generate_dashboard(data: dict) -> str:
     """Generate the complete HTML dashboard from metrics data."""
     _normalize_metrics(data)
+    _register_builders()
     timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
 
     # Load Monday.com metrics if available
@@ -4219,36 +4334,48 @@ def generate_dashboard(data: dict) -> str:
         except Exception as exc:
             logger.warning("Failed to load Monday.com metrics: %s", exc)
 
-    section_builders = [
-        ("Executive Summary", _build_executive_summary),
-        ("Leads & Sources", _build_leads_section),
-        ("Qualified Leads & Funnel", _build_funnel_section),
-        ("Target Setting", _build_target_section),
-        ("Pipeline View", _build_pipeline_section),
-        ("Activity Tracking", _build_activity_section),
-        ("Contacts & Companies", _build_contacts_section),
-        ("Insights & Forecast", _build_insights_section),
-        ("M&A Pipeline", _build_monday_pipeline),
-        ("IC Scorecards", _build_monday_ic),
-        ("Workspaces", _build_monday_workspaces),
-        ("AI Roadmap", _build_ai_section),
-        ("Quick Actions", _build_quick_actions),
-        ("Inbound Queue", _build_inbound_queue),
-    ]
-    page_ids = ["executive", "leads", "funnel", "targets", "pipeline",
-                "activities", "contacts", "insights",
-                "monday-pipeline", "monday-ic", "monday-workspaces",
-                "ai-roadmap", "quick-actions", "inbound-queue"]
+    # --- Data freshness timestamps (#45) ---
+    freshness: Dict[str, str] = {}
+    hs_gen = data.get("generated_at", "")
+    if hs_gen:
+        freshness["HubSpot"] = str(hs_gen)[:19]
+    monday_gen = _safe_get(data, "monday", "generated_at", default="")
+    if monday_gen:
+        freshness["Monday"] = str(monday_gen)[:19]
+    queue_file = BASE_DIR / "data" / "processed" / "inbound_queue.json"
+    if queue_file.exists():
+        try:
+            with open(queue_file, "r", encoding="utf-8") as qf:
+                q_meta = json.load(qf)
+            q_gen = q_meta.get("generated_at", "")
+            if q_gen:
+                freshness["Queue"] = str(q_gen)[:19]
+        except Exception:
+            pass
 
+    freshness_html = ""
+    if freshness:
+        pills = " ".join(
+            f'<span class="freshness-pill" title="Last sync: {v}">{k}: {v[5:16] if len(v) > 16 else v}</span>'
+            for k, v in freshness.items()
+        )
+        freshness_html = f'<div class="freshness-bar" id="freshness-bar">{pills}</div>'
+
+    # --- Build sections from MODULES registry (#56) ---
     sections = []
-    for i, (name, builder) in enumerate(section_builders):
-        page_id = page_ids[i] if i < len(page_ids) else f"page-{i}"
+    for mod in MODULES:
+        page_id = mod["id"]
+        label = mod["label"]
+        builder = _MODULE_BUILDERS.get(page_id)
+        if not builder:
+            logger.warning(f"No builder for module '{page_id}'")
+            continue
         try:
             content = builder(data)
             sections.append(f'<div class="dash-page" id="page-{page_id}">{content}</div>')
         except Exception as e:
-            logger.warning(f"Section '{name}' failed: {e}")
-            sections.append(f'<div class="dash-page" id="page-{page_id}"><section class="dashboard-section"><div class="glass-card" style="padding:40px;text-align:center;color:{COLORS["text_muted"]}"><h3>{_esc(name)}</h3><p>Data unavailable — {_esc(str(e))}</p></div></section></div>')
+            logger.warning(f"Section '{label}' failed: {e}")
+            sections.append(f'<div class="dash-page" id="page-{page_id}"><section class="dashboard-section"><div class="glass-card" style="padding:40px;text-align:center;color:{COLORS["text_muted"]}"><h3>{_esc(label)}</h3><p>Data unavailable — {_esc(str(e))}</p></div></section></div>')
 
     record_counts = _safe_get(data, "record_counts", default={})
     footer_stats = " | ".join([
@@ -4632,6 +4759,7 @@ def generate_dashboard(data: dict) -> str:
 
     <div class="layout-main" id="layout-main">
         {filter_bar}
+        {freshness_html}
         <main class="main-content">
             {''.join(sections)}
         </main>
