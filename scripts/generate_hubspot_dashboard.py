@@ -3874,6 +3874,130 @@ def _build_js() -> str:
 
 
 # ---------------------------------------------------------------------------
+# Inbound Queue
+# ---------------------------------------------------------------------------
+
+def _build_inbound_queue(data: dict) -> str:
+    """Build the Inbound Queue page — prioritised action inbox from all sources."""
+    queue_file = BASE_DIR / "data" / "processed" / "inbound_queue.json"
+    queue: dict = {}
+    if queue_file.exists():
+        try:
+            with open(queue_file, "r", encoding="utf-8") as f:
+                queue = json.load(f)
+        except Exception:
+            pass
+
+    items = queue.get("items", [])
+    summary = queue.get("summary", {})
+    by_priority = summary.get("by_priority", {})
+    by_category = summary.get("by_category", {})
+    by_source = summary.get("by_source", {})
+
+    h = '<section class="dashboard-section">'
+    h += f'''<div class="section-header">
+        <h2 class="section-title">Inbound Queue</h2>
+        <p class="section-subtitle">Prioritised action inbox — {summary.get("total", 0)} signals from HubSpot, Monday.com &amp; system alerts</p>
+    </div>'''
+
+    # KPI row
+    critical = by_priority.get("critical", 0)
+    high = by_priority.get("high", 0)
+    medium = by_priority.get("medium", 0)
+    low = by_priority.get("low", 0)
+    h += '<div class="kpi-grid" style="grid-template-columns:repeat(4,1fr)">'
+    h += _stat_card("Critical", str(critical), "need immediate action", "&#9888;", COLORS["danger"])
+    h += _stat_card("High", str(high), "action today", "&#9650;", COLORS["warning"])
+    h += _stat_card("Medium", str(medium), "this week", "&#9679;", COLORS["accent"])
+    h += _stat_card("Low", str(low), "when convenient", "&#9660;", COLORS["accent4"])
+    h += '</div>'
+
+    # Category breakdown
+    h += f'<div class="glass-card"><div class="card-title">Signal Categories</div>'
+    h += '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px">'
+    cat_colors = {
+        "stale_follow_up": COLORS["danger"], "new_lead": COLORS["success"],
+        "deal_update": COLORS["accent2"], "ic_review": COLORS["accent3"],
+        "nda_request": COLORS["accent5"], "web_signal": COLORS["accent"],
+        "alert": COLORS["warning"], "meeting_request": COLORS["info"],
+        "follow_up": COLORS["accent6"],
+    }
+    for cat, count in sorted(by_category.items(), key=lambda x: -x[1]):
+        cc = cat_colors.get(cat, COLORS["text_muted"])
+        label = cat.replace("_", " ").title()
+        h += f'''<span style="font-size:11px;font-weight:600;color:{cc};
+            background:{cc}12;padding:4px 10px;border-radius:6px;
+            border:1px solid {cc}30">{label}: {count}</span>'''
+    h += '</div></div>'
+
+    # Source breakdown
+    h += f'<div class="glass-card"><div class="card-title">By Source</div>'
+    h += '<div style="display:flex;gap:16px;margin-top:6px">'
+    src_icons = {"hubspot": "&#128200;", "monday": "&#128197;", "email": "&#9993;", "system": "&#9881;", "weekly": "&#128203;"}
+    for src, count in sorted(by_source.items(), key=lambda x: -x[1]):
+        icon = src_icons.get(src, "&#9679;")
+        h += f'''<div style="text-align:center;padding:10px 16px;background:{COLORS["surface2"]};
+            border-radius:8px;flex:1;min-width:80px">
+            <div style="font-size:18px">{icon}</div>
+            <div style="font-size:18px;font-weight:700;color:{COLORS["text"]};margin:4px 0">{count}</div>
+            <div style="font-size:10px;color:{COLORS["text_muted"]};text-transform:capitalize">{src}</div>
+        </div>'''
+    h += '</div></div>'
+
+    # Top items table — show critical + high priority items (max 50)
+    top_items = [i for i in items if i.get("priority") in ("critical", "high")][:50]
+    if not top_items:
+        top_items = items[:30]
+
+    h += f'<div class="glass-card"><div class="card-title">Top Priority Items ({len(top_items)} shown)</div>'
+    h += f'''<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px">
+        <thead><tr style="border-bottom:2px solid {COLORS["card_border"]};text-align:left">
+            <th style="padding:8px 6px;color:{COLORS["text_muted"]}">Priority</th>
+            <th style="padding:8px 6px;color:{COLORS["text_muted"]}">Category</th>
+            <th style="padding:8px 6px;color:{COLORS["text_muted"]}">Title</th>
+            <th style="padding:8px 6px;color:{COLORS["text_muted"]}">Entity</th>
+            <th style="padding:8px 6px;color:{COLORS["text_muted"]}">Action</th>
+            <th style="padding:8px 6px;color:{COLORS["text_muted"]}">Source</th>
+        </tr></thead><tbody>'''
+
+    p_colors = {"critical": COLORS["danger"], "high": COLORS["warning"], "medium": COLORS["accent"], "low": COLORS["accent4"]}
+    for item in top_items:
+        pri = item.get("priority", "medium")
+        pc = p_colors.get(pri, COLORS["text_muted"])
+        cat = item.get("category", "").replace("_", " ").title()
+        title = item.get("title", "")[:60]
+        entity = item.get("entity", "")[:30]
+        action = item.get("recommended_action", "")[:40]
+        source = item.get("source", "")
+
+        h += f'''<tr style="border-bottom:1px solid {COLORS["card_border"]}">
+            <td style="padding:6px"><span style="font-size:10px;font-weight:700;color:{pc};
+                background:{pc}12;padding:2px 6px;border-radius:3px;text-transform:uppercase">{pri}</span></td>
+            <td style="padding:6px;color:{COLORS["text_muted"]}">{_esc(cat)}</td>
+            <td style="padding:6px;font-weight:500;color:{COLORS["text"]}">{_esc(title)}</td>
+            <td style="padding:6px;color:{COLORS["text_muted"]}">{_esc(entity)}</td>
+            <td style="padding:6px;color:{COLORS["accent2"]};font-size:11px">{_esc(action)}</td>
+            <td style="padding:6px;color:{COLORS["text_muted"]};text-transform:capitalize">{_esc(source)}</td>
+        </tr>'''
+
+    h += '</tbody></table></div></div>'
+
+    # Remaining items by category (collapsed summary)
+    remaining = len(items) - len(top_items)
+    if remaining > 0:
+        h += f'''<div class="glass-card" style="background:{COLORS["surface2"]}">
+            <div style="font-size:12px;color:{COLORS["text_muted"]};text-align:center">
+                + {remaining} more items in queue &mdash; run
+                <code style="background:{COLORS["card"]};padding:2px 6px;border-radius:4px">python scripts/inbound_queue.py --top 100</code>
+                for full details
+            </div>
+        </div>'''
+
+    h += '</section>'
+    return h
+
+
+# ---------------------------------------------------------------------------
 # Quick Actions
 # ---------------------------------------------------------------------------
 
@@ -4045,7 +4169,10 @@ def _build_sidebar() -> str:
         {
             "label": "Actions",
             "icon": "&#9889;",
-            "items": [("quick-actions", "Quick Actions")],
+            "items": [
+                ("inbound-queue", "Inbound Queue"),
+                ("quick-actions", "Quick Actions"),
+            ],
         },
     ]
     groups_html = ''
@@ -4106,11 +4233,12 @@ def generate_dashboard(data: dict) -> str:
         ("Workspaces", _build_monday_workspaces),
         ("AI Roadmap", _build_ai_section),
         ("Quick Actions", _build_quick_actions),
+        ("Inbound Queue", _build_inbound_queue),
     ]
     page_ids = ["executive", "leads", "funnel", "targets", "pipeline",
                 "activities", "contacts", "insights",
                 "monday-pipeline", "monday-ic", "monday-workspaces",
-                "ai-roadmap", "quick-actions"]
+                "ai-roadmap", "quick-actions", "inbound-queue"]
 
     sections = []
     for i, (name, builder) in enumerate(section_builders):
