@@ -40,8 +40,9 @@ cache/
 .DS_Store
 Thumbs.db
 
-# Raw data (too large for git, regenerate with fetch_hubspot.py)
+# Raw data (too large for git, regenerate with fetch scripts)
 data/raw/
+data/cache/
 
 # Test artifacts
 .pytest_cache/

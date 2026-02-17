@@ -45,28 +45,28 @@ logger = logging.getLogger("generate_hubspot_dashboard")
 # Colour palette
 # ---------------------------------------------------------------------------
 COLORS = {
-    "bg":           "#0f172a",
-    "card":         "#1e293b",
-    "card_border":  "#334155",
-    "text":         "#e2e8f0",
-    "text_muted":   "#94a3b8",
-    "accent":       "#fb923c",       # HubSpot orange
-    "accent2":      "#38bdf8",       # sky-400
+    "bg":           "#f7f8fa",       # eComplete light background
+    "card":         "#ffffff",       # White cards
+    "card_border":  "#e2e5ea",       # Light grey border
+    "text":         "#121212",       # eComplete near-black
+    "text_muted":   "#6b7280",       # Medium grey
+    "accent":       "#3CB4AD",       # eComplete teal
+    "accent2":      "#334FB4",       # eComplete royal blue
     "accent3":      "#a78bfa",       # violet-400
     "accent4":      "#34d399",       # emerald-400
     "accent5":      "#f472b6",       # pink-400
-    "accent6":      "#facc15",       # yellow-400
+    "accent6":      "#f59e0b",       # amber
     "success":      "#22c55e",
     "danger":       "#ef4444",
     "warning":      "#f59e0b",
     "info":         "#3b82f6",
-    "surface":      "#1e293b",
-    "surface2":     "#0f1729",
+    "surface":      "#ffffff",       # White
+    "surface2":     "#f3f4f6",       # Light grey
 }
 
 CHART_PALETTE = [
-    "#fb923c", "#38bdf8", "#a78bfa", "#34d399", "#f472b6",
-    "#facc15", "#60a5fa", "#f87171", "#2dd4bf", "#c084fc",
+    "#3CB4AD", "#334FB4", "#a78bfa", "#34d399", "#f472b6",
+    "#f59e0b", "#60a5fa", "#ef4444", "#2dd4bf", "#c084fc",
     "#4ade80", "#fbbf24", "#e879f9", "#22d3ee", "#fb7185",
 ]
 
@@ -216,7 +216,7 @@ def _svg_bar_chart(
     data: List[Tuple[str, float]],
     width: int = 500,
     height: int = 300,
-    color: str = "#fb923c",
+    color: str = "#3CB4AD",
     show_values: bool = True,
 ) -> str:
     """Horizontal bar chart.  data = [(label, value), ...]."""
@@ -343,7 +343,7 @@ def _svg_sparkline(
     values: List[float],
     width: int = 160,
     height: int = 40,
-    color: str = "#fb923c",
+    color: str = "#3CB4AD",
     fill: bool = True,
 ) -> str:
     """Tiny trend sparkline."""
@@ -451,7 +451,7 @@ def _svg_horizontal_bar(
     label: str,
     value: float,
     max_val: float,
-    color: str = "#fb923c",
+    color: str = "#3CB4AD",
     show_pct: bool = True,
 ) -> str:
     """Single horizontal progress bar with label."""
@@ -573,7 +573,7 @@ def _stat_card(
     value: str,
     subtitle: str = "",
     icon: str = "",
-    color: str = "#fb923c",
+    color: str = "#3CB4AD",
     sparkline_values: Optional[List[float]] = None,
 ) -> str:
     """Metric KPI card with optional sparkline."""
@@ -585,19 +585,19 @@ def _stat_card(
 
     icon_html = ""
     if icon:
-        icon_html = f'''<div style="width:42px;height:42px;border-radius:12px;
+        icon_html = f'''<div style="width:30px;height:30px;border-radius:8px;
             background:linear-gradient(135deg,{color}22,{color}11);
             display:flex;align-items:center;justify-content:center;
-            font-size:18px;flex-shrink:0;margin-bottom:8px;
+            font-size:14px;flex-shrink:0;margin-bottom:4px;
             border:1px solid {color}33">{icon}</div>'''
 
     return f'''<div class="stat-card" style="--accent:{color}">
         {icon_html}
-        <div style="font-size:12px;color:{COLORS['text_muted']};text-transform:uppercase;
-                    letter-spacing:0.05em;margin-bottom:4px">{_esc(title)}</div>
-        <div style="font-size:28px;font-weight:800;color:{COLORS['text']};
-                    line-height:1.1;margin-bottom:2px">{_esc(value)}</div>
-        <div style="font-size:12px;color:{COLORS['text_muted']}">{_esc(subtitle)}</div>
+        <div style="font-size:10px;color:{COLORS['text_muted']};text-transform:uppercase;
+                    letter-spacing:0.05em;margin-bottom:2px">{_esc(title)}</div>
+        <div data-role="stat-value" style="font-size:22px;font-weight:800;color:{COLORS['text']};
+                    line-height:1.1;margin-bottom:1px">{_esc(value)}</div>
+        <div style="font-size:11px;color:{COLORS['text_muted']}">{_esc(subtitle)}</div>
         {spark_html}
     </div>'''
 
@@ -645,7 +645,7 @@ def _data_table(
 def _progress_bar(
     value: float,
     max_val: float,
-    color: str = "#fb923c",
+    color: str = "#3CB4AD",
     label: str = "",
     show_values: bool = True,
 ) -> str:
@@ -1483,15 +1483,1354 @@ def _build_insights_section(data: dict) -> str:
 
 
 # ---------------------------------------------------------------------------
+# Section 9: Monday.com — M&A Projects & IC Scores
+# ---------------------------------------------------------------------------
+
+MONDAY_PURPLE = "#6C6CFF"
+MONDAY_RED = "#F44336"
+MONDAY_YELLOW = "#FFCB00"
+MONDAY_GREEN = "#00CA72"
+
+# Dormancy cutoff: items not updated in this many months are considered dormant
+DORMANCY_MONTHS = 5
+
+
+def _is_dormant(updated_at_str: str, months: int = DORMANCY_MONTHS) -> bool:
+    """Check if an item hasn't been updated in the last N months."""
+    if not updated_at_str:
+        return True  # no date = treat as dormant
+    try:
+        from datetime import datetime, timezone, timedelta
+        # Parse ISO date string
+        dt_str = updated_at_str[:19].replace("T", " ")
+        for fmt in ("%Y-%m-%d %H:%M:%S", "%Y-%m-%d"):
+            try:
+                dt = datetime.strptime(dt_str, fmt).replace(tzinfo=timezone.utc)
+                cutoff = datetime.now(timezone.utc) - timedelta(days=months * 30)
+                return dt < cutoff
+            except ValueError:
+                continue
+        return True
+    except Exception:
+        return True
+
+
+def _monday_stage_badge(stage: str) -> str:
+    """Return an HTML stage badge with color coding."""
+    s = stage.lower()
+    if "ic" in s:
+        bg, fg = f"{MONDAY_PURPLE}33", MONDAY_PURPLE
+    elif any(x in s for x in ["diligence", "negotiation", "closing", "approved"]):
+        bg, fg = f"{MONDAY_GREEN}33", MONDAY_GREEN
+    elif any(x in s for x in ["hold", "stuck", "passed", "rejected"]):
+        bg, fg = f"{MONDAY_RED}33", MONDAY_RED
+    elif any(x in s for x in ["completed", "closed"]):
+        bg, fg = f"{MONDAY_GREEN}55", MONDAY_GREEN
+    else:
+        bg, fg = f"{MONDAY_YELLOW}33", MONDAY_YELLOW
+    label = _esc(stage.replace("_", " ").title())
+    return (f'<span style="display:inline-block;padding:2px 8px;border-radius:10px;'
+            f'font-size:11px;background:{bg};color:{fg}">{label}</span>')
+
+
+def _classify_ic_stage(status_text: str) -> str:
+    """Classify a raw status string into a deal flow stage key for IC filtering."""
+    if not status_text:
+        return "unknown"
+    s = status_text.lower().strip()
+    stage_map = [
+        ("identified", ["identified", "new", "prospect"]),
+        ("screening", ["screen", "initial review", "gate 0", "im received", "pending info",
+                        "pending nda", "disqualified im"]),
+        ("due diligence", ["diligence", "dd", "pending scorecard"]),
+        ("ic review", ["ic review", "ic pending", "scorecard", "assess", "evaluat", "gate 1",
+                        "gate 2", "gate 3"]),
+        ("ic approved", ["ic approved", "approved"]),
+        ("negotiation", ["negotiat", "heads of terms", "hots", "loi", "offer", "contract"]),
+        ("closing", ["closing", "close"]),
+        ("completed", ["completed", "done", "won"]),
+        ("on hold", ["hold", "pause", "wait", "stuck"]),
+        ("passed", ["pass", "reject", "dead", "lost", "declined", "failed", "unsuccessful",
+                     "retract", "disqualif"]),
+    ]
+    for stage_key, keywords in stage_map:
+        if any(kw in s for kw in keywords):
+            return stage_key
+    return "screening"  # default to screening for unclassified M&A items
+
+
+def _build_monday_pipeline(data: dict) -> str:
+    """M&A Pipeline page — KPIs, deal funnel, board-style project table, stale warnings, owner summary."""
+    monday = data.get("monday", {})
+    if not monday:
+        return '<section class="dashboard-section"><div class="glass-card" style="padding:40px;text-align:center;color:#6b7280"><p>No Monday.com data available. Run fetch_monday.py and monday_analyzer.py first.</p></div></section>'
+
+    ma = monday.get("ma_metrics", {})
+    overview = monday.get("board_overview", {})
+
+    html = _section_header(
+        "monday-pipeline", "M&A Pipeline",
+        "Monday.com project tracking — active deals, pipeline stages, and owner workloads (dormant items hidden)",
+        "\U0001F4BC",
+    )
+
+    # ── Deal Flow Navigation ──
+    deal_flow_stages = [
+        ("Identified", "#3CB4AD"),
+        ("Initial Review", "#3CB4AD"),
+        ("Screening", "#334FB4"),
+        ("NDA Signed", "#334FB4"),
+        ("Info Requested", "#a78bfa"),
+        ("Due Diligence", "#a78bfa"),
+        ("LOI", "#f59e0b"),
+        ("IC Review", "#6C6CFF"),
+        ("IC Approved", "#22c55e"),
+        ("Negotiation", "#f59e0b"),
+        ("Contract", "#ef4444"),
+        ("Closing", "#34d399"),
+        ("Completed", "#22c55e"),
+    ]
+    flow_html = '<div class="glass-card" style="margin-bottom:16px;padding:16px 20px">'
+    flow_html += f'<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:{COLORS["text_muted"]};margin-bottom:10px">Deal Flow — Order of Events</div>'
+    flow_html += '<div class="deal-flow-nav">'
+    for i, (stage_name, stage_color) in enumerate(deal_flow_stages):
+        flow_html += f'''<div class="deal-flow-step">
+            <span class="step-dot" style="background:{stage_color}">{i + 1}</span>
+            <span class="step-label">{stage_name}</span>'''
+        if i < len(deal_flow_stages) - 1:
+            flow_html += '<span class="step-arrow">&#8594;</span>'
+        flow_html += '</div>'
+    flow_html += '</div></div>'
+    html += flow_html
+
+    # ── Filter out dormant projects and sort by recency ──
+    projects = ma.get("projects", [])
+    # Remove dormant (5+ months no update)
+    fresh_projects = [p for p in projects if not _is_dormant(p.get("updated_at", ""))]
+    # Sort by most recently updated
+    fresh_projects.sort(key=lambda p: p.get("updated_at") or "", reverse=True)
+    active_list = [p for p in fresh_projects if p.get("is_active")]
+    dormant_count = len(projects) - len(fresh_projects)
+
+    # ── KPI row ──
+    total_projects = len(fresh_projects)
+    active_projects = len(active_list)
+    total_value = sum(p.get("value", 0) for p in active_list)
+    avg_stale = ma.get("avg_days_since_update", 0)
+
+    html += '<div class="kpi-grid kpi-grid-3">'
+    html += _stat_card("Active Projects", _fmt_number(active_projects),
+                       f"{total_projects} total ({dormant_count} dormant hidden)", "\U0001F4C1", MONDAY_PURPLE)
+    html += _stat_card("Pipeline Value", _fmt_currency(total_value),
+                       f"Across {active_projects} active deals", "\U0001F4B0", MONDAY_GREEN)
+    html += _stat_card("Avg Days Since Update", _fmt_number(avg_stale),
+                       "Active projects",
+                       "\u23F1\uFE0F",
+                       MONDAY_YELLOW if avg_stale < 7 else MONDAY_RED)
+    html += '</div>'
+
+    # ── Search & Filter Bar ──
+    html += f'''<div class="glass-card" style="margin-top:16px;padding:12px 16px">
+        <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center">
+            <input type="text" id="monday-search" placeholder="Search projects, owners, boards..."
+                style="flex:1;min-width:200px;padding:8px 12px;border:1px solid {COLORS['card_border']};
+                border-radius:8px;background:{COLORS['bg']};color:{COLORS['text']};font-size:13px;
+                outline:none" oninput="filterMonday()">
+            <select id="monday-filter-owner" onchange="filterMonday()"
+                style="padding:8px 12px;border:1px solid {COLORS['card_border']};border-radius:8px;
+                background:{COLORS['bg']};color:{COLORS['text']};font-size:13px">
+                <option value="">All Owners</option>
+            </select>
+            <select id="monday-filter-stage" onchange="filterMonday()"
+                style="padding:8px 12px;border:1px solid {COLORS['card_border']};border-radius:8px;
+                background:{COLORS['bg']};color:{COLORS['text']};font-size:13px">
+                <option value="">All Stages</option>
+            </select>
+            <label style="display:flex;align-items:center;gap:4px;font-size:12px;color:{COLORS['text_muted']};cursor:pointer">
+                <input type="checkbox" id="monday-hide-unassigned" onchange="filterMonday()"> Hide unassigned
+            </label>
+        </div>
+    </div>'''
+
+    # ── M&A Pipeline Funnel ──
+    funnel = ma.get("funnel", [])
+    if funnel:
+        active_funnel = [s for s in funnel if s.get("count", 0) > 0]
+        if active_funnel:
+            max_count = max(s.get("count", 0) for s in active_funnel) or 1
+            funnel_html = ""
+            stage_colors = [MONDAY_PURPLE, "#7B61FF", "#9B8AFF", COLORS['accent2'],
+                            COLORS['info'], MONDAY_GREEN, COLORS['accent4'],
+                            COLORS['accent'], MONDAY_YELLOW]
+            for i, stage in enumerate(active_funnel):
+                name = stage.get("stage", "").replace("_", " ").title()
+                count = stage.get("count", 0)
+                value = stage.get("value", 0)
+                pct = (count / max_count) * 100
+                color = stage_colors[i % len(stage_colors)]
+                funnel_html += f'''<div style="margin-bottom:10px">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+                        <span style="font-size:13px;color:{COLORS['text_muted']};text-transform:capitalize">{_esc(name)}</span>
+                        <span style="font-size:13px;font-weight:600;color:{COLORS['text']}">{_fmt_number(count)} deals &middot; {_fmt_currency(value)}</span>
+                    </div>
+                    <div style="height:24px;background:{COLORS['card_border']};border-radius:6px;overflow:hidden">
+                        <div class="progress-fill" style="height:100%;width:{pct:.1f}%;
+                            background:linear-gradient(90deg,{color},{color}88);border-radius:6px"></div>
+                    </div>
+                </div>'''
+
+            html += f'''<div class="glass-card" style="margin-top:16px">
+                <h3 class="card-title" style="display:flex;align-items:center;gap:8px">
+                    <span style="color:{MONDAY_PURPLE}">\U0001F3E2</span> Deal Pipeline by Stage
+                </h3>
+                {funnel_html}
+            </div>'''
+
+    # ── Board-style Active Projects (sorted by recency, show 10) ──
+    if active_list:
+        # Stage color mapping
+        stage_color_map = {
+            "ic_review": MONDAY_PURPLE,
+            "due_diligence": COLORS['accent2'],
+            "negotiation": COLORS['info'],
+            "approved": MONDAY_GREEN,
+            "closing": MONDAY_GREEN,
+            "completed": "#22c55e",
+            "on_hold": MONDAY_YELLOW,
+            "passed": MONDAY_RED,
+            "rejected": MONDAY_RED,
+        }
+        avatar_colors = ["#6C3CE1", "#0073EA", "#00CA72", "#FDAB3D",
+                         "#E2445C", "#A25DDC", "#579BFC", "#CAB641"]
+
+        SHOW_LIMIT = 10
+        board_html = '<div class="board-container">'
+        board_html += '''<div class="board-header-row">
+            <div>Project</div>
+            <div>Stage</div>
+            <div>Value</div>
+            <div>Owner</div>
+            <div>Workspace</div>
+            <div>Tasks</div>
+            <div>Updated</div>
+        </div>'''
+
+        for idx, p in enumerate(active_list):
+            name = _esc(p.get("name", "Unknown"))
+            stage = p.get("stage", "")
+            value = _fmt_currency(p.get("value", 0))
+            owner = _esc(p.get("owner", "Unassigned"))
+            ws = _esc(p.get("workspace", ""))
+            updated = p.get("updated_at", "")[:10] if p.get("updated_at") else "N/A"
+            si_count = p.get("subitems_count", 0)
+            si_done = p.get("subitems_complete", 0)
+            has_owner = "1" if p.get("has_owner") else "0"
+            group_color = stage_color_map.get(stage, COLORS['accent'])
+
+            initials = "".join(w[0] for w in owner.split()[:2]).upper() if owner != "Unassigned" else "?"
+            av_color = avatar_colors[hash(owner) % len(avatar_colors)]
+
+            if si_count > 0:
+                pct = min(100, (si_done / si_count) * 100)
+                prog_color = MONDAY_GREEN if pct >= 75 else (MONDAY_YELLOW if pct >= 40 else COLORS['text_muted'])
+                progress_html = f'''<div class="progress-mini">
+                    <div class="bar"><div class="bar-fill" style="width:{pct:.0f}%;background:{prog_color}"></div></div>
+                    <span class="pct">{si_done}/{si_count}</span>
+                </div>'''
+            else:
+                progress_html = f'<span style="color:{COLORS["text_muted"]};font-size:11px">-</span>'
+
+            # Hide items beyond the first 10
+            hidden = ' style="display:none"' if idx >= SHOW_LIMIT else ''
+            extra_class = ' pipeline-extra-row' if idx >= SHOW_LIMIT else ''
+
+            board_html += (
+                f'<div class="board-row monday-row{extra_class}" data-owner="{owner}" data-stage="{_esc(stage)}" '
+                f'data-name="{name}" data-ws="{ws}" data-has-owner="{has_owner}"{hidden}>'
+                f'<div style="display:flex;align-items:center;gap:8px">'
+                f'<div style="width:4px;height:24px;border-radius:2px;background:{group_color};flex-shrink:0"></div>'
+                f'<span style="font-weight:500;color:{COLORS["text"]}">{name}</span></div>'
+                f'<div>{_monday_stage_badge(stage)}</div>'
+                f'<div style="font-weight:600">{value}</div>'
+                f'<div class="person-avatar">'
+                f'<span class="avatar-circle" style="background:{av_color}">{initials}</span>'
+                f'<span>{owner}</span></div>'
+                f'<div style="font-size:12px;color:{COLORS["text_muted"]}">{ws}</div>'
+                f'<div>{progress_html}</div>'
+                f'<div style="font-size:12px;color:{COLORS["text_muted"]}">{updated}</div>'
+                f'</div>'
+            )
+
+        board_html += '</div>'
+
+        # Show more button
+        show_more_btn = ""
+        if len(active_list) > SHOW_LIMIT:
+            remaining = len(active_list) - SHOW_LIMIT
+            show_more_btn = f'''<div style="text-align:center;padding:12px;border-top:1px solid {COLORS['card_border']}">
+                <button id="pipeline-show-more" onclick="toggleExpandList('pipeline-extra-row','pipeline-show-more',{len(active_list)},{SHOW_LIMIT})"
+                    style="background:none;border:1px solid {COLORS['card_border']};border-radius:8px;
+                    padding:8px 24px;color:{COLORS['accent2']};font-size:13px;font-weight:600;
+                    cursor:pointer;transition:all 0.2s ease">
+                    Show all {len(active_list)} projects ({remaining} more)
+                </button>
+            </div>'''
+
+        html += f'''<div class="glass-card" style="margin-top:16px;padding:0;overflow:hidden">
+            <div style="padding:16px 20px;border-bottom:1px solid {COLORS['card_border']}">
+                <h3 class="card-title" style="margin-bottom:0">\U0001F3AF Active M&A Projects
+                    <span id="monday-count" style="font-size:13px;font-weight:400;color:{COLORS['text_muted']}">
+                        ({len(active_list)} — showing {min(SHOW_LIMIT, len(active_list))})
+                    </span>
+                </h3>
+                <p style="font-size:11px;color:{COLORS['text_muted']};margin-top:4px">Sorted by most recently updated &middot; {dormant_count} dormant items hidden</p>
+            </div>
+            {board_html}
+            {show_more_btn}
+        </div>'''
+
+    # ── Stale Projects Warning (show 10 with expand) ──
+    stale = ma.get("stale_projects", [])
+    # Sort stale by days_stale desc
+    stale.sort(key=lambda sp: sp.get("days_stale", 0), reverse=True)
+    # Filter out stale items that are also dormant (5+ months)
+    stale = [sp for sp in stale if sp.get("days_stale", 0) < DORMANCY_MONTHS * 30]
+    if stale:
+        STALE_LIMIT = 10
+        stale_html = ""
+        for i, sp in enumerate(stale):
+            days = sp.get("days_stale", 0)
+            urgency_color = MONDAY_RED if days > 21 else MONDAY_YELLOW
+            hidden = ' style="display:none"' if i >= STALE_LIMIT else ''
+            extra_cls = ' stale-extra-row' if i >= STALE_LIMIT else ''
+            stale_html += f'''<div class="stale-item{extra_cls}" {hidden if i >= STALE_LIMIT else ''}>
+                <div style="display:flex;justify-content:space-between;align-items:center;
+                    padding:10px 12px;border-bottom:1px solid {COLORS['card_border']}">
+                    <div>
+                        <span style="font-size:13px;color:{COLORS['text']};font-weight:500">{_esc(sp.get("name", ""))}</span>
+                        <span style="font-size:11px;color:{COLORS['text_muted']};margin-left:8px">{_esc(sp.get("stage", "").title())}</span>
+                    </div>
+                    <span style="font-size:12px;font-weight:600;color:{urgency_color}">{days}d stale</span>
+                </div>
+            </div>'''
+
+        stale_more = ""
+        if len(stale) > STALE_LIMIT:
+            remaining = len(stale) - STALE_LIMIT
+            stale_more = f'''<div style="text-align:center;padding:10px">
+                <button id="stale-show-more" onclick="toggleExpandList('stale-extra-row','stale-show-more',{len(stale)},{STALE_LIMIT})"
+                    style="background:none;border:1px solid {COLORS['card_border']};border-radius:8px;
+                    padding:6px 20px;color:{COLORS['text_muted']};font-size:12px;font-weight:600;
+                    cursor:pointer">Show all {len(stale)} ({remaining} more)</button>
+            </div>'''
+
+        html += f'''<div class="glass-card" style="margin-top:16px;border:1px solid {MONDAY_RED}44">
+            <h3 class="card-title" style="color:{MONDAY_RED}">\u26A0\uFE0F Stale Projects ({len(stale)})</h3>
+            <p style="font-size:12px;color:{COLORS['text_muted']};margin-bottom:8px">No updates in 14+ days (dormant 5mo+ hidden)</p>
+            {stale_html}
+            {stale_more}
+        </div>'''
+
+    # ── Owner Summary (show 10 with expand) ──
+    owner_summary = ma.get("owner_summary", [])
+    if owner_summary:
+        OWNER_LIMIT = 10
+        rows = []
+        for o in owner_summary[:OWNER_LIMIT]:
+            rows.append([
+                _esc(o.get("owner", "Unknown")),
+                _fmt_number(o.get("total_deals", 0)),
+                _fmt_number(o.get("active_deals", 0)),
+                _fmt_currency(o.get("total_value", 0)),
+            ])
+        html += f'''<div class="glass-card" style="margin-top:16px">
+            <h3 class="card-title">\U0001F465 M&A by Owner
+                <span style="font-size:12px;font-weight:400;color:{COLORS['text_muted']}">
+                    (showing {min(OWNER_LIMIT, len(owner_summary))} of {len(owner_summary)})
+                </span>
+            </h3>
+            {_data_table(["Owner", "Total Deals", "Active", "Total Value"], rows, "ma_owners")}
+        </div>'''
+
+    # ── Stage Distribution chart ──
+    stage_dist = ma.get("stage_distribution", {})
+    if stage_dist:
+        stage_data = [(k.replace("_", " ").title(), v) for k, v in
+                      sorted(stage_dist.items(), key=lambda x: x[1], reverse=True)]
+        html += f'''<div class="glass-card" style="margin-top:16px">
+            <h3 class="card-title">\U0001F4CA Stage Distribution</h3>
+            {_svg_bar_chart(stage_data, 650, max(200, len(stage_data) * 44))}
+        </div>'''
+
+    # ── Filter and board toggle JavaScript ──
+    html += '''<script>
+    (function(){
+        var rows = document.querySelectorAll('.monday-row');
+        var owners = new Set(), stages = new Set();
+        rows.forEach(function(r){
+            var o = r.getAttribute('data-owner');
+            var s = r.getAttribute('data-stage');
+            if(o && o !== 'Unassigned') owners.add(o);
+            if(s) stages.add(s);
+        });
+        var ownerSel = document.getElementById('monday-filter-owner');
+        var stageSel = document.getElementById('monday-filter-stage');
+        if(ownerSel){
+            Array.from(owners).sort().forEach(function(o){
+                var opt = document.createElement('option');
+                opt.value = o; opt.textContent = o;
+                ownerSel.appendChild(opt);
+            });
+        }
+        if(stageSel){
+            Array.from(stages).sort().forEach(function(s){
+                var opt = document.createElement('option');
+                opt.value = s;
+                opt.textContent = s.replace(/_/g,' ').replace(/\\b\\w/g,function(l){return l.toUpperCase()});
+                stageSel.appendChild(opt);
+            });
+        }
+    })();
+    function filterMonday(){
+        var q = (document.getElementById('monday-search').value || '').toLowerCase();
+        var owner = document.getElementById('monday-filter-owner').value;
+        var stage = document.getElementById('monday-filter-stage').value;
+        var hideUnassigned = document.getElementById('monday-hide-unassigned').checked;
+        var rows = document.querySelectorAll('.monday-row');
+        var visible = 0;
+        rows.forEach(function(r){
+            var show = true;
+            if(q){
+                var text = (r.getAttribute('data-name')||'') + ' ' +
+                           (r.getAttribute('data-owner')||'') + ' ' +
+                           (r.getAttribute('data-ws')||'') + ' ' +
+                           (r.getAttribute('data-stage')||'');
+                if(text.toLowerCase().indexOf(q) === -1) show = false;
+            }
+            if(owner && r.getAttribute('data-owner') !== owner) show = false;
+            if(stage && r.getAttribute('data-stage') !== stage) show = false;
+            if(hideUnassigned && r.getAttribute('data-has-owner') === '0') show = false;
+            r.style.display = show ? '' : 'none';
+            if(show) visible++;
+        });
+        var countEl = document.getElementById('monday-count');
+        if(countEl) countEl.textContent = '(' + visible + ')';
+    }
+    window.toggleBoardGroup = function(id){
+        var el = document.getElementById(id);
+        var arrow = document.getElementById(id + '_arrow');
+        if(!el) return;
+        if(el.style.display === 'none'){
+            el.style.display = 'block';
+            if(arrow) arrow.classList.add('expanded');
+        } else {
+            el.style.display = 'none';
+            if(arrow) arrow.classList.remove('expanded');
+        }
+    };
+    window.toggleExpandList = function(extraClass, btnId, total, limit) {
+        var extras = document.querySelectorAll('.' + extraClass);
+        var btn = document.getElementById(btnId);
+        if (!btn) return;
+        var isExpanded = btn.getAttribute('data-expanded') === '1';
+        extras.forEach(function(el) {
+            el.style.display = isExpanded ? 'none' : '';
+        });
+        if (isExpanded) {
+            btn.textContent = 'Show all ' + total + ' (' + (total - limit) + ' more)';
+            btn.setAttribute('data-expanded', '0');
+        } else {
+            btn.textContent = 'Show less (collapse to ' + limit + ')';
+            btn.setAttribute('data-expanded', '1');
+        }
+    };
+    </script>'''
+
+    html += '</section>'
+    return html
+
+
+def _build_monday_ic(data: dict) -> str:
+    """IC Scorecards page — Gate score breakdowns, category scores, trend, decision distribution."""
+    monday = data.get("monday", {})
+    if not monday:
+        return '<section class="dashboard-section"><div class="glass-card" style="padding:40px;text-align:center;color:#6b7280"><p>No Monday.com data available.</p></div></section>'
+
+    ic = monday.get("ic_metrics", {})
+
+    html = _section_header(
+        "monday-ic", "IC Scorecards",
+        "Investment Committee scoring — gate scores, trends, and decision tracking (dormant items hidden)",
+        "\U0001F4CB",
+    )
+
+    # ── IC Deal Flow Filter Buttons ──
+    ic_flow_stages = [
+        ("all", "All", "#6b7280"),
+        ("identified", "Identified", "#3CB4AD"),
+        ("screening", "Screening", "#334FB4"),
+        ("due diligence", "Due Diligence", "#a78bfa"),
+        ("ic review", "IC Review", "#6C6CFF"),
+        ("ic approved", "IC Approved", "#22c55e"),
+        ("negotiation", "Negotiation", "#f59e0b"),
+        ("closing", "Closing", "#34d399"),
+        ("completed", "Completed", "#22c55e"),
+        ("on hold", "On Hold", "#f59e0b"),
+        ("passed", "Passed", "#ef4444"),
+    ]
+    ic_flow_html = f'<div class="glass-card" style="margin-bottom:16px;padding:16px 20px">'
+    ic_flow_html += f'<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px">'
+    ic_flow_html += '<div style="flex:1;min-width:300px">'
+    ic_flow_html += f'<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:{COLORS["text_muted"]};margin-bottom:10px">IC Gate Progression — Click to Filter</div>'
+    ic_flow_html += '<div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center">'
+    for i, (stage_key, stage_label, stage_color) in enumerate(ic_flow_stages):
+        is_all = stage_key == "all"
+        active_cls = ' ic-stage-active' if is_all else ''
+        ic_flow_html += (
+            f'<button class="ic-stage-btn{active_cls}" data-ic-filter="{stage_key}" '
+            f'onclick="filterICStage(\'{stage_key}\')" '
+            f'style="display:inline-flex;align-items:center;gap:5px;padding:6px 14px;'
+            f'border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;'
+            f'transition:all 0.2s ease;font-family:inherit;white-space:nowrap;'
+            f'border:1px solid {COLORS["card_border"]};background:{COLORS["card"]};color:{COLORS["text_muted"]}">'
+        )
+        if not is_all:
+            ic_flow_html += (
+                f'<span style="width:8px;height:8px;border-radius:50%;background:{stage_color};'
+                f'flex-shrink:0;display:inline-block"></span>'
+            )
+        ic_flow_html += f'{stage_label}'
+        ic_flow_html += f'<span class="ic-stage-count" data-stage-count="{stage_key}" '
+        ic_flow_html += f'style="font-size:10px;opacity:0.7"></span>'
+        ic_flow_html += '</button>'
+        # Add arrow separator between non-"all" stages (except last)
+        if not is_all and i < len(ic_flow_stages) - 1 and ic_flow_stages[i + 1][0] != "on hold":
+            ic_flow_html += f'<span style="color:#d1d5db;font-size:12px">&#8594;</span>'
+        elif stage_key == "ic approved":
+            ic_flow_html += f'<span style="color:#d1d5db;font-size:12px;margin:0 2px">|</span>'
+    ic_flow_html += '</div></div>'
+    # IC Scorecard data source info
+    ic_flow_html += f'''<div style="text-align:right;font-size:11px;color:{COLORS["text_muted"]};flex-shrink:0">
+        <div style="font-weight:600;margin-bottom:2px">IC Scorecard Data</div>
+        <div>Source: Monday.com M&amp;A Boards</div>
+        <div>Metrics: <a href="javascript:void(0)" onclick="window.open('data/processed/monday_metrics.json','_blank')"
+            style="color:{COLORS["accent"]};text-decoration:none">monday_metrics.json</a></div>
+        <div id="ic-filter-status" style="margin-top:6px;font-weight:600;color:{COLORS["accent"]}"></div>
+    </div>'''
+    ic_flow_html += '</div></div>'
+    html += ic_flow_html
+
+    # ── Filter & sort IC items ──
+    top_scored = ic.get("top_scored", [])
+    # Filter out dormant IC items
+    top_scored = [s for s in top_scored if not _is_dormant(s.get("updated_at") or s.get("created_at") or "")]
+    # Sort by most recently updated
+    top_scored.sort(key=lambda s: s.get("updated_at") or s.get("created_at") or "", reverse=True)
+
+    dormant_ic = ic.get("total_scored_items", 0) - len(top_scored)
+
+    # ── IC KPI row ──
+    ic_stats = ic.get("score_statistics", {})
+    ic_avg = ic_stats.get("avg", 0)
+    ic_max = ic_stats.get("max", 0)
+    ic_min = ic_stats.get("min", 0)
+    decisions = ic.get("decision_distribution", {})
+    total_decisions = sum(decisions.values()) if decisions else 0
+
+    html += '<div class="kpi-grid kpi-grid-3">'
+    html += _stat_card("IC Scored Items", _fmt_number(len(top_scored)),
+                       f"Avg: {ic_avg:.1f} | {dormant_ic} dormant hidden", "\U0001F4CB", MONDAY_PURPLE)
+    html += _stat_card("Average IC Score", f"{ic_avg:.1f}",
+                       f"Range: {ic_min:.1f} — {ic_max:.1f}", "\U0001F4CA", COLORS['accent2'])
+    html += _stat_card("IC Decisions", _fmt_number(total_decisions),
+                       f"{len(decisions)} outcome types", "\U0001F3DB\uFE0F", COLORS['accent4'])
+    html += '</div>'
+
+    # ── IC Scorecard with Gate Breakdown + Expandable Project Detail ──
+    if top_scored:
+        max_score = max(s.get("total_score", 0) for s in top_scored) or 1
+        IC_LIMIT = 10
+
+        board_html = '<div class="board-container">'
+        board_html += f'''<div class="board-header-row" style="grid-template-columns:2fr 70px 70px 110px 1fr 90px 20px">
+            <div>Project</div>
+            <div>Total</div>
+            <div>Avg</div>
+            <div>Status</div>
+            <div>Gate Scores</div>
+            <div>Owner</div>
+            <div></div>
+        </div>'''
+
+        # Count items per stage for the filter button badges
+        ic_stage_counts: Dict[str, int] = {}
+        for item in top_scored:
+            stage = _classify_ic_stage(item.get("status", ""))
+            ic_stage_counts[stage] = ic_stage_counts.get(stage, 0) + 1
+
+        for idx, item in enumerate(top_scored):
+            name = _esc(item.get("name", "Unknown"))
+            total = item.get("total_score", 0)
+            avg = item.get("avg_score", 0)
+            status = _esc(item.get("status", ""))
+            owner = _esc(item.get("owner", "Unassigned"))
+            pct = (total / max_score) * 100
+            score_color = MONDAY_GREEN if pct >= 70 else (MONDAY_YELLOW if pct >= 40 else MONDAY_RED)
+            ic_stage = _classify_ic_stage(item.get("status", ""))
+            detail_id = f"ic_detail_{idx}"
+
+            scores = item.get("scores", {})
+            gate_html = ""
+            for gate_name, gate_val in sorted(scores.items()):
+                g_pct = min(100, gate_val * 10)
+                g_color = MONDAY_GREEN if g_pct >= 70 else (MONDAY_YELLOW if g_pct >= 40 else MONDAY_RED)
+                gate_html += (
+                    f'<span class="status-pill" style="background:{g_color}22;color:{g_color};'
+                    f'min-width:auto;padding:2px 6px;margin:1px 2px;font-size:10px">'
+                    f'{_esc(gate_name[:10])}: {gate_val:.1f}</span>'
+                )
+
+            bar_html = f'''<div style="display:flex;align-items:center;gap:4px">
+                <span style="font-weight:700;color:{score_color};font-size:13px">{total:.1f}</span>
+                <div style="flex:1;height:4px;background:{COLORS['card_border']};border-radius:2px;overflow:hidden;max-width:36px">
+                    <div style="height:100%;width:{pct:.0f}%;background:{score_color};border-radius:2px"></div>
+                </div>
+            </div>'''
+
+            extra_cls = ' ic-extra-row' if idx >= IC_LIMIT else ''
+
+            board_html += (
+                f'<div class="board-row ic-row{extra_cls}" data-ic-stage="{ic_stage}" '
+                f'onclick="toggleICDetail(\'{detail_id}\')" '
+                f'style="grid-template-columns:2fr 70px 70px 110px 1fr 90px 20px'
+                f'{";display:none" if idx >= IC_LIMIT else ""}">'
+                f'<div style="font-weight:500;color:{COLORS["text"]}">{name}</div>'
+                f'<div>{bar_html}</div>'
+                f'<div style="font-size:12px;color:{COLORS["text_muted"]}">{avg:.1f}</div>'
+                f'<div>{_monday_stage_badge(status) if status else "<span style=\'color:#64748b\'>—</span>"}</div>'
+                f'<div style="display:flex;flex-wrap:wrap;gap:2px">{gate_html}</div>'
+                f'<div style="font-size:11px;color:{COLORS["text_muted"]}">{owner}</div>'
+                f'<div class="ic-expand-arrow" id="{detail_id}_arrow">&#9654;</div>'
+                f'</div>'
+            )
+
+            # ── Expandable Project Detail Panel ──
+            columns = item.get("columns", {})
+            updates = item.get("updates", [])
+            subitems = item.get("subitems", [])
+            decisions = item.get("decisions", {})
+            group = item.get("group", "")
+            created = (item.get("created_at") or "")[:10]
+            updated = (item.get("updated_at") or "")[:10]
+
+            # Column values (non-score, meaningful)
+            skip_cols = set(scores.keys()) | {""}
+            col_rows = ""
+            for col_title, col_val in columns.items():
+                if col_title in skip_cols or len(col_val) > 200:
+                    continue
+                col_rows += f'''<div class="ic-detail-row">
+                    <span class="label">{_esc(col_title)}</span>
+                    <span class="value">{_esc(col_val[:80])}</span>
+                </div>'''
+            if group:
+                col_rows = f'''<div class="ic-detail-row">
+                    <span class="label">Group</span>
+                    <span class="value">{_esc(group)}</span>
+                </div>''' + col_rows
+            col_rows += f'''<div class="ic-detail-row">
+                <span class="label">Board</span>
+                <span class="value">{_esc(item.get("board", ""))}</span>
+            </div>'''
+            if created:
+                col_rows += f'''<div class="ic-detail-row">
+                    <span class="label">Created</span><span class="value">{created}</span>
+                </div>'''
+            if updated:
+                col_rows += f'''<div class="ic-detail-row">
+                    <span class="label">Last Updated</span><span class="value">{updated}</span>
+                </div>'''
+            for dec_title, dec_val in decisions.items():
+                col_rows += f'''<div class="ic-detail-row">
+                    <span class="label">{_esc(dec_title)}</span>
+                    <span class="value" style="color:{MONDAY_PURPLE};font-weight:600">{_esc(dec_val)}</span>
+                </div>'''
+
+            # Updates / Notes
+            notes_html = ""
+            if updates:
+                for u in updates[:3]:
+                    body = u.get("body", "")[:300]
+                    creator = u.get("creator", "")
+                    udate = (u.get("created_at") or "")[:10]
+                    notes_html += f'''<div style="padding:4px 0;border-bottom:1px solid {COLORS['card_border']}">
+                        <div style="font-size:10px;color:{COLORS['text_muted']}">{_esc(creator)} &middot; {udate}</div>
+                        <div style="font-size:12px;color:{COLORS['text']};margin-top:2px">{_esc(body)}</div>
+                    </div>'''
+            else:
+                notes_html = f'<div style="font-size:11px;color:{COLORS["text_muted"]};font-style:italic">No notes or updates recorded</div>'
+
+            # Subitems / Tasks
+            tasks_html = ""
+            if subitems:
+                for si in subitems:
+                    done = si.get("done", False)
+                    check_cls = "check done" if done else "check"
+                    check_icon = "&#10003;" if done else ""
+                    tasks_html += f'''<div class="ic-task-item">
+                        <span class="{check_cls}">{check_icon}</span>
+                        <span style="color:{COLORS['text'] if not done else COLORS['text_muted']};{'text-decoration:line-through' if done else ''}">{_esc(si.get("name", ""))}</span>
+                        {f'<span style="font-size:10px;color:{COLORS["text_muted"]};margin-left:auto">{_esc(si.get("status", ""))}</span>' if si.get("status") else ""}
+                    </div>'''
+            else:
+                tasks_html = f'<div style="font-size:11px;color:{COLORS["text_muted"]};font-style:italic">No sub-tasks defined</div>'
+
+            # Gap Flags — flag missing information
+            gaps = []
+            if not updates:
+                gaps.append("No notes/updates")
+            if not subitems:
+                gaps.append("No sub-tasks")
+            if not item.get("has_owner"):
+                gaps.append("No owner assigned")
+            if not created:
+                gaps.append("No creation date")
+            has_value = any("value" in k.lower() or "revenue" in k.lower() or "amount" in k.lower() for k in columns.keys())
+            if not has_value and not any("value" in k.lower() for k in scores.keys()):
+                gaps.append("No deal value")
+            if not decisions:
+                gaps.append("No IC decision recorded")
+            score_cols_with_data = sum(1 for v in scores.values() if v > 0)
+            if score_cols_with_data < len(scores) and len(scores) > 0:
+                gaps.append(f"Only {score_cols_with_data}/{len(scores)} gate scores filled")
+
+            gaps_html = ""
+            if gaps:
+                for g in gaps:
+                    gaps_html += f'<span class="ic-gap-flag">&#9888; {_esc(g)}</span>'
+            else:
+                gaps_html = f'<span style="font-size:11px;color:{COLORS["success"]};font-weight:600">&#10003; No gaps detected</span>'
+
+            # Recommended Next Steps — based on stage + gaps
+            next_steps = []
+            stage_lower = ic_stage.lower()
+            if stage_lower in ("screening", "identified"):
+                next_steps.append("Complete initial information gathering and IM review")
+                if not subitems:
+                    next_steps.append("Define due diligence checklist tasks")
+            elif stage_lower == "due diligence":
+                next_steps.append("Complete outstanding DD tasks and prepare for IC review")
+                if subitems:
+                    incomplete = sum(1 for s in subitems if not s.get("done"))
+                    if incomplete:
+                        next_steps.append(f"Complete {incomplete} remaining sub-task(s)")
+            elif stage_lower == "ic review":
+                next_steps.append("Prepare scorecard presentation for IC committee")
+                if not decisions:
+                    next_steps.append("Record IC decision outcome")
+            elif stage_lower == "negotiation":
+                next_steps.append("Progress commercial terms and heads of terms")
+                if not updates:
+                    next_steps.append("Add negotiation status update")
+            elif stage_lower == "completed":
+                next_steps.append("Archive and record lessons learned")
+            elif stage_lower == "passed":
+                next_steps.append("Record reason for passing and archive")
+            else:
+                next_steps.append("Update project status and add latest progress notes")
+            if not updates:
+                next_steps.append("Add a project update note with current status")
+            if not item.get("has_owner"):
+                next_steps.append("Assign a project owner")
+
+            next_steps_html = ""
+            for ns in next_steps[:4]:
+                next_steps_html += f'<div class="ic-next-step"><span class="bullet">&#8226;</span> {_esc(ns)}</div>'
+
+            # Assemble detail panel
+            board_html += f'''<div class="ic-detail" id="{detail_id}">
+                <div style="margin-bottom:8px">{gaps_html}</div>
+                <div class="ic-detail-grid">
+                    <div>
+                        <div class="ic-detail-section">
+                            <h4>Project Details</h4>
+                            {col_rows}
+                        </div>
+                        <div class="ic-detail-section" style="margin-top:8px">
+                            <h4>Recommended Next Steps</h4>
+                            {next_steps_html}
+                        </div>
+                    </div>
+                    <div>
+                        <div class="ic-detail-section">
+                            <h4>Notes &amp; Updates ({len(updates)})</h4>
+                            {notes_html}
+                        </div>
+                        <div class="ic-detail-section" style="margin-top:8px">
+                            <h4>Sub-Tasks ({len(subitems)})</h4>
+                            {tasks_html}
+                        </div>
+                    </div>
+                </div>
+            </div>'''
+
+        board_html += '</div>'
+
+        ic_more = ""
+        if len(top_scored) > IC_LIMIT:
+            remaining = len(top_scored) - IC_LIMIT
+            ic_more = f'''<div style="text-align:center;padding:10px;border-top:1px solid {COLORS['card_border']}">
+                <button id="ic-show-more" onclick="toggleExpandList('ic-extra-row','ic-show-more',{len(top_scored)},{IC_LIMIT})"
+                    style="background:none;border:1px solid {COLORS['card_border']};border-radius:8px;
+                    padding:6px 20px;color:{COLORS['accent2']};font-size:12px;font-weight:600;
+                    cursor:pointer;transition:all 0.2s ease">
+                    Show all {len(top_scored)} items ({remaining} more)
+                </button>
+            </div>'''
+
+        html += f'''<div class="glass-card" style="margin-top:12px;padding:0;overflow:hidden;border-top:3px solid {MONDAY_PURPLE}">
+            <div style="padding:10px 16px;border-bottom:1px solid {COLORS['card_border']}">
+                <h3 class="card-title" style="margin-bottom:0;display:flex;align-items:center;gap:6px;font-size:13px">
+                    <span style="color:{MONDAY_PURPLE}">\U0001F4CB</span> IC Scorecard — Click a project to expand details
+                </h3>
+                <p style="font-size:10px;color:{COLORS['text_muted']};margin-top:2px">Sorted by most recently updated &middot; {len(top_scored)} projects &middot; click row for context, notes, next steps &amp; gaps</p>
+            </div>
+            {board_html}
+            {ic_more}
+        </div>'''
+
+    # ── IC Category Scores ──
+    cat_scores = ic.get("category_scores", {})
+    if cat_scores:
+        cat_data = [(name, stats.get("avg", 0))
+                    for name, stats in sorted(cat_scores.items(),
+                                              key=lambda x: x[1].get("avg", 0), reverse=True)]
+        if cat_data:
+            html += f'''<div class="glass-card" style="margin-top:16px">
+                <h3 class="card-title">\U0001F4CA IC Score by Category (Averages)</h3>
+                {_svg_bar_chart(cat_data, 650, max(200, len(cat_data) * 44), MONDAY_PURPLE)}
+            </div>'''
+
+    # ── Charts row: Trend + Decision Distribution ──
+    score_trend = ic.get("score_trend", {})
+    if score_trend or decisions:
+        html += '<div class="grid-2" style="margin-top:16px">'
+        if score_trend:
+            trend_data = [(month, stats.get("avg_score", 0))
+                          for month, stats in sorted(score_trend.items())]
+            if trend_data:
+                html += f'''<div class="glass-card">
+                    <h3 class="card-title">\U0001F4C8 IC Score Trend (Monthly Avg)</h3>
+                    {_svg_line_chart(trend_data, 700, 220, MONDAY_PURPLE)}
+                </div>'''
+        if decisions:
+            decision_data = [(k, v) for k, v in sorted(decisions.items(),
+                                                        key=lambda x: x[1], reverse=True)]
+            html += f'''<div class="glass-card">
+                <h3 class="card-title">\U0001F3DB\uFE0F IC Decision Distribution</h3>
+                {_svg_donut(decision_data, 240)}
+            </div>'''
+        html += '</div>'
+
+    # ── IC Detail Toggle + Stage Filter JavaScript ──
+    ic_stage_counts_json = json.dumps(ic_stage_counts if top_scored else {})
+    html += f'''<script>
+    // Toggle IC project detail panel
+    window.toggleICDetail = function(id) {{
+        var el = document.getElementById(id);
+        var arrow = document.getElementById(id + '_arrow');
+        if (!el) return;
+        var isOpen = el.classList.contains('open');
+        // Close all other open details
+        document.querySelectorAll('.ic-detail.open').forEach(function(d) {{
+            if (d.id !== id) {{
+                d.classList.remove('open');
+                var otherArrow = document.getElementById(d.id + '_arrow');
+                if (otherArrow) otherArrow.classList.remove('open');
+            }}
+        }});
+        el.classList.toggle('open');
+        if (arrow) arrow.classList.toggle('open');
+    }};
+
+    (function() {{
+        var icStageCounts = {ic_stage_counts_json};
+        icStageCounts['all'] = {len(top_scored) if top_scored else 0};
+        // Populate stage count badges
+        document.querySelectorAll('[data-stage-count]').forEach(function(el) {{
+            var stage = el.getAttribute('data-stage-count');
+            var count = icStageCounts[stage] || 0;
+            if (stage === 'all') count = icStageCounts['all'];
+            el.textContent = count > 0 ? '(' + count + ')' : '';
+        }});
+
+        var currentICFilter = 'all';
+
+        window.filterICStage = function(stage) {{
+            currentICFilter = stage;
+            var rows = document.querySelectorAll('.ic-row');
+            var visibleCount = 0;
+
+            // When filtering, first expand all rows (override show-10 limit)
+            if (stage !== 'all') {{
+                rows.forEach(function(row) {{
+                    if (row.classList.contains('ic-extra-row')) {{
+                        // Remove the hidden state from expand logic
+                        row.style.display = '';
+                    }}
+                }});
+            }}
+
+            rows.forEach(function(row) {{
+                var rowStage = row.getAttribute('data-ic-stage');
+                var match = (stage === 'all' || rowStage === stage);
+                if (match) {{
+                    row.style.display = '';
+                    visibleCount++;
+                }} else {{
+                    row.style.display = 'none';
+                }}
+            }});
+
+            // If "all" is selected, re-apply the show-10 limit
+            if (stage === 'all') {{
+                var idx = 0;
+                rows.forEach(function(row) {{
+                    if (row.classList.contains('ic-extra-row')) {{
+                        var expandBtn = document.getElementById('ic-show-more');
+                        var isExpanded = expandBtn && expandBtn.getAttribute('data-expanded') === '1';
+                        if (!isExpanded) {{
+                            row.style.display = 'none';
+                        }}
+                    }}
+                    idx++;
+                }});
+            }}
+
+            // Hide show-more button when filtering
+            var moreBtn = document.getElementById('ic-show-more');
+            if (moreBtn) {{
+                moreBtn.parentElement.style.display = (stage === 'all') ? '' : 'none';
+            }}
+
+            // Update active button styling
+            document.querySelectorAll('.ic-stage-btn').forEach(function(btn) {{
+                var btnStage = btn.getAttribute('data-ic-filter');
+                if (btnStage === stage) {{
+                    btn.classList.add('ic-stage-active');
+                    btn.style.background = '{COLORS["accent"]}';
+                    btn.style.color = '#fff';
+                    btn.style.borderColor = '{COLORS["accent"]}';
+                    btn.style.boxShadow = '0 2px 8px rgba(60,180,173,0.25)';
+                }} else {{
+                    btn.classList.remove('ic-stage-active');
+                    btn.style.background = '{COLORS["card"]}';
+                    btn.style.color = '{COLORS["text_muted"]}';
+                    btn.style.borderColor = '{COLORS["card_border"]}';
+                    btn.style.boxShadow = 'none';
+                }}
+            }});
+
+            // Update filter status text
+            var statusEl = document.getElementById('ic-filter-status');
+            if (statusEl) {{
+                if (stage === 'all') {{
+                    statusEl.textContent = '';
+                }} else {{
+                    var label = stage.charAt(0).toUpperCase() + stage.slice(1);
+                    statusEl.textContent = 'Showing: ' + label + ' (' + visibleCount + ')';
+                }}
+            }}
+        }};
+
+        // Initial: set "All" as active on page load
+        var allBtn = document.querySelector('.ic-stage-btn.ic-stage-active');
+        if (allBtn) {{
+            allBtn.style.background = '{COLORS["accent"]}';
+            allBtn.style.color = '#fff';
+            allBtn.style.borderColor = '{COLORS["accent"]}';
+            allBtn.style.boxShadow = '0 2px 8px rgba(60,180,173,0.25)';
+        }}
+    }})();
+    </script>'''
+
+    html += '</section>'
+    return html
+
+
+def _build_monday_workspaces(data: dict) -> str:
+    """Workspaces page — board overview by workspace with collapsible groups, dormant filtered."""
+    monday = data.get("monday", {})
+    if not monday:
+        return '<section class="dashboard-section"><div class="glass-card" style="padding:40px;text-align:center;color:#6b7280"><p>No Monday.com data available.</p></div></section>'
+
+    overview = monday.get("board_overview", {})
+
+    html = _section_header(
+        "monday-workspaces", "Workspaces",
+        "Monday.com workspace and board overview — sorted by activity, dormant workspaces hidden",
+        "\U0001F3E2",
+    )
+
+    # ── Filter dormant workspaces (all items inactive for 5+ months) ──
+    workspaces_raw = overview.get("workspaces", [])
+    # Keep workspaces that have active items (rough activity proxy)
+    active_workspaces = [ws for ws in workspaces_raw if ws.get("active_items", 0) > 0]
+    dormant_ws = len(workspaces_raw) - len(active_workspaces)
+
+    # ── KPI row ──
+    ws_count = len(active_workspaces)
+    board_count = sum(ws.get("board_count", 0) for ws in active_workspaces)
+    filtered_out = overview.get("subitem_boards_filtered", 0)
+    total_items = sum(ws.get("total_items", 0) for ws in active_workspaces)
+    total_active = sum(ws.get("active_items", 0) for ws in active_workspaces)
+
+    html += '<div class="kpi-grid kpi-grid-3">'
+    html += _stat_card("Active Workspaces", _fmt_number(ws_count),
+                       f"{dormant_ws} dormant hidden", "\U0001F3E2", COLORS['accent2'])
+    html += _stat_card("Total Items", _fmt_number(total_items),
+                       f"{_fmt_number(total_active)} active", "\U0001F4CA", COLORS['accent'])
+    html += _stat_card("Filtered Out", _fmt_number(filtered_out),
+                       "Sub-item boards removed", "\U0001F50D", COLORS['text_muted'])
+    html += '</div>'
+
+    # ── Workspace board-style listing (show 10 with expand) ──
+    if active_workspaces:
+        # Sort workspaces by active items desc (most active first)
+        active_workspaces.sort(key=lambda ws: ws.get("active_items", 0), reverse=True)
+
+        ws_colors = [MONDAY_PURPLE, COLORS['accent2'], MONDAY_GREEN, COLORS['accent'],
+                     MONDAY_YELLOW, COLORS['accent3'], COLORS['info'], COLORS['accent4'],
+                     "#E2445C", "#FF642E", "#579BFC", "#CAB641"]
+
+        WS_LIMIT = 10
+        board_html = '<div class="board-container">'
+        for i, ws in enumerate(active_workspaces):
+            ws_name = _esc(ws.get("name", "Unknown"))
+            ws_boards = ws.get("board_count", 0)
+            ws_items = ws.get("total_items", 0)
+            ws_active = ws.get("active_items", 0)
+            boards = ws.get("boards", [])
+            ws_id = f"ws_grp_{i}"
+            ws_color = ws_colors[i % len(ws_colors)]
+
+            # Hide workspaces beyond the first 10
+            hidden_style = 'display:none;' if i >= WS_LIMIT else ''
+            extra_cls = ' ws-extra-group' if i >= WS_LIMIT else ''
+
+            board_html += f'''<div class="board-group{extra_cls}" style="{hidden_style}">
+                <div class="board-group-header" onclick="toggleBoardGroup('{ws_id}')">
+                    <div class="group-color" style="background:{ws_color}"></div>
+                    <div class="group-title">{ws_name}</div>
+                    <div class="group-count">{ws_boards} boards &middot; {_fmt_number(ws_items)} items &middot; {_fmt_number(ws_active)} active</div>
+                    <div class="group-arrow" id="{ws_id}_arrow">&#9654;</div>
+                </div>
+                <div class="board-rows" id="{ws_id}" style="display:none">'''
+
+            if boards:
+                # Sort boards by active items desc
+                boards_sorted = sorted(boards, key=lambda b: b.get("active_items", 0), reverse=True)
+                # Filter out boards with 0 items
+                boards_sorted = [b for b in boards_sorted if b.get("item_count", 0) > 0]
+
+                board_html += f'''<div class="board-header-row" style="grid-template-columns:2fr 100px 100px">
+                    <div>Board Name</div>
+                    <div>Items</div>
+                    <div>Active</div>
+                </div>'''
+
+                for b in boards_sorted[:20]:
+                    b_name = _esc(b.get("name", ""))
+                    b_items = b.get("item_count", 0)
+                    b_active = b.get("active_items", 0)
+                    active_pct = (b_active / b_items * 100) if b_items > 0 else 0
+                    bar_color = MONDAY_GREEN if active_pct >= 50 else (MONDAY_YELLOW if active_pct >= 20 else COLORS['text_muted'])
+
+                    board_html += f'''<div class="board-row" style="grid-template-columns:2fr 100px 100px">
+                        <div style="font-weight:500;color:{COLORS['text']}">{b_name}</div>
+                        <div style="font-size:12px">{_fmt_number(b_items)}</div>
+                        <div>
+                            <div class="progress-mini">
+                                <div class="bar"><div class="bar-fill" style="width:{active_pct:.0f}%;background:{bar_color}"></div></div>
+                                <span class="pct">{_fmt_number(b_active)}</span>
+                            </div>
+                        </div>
+                    </div>'''
+
+            board_html += '</div></div>'
+
+        board_html += '</div>'
+
+        ws_more = ""
+        if len(active_workspaces) > WS_LIMIT:
+            remaining = len(active_workspaces) - WS_LIMIT
+            ws_more = f'''<div style="text-align:center;padding:12px;border-top:1px solid {COLORS['card_border']}">
+                <button id="ws-show-more" onclick="toggleExpandList('ws-extra-group','ws-show-more',{len(active_workspaces)},{WS_LIMIT})"
+                    style="background:none;border:1px solid {COLORS['card_border']};border-radius:8px;
+                    padding:8px 24px;color:{COLORS['accent2']};font-size:13px;font-weight:600;
+                    cursor:pointer;transition:all 0.2s ease">
+                    Show all {len(active_workspaces)} workspaces ({remaining} more)
+                </button>
+            </div>'''
+
+        html += f'''<div class="glass-card" style="margin-top:16px;padding:0;overflow:hidden">
+            <div style="padding:16px 20px;border-bottom:1px solid {COLORS['card_border']}">
+                <h3 class="card-title" style="margin-bottom:0">\U0001F3E2 Active Workspaces
+                    <span style="font-size:13px;font-weight:400;color:{COLORS['text_muted']}">
+                        ({len(active_workspaces)} active, {dormant_ws} dormant hidden)
+                    </span>
+                </h3>
+                <p style="font-size:11px;color:{COLORS['text_muted']};margin-top:4px">
+                    Sorted by most active &middot; Click to expand &middot; Showing {min(WS_LIMIT, len(active_workspaces))} of {len(active_workspaces)}
+                </p>
+            </div>
+            {board_html}
+            {ws_more}
+        </div>'''
+
+    # ── toggleBoardGroup JS (shared) ──
+    html += '''<script>
+    if(!window.toggleBoardGroup) {
+        window.toggleBoardGroup = function(id){
+            var el = document.getElementById(id);
+            var arrow = document.getElementById(id + '_arrow');
+            if(!el) return;
+            if(el.style.display === 'none'){
+                el.style.display = 'block';
+                if(arrow) arrow.classList.add('expanded');
+            } else {
+                el.style.display = 'none';
+                if(arrow) arrow.classList.remove('expanded');
+            }
+        };
+    }
+    if(!window.toggleExpandList) {
+        window.toggleExpandList = function(extraClass, btnId, total, limit) {
+            var extras = document.querySelectorAll('.' + extraClass);
+            var btn = document.getElementById(btnId);
+            if (!btn) return;
+            var isExpanded = btn.getAttribute('data-expanded') === '1';
+            extras.forEach(function(el) {
+                el.style.display = isExpanded ? 'none' : '';
+            });
+            if (isExpanded) {
+                btn.textContent = 'Show all ' + total + ' (' + (total - limit) + ' more)';
+                btn.setAttribute('data-expanded', '0');
+            } else {
+                btn.textContent = 'Show less (collapse to ' + limit + ')';
+                btn.setAttribute('data-expanded', '1');
+            }
+        };
+    }
+    </script>'''
+
+    html += '</section>'
+    return html
+
+
+# ---------------------------------------------------------------------------
+# Section: AI Roadmap & Tasks
+# ---------------------------------------------------------------------------
+
+AI_TEAL = "#3CB4AD"
+AI_BLUE = "#334FB4"
+
+AI_CATEGORY_LABELS = {
+    "initiatives": ("Initiatives", AI_TEAL, "\U0001F680"),
+    "tools": ("AI Tools", AI_BLUE, "\U0001F6E0\uFE0F"),
+    "knowledge": ("Knowledge Base", "#a78bfa", "\U0001F4DA"),
+    "meetings": ("Meetings", "#f59e0b", "\U0001F4C5"),
+    "active_projects": ("Active Projects", "#22c55e", "\u2699\uFE0F"),
+    "survey": ("Surveys", "#f472b6", "\U0001F4CA"),
+    "submissions": ("Business Needs", "#60a5fa", "\U0001F4DD"),
+    "other": ("Other", "#6b7280", "\U0001F4C1"),
+}
+
+
+def _build_ai_section(data: dict) -> str:
+    """AI Roadmap & Tasks page — eComplete AI workspace boards."""
+    monday = data.get("monday", {})
+    ai = monday.get("ai_metrics", {})
+    if not ai or not ai.get("total_items"):
+        return '''<section class="dashboard-section"><div class="glass-card" style="padding:30px;text-align:center;color:#6b7280"><p>No AI workspace data available. Ensure the eComplete AI workspace exists in Monday.com.</p></div></section>'''
+
+    html = _section_header(
+        "ai-roadmap", "AI Roadmap & Tasks",
+        "eComplete AI Committee — initiatives, tools, knowledge, meetings, and project tracking",
+        "\U0001F916",
+    )
+
+    total_items = ai.get("total_items", 0)
+    boards = ai.get("boards", [])
+    categories = ai.get("categories", {})
+    status_dist = ai.get("status_distribution", {})
+
+    # ── KPI row ──
+    html += '<div class="kpi-grid">'
+    html += _stat_card("AI Items", _fmt_number(total_items),
+                       f"Across {len(boards)} boards", "\U0001F916", AI_TEAL)
+    html += _stat_card("Initiatives", _fmt_number(len(categories.get("initiatives", {}).get("items", []))),
+                       "", "\U0001F680", AI_BLUE)
+    html += _stat_card("Tools Tracked", _fmt_number(len(categories.get("tools", {}).get("items", []))),
+                       "", "\U0001F6E0\uFE0F", "#a78bfa")
+    html += _stat_card("Active Projects", _fmt_number(len(categories.get("active_projects", {}).get("items", []))),
+                       "", "\u2699\uFE0F", "#22c55e")
+    html += '</div>'
+
+    # ── Status distribution ──
+    if status_dist:
+        status_items = sorted(status_dist.items(), key=lambda x: x[1], reverse=True)
+        max_status = max(status_dist.values()) if status_dist else 1
+        html += f'''<div class="glass-card" style="margin-top:10px">
+            <h3 class="card-title">Status Distribution</h3>'''
+        for s_name, s_count in status_items[:10]:
+            html += _svg_horizontal_bar(s_name, s_count, max_status, AI_TEAL, show_pct=False)
+        html += '</div>'
+
+    # ── Category boards with expandable items ──
+    ai_detail_idx = 0
+    for cat_key, cat_data in sorted(categories.items(), key=lambda x: len(x[1].get("items", [])), reverse=True):
+        cat_label, cat_color, cat_icon = AI_CATEGORY_LABELS.get(cat_key, ("Other", "#6b7280", "\U0001F4C1"))
+        cat_items = cat_data.get("items", [])
+        if not cat_items:
+            continue
+
+        items_html = ""
+        for item in cat_items:
+            ai_detail_idx += 1
+            detail_id = f"ai_det_{ai_detail_idx}"
+            i_name = _esc(item.get("name", ""))
+            i_status = _esc(item.get("status", ""))
+            i_owner = _esc(item.get("owner", "Unassigned"))
+            i_updated = (item.get("updated_at") or "")[:10]
+
+            status_bg = f"{cat_color}22"
+            items_html += (
+                f'<div class="ai-item-row" onclick="toggleAIDetail(\'{detail_id}\')">'
+                f'<div style="font-weight:500;color:{COLORS["text"]}">{i_name}</div>'
+                f'<div><span class="status-pill" style="background:{status_bg};color:{cat_color};padding:2px 8px;min-width:auto;font-size:10px">{i_status or "—"}</span></div>'
+                f'<div style="font-size:11px;color:{COLORS["text_muted"]}">{i_owner}</div>'
+                f'<div style="font-size:11px;color:{COLORS["text_muted"]}">{i_updated}</div>'
+                f'</div>'
+            )
+
+            # Detail panel
+            cols = item.get("columns", {})
+            updates = item.get("updates", [])
+            subitems = item.get("subitems", [])
+
+            det_cols = ""
+            for ck, cv in cols.items():
+                if len(cv) > 300:
+                    continue
+                det_cols += f'''<div class="ic-detail-row">
+                    <span class="label">{_esc(ck)}</span>
+                    <span class="value">{_esc(cv[:100])}</span>
+                </div>'''
+
+            det_notes = ""
+            if updates:
+                for u in updates[:3]:
+                    det_notes += f'''<div style="padding:3px 0;border-bottom:1px solid {COLORS['card_border']}">
+                        <div style="font-size:10px;color:{COLORS['text_muted']}">{_esc(u.get("creator",""))} &middot; {(u.get("created_at","") or "")[:10]}</div>
+                        <div style="font-size:12px;color:{COLORS['text']};margin-top:1px">{_esc(u.get("body","")[:200])}</div>
+                    </div>'''
+            else:
+                det_notes = f'<span style="font-size:11px;color:{COLORS["text_muted"]};font-style:italic">No updates</span>'
+
+            det_tasks = ""
+            if subitems:
+                for si in subitems:
+                    done = si.get("done", False)
+                    check_cls = "check done" if done else "check"
+                    det_tasks += f'''<div class="ic-task-item">
+                        <span class="{check_cls}">{"&#10003;" if done else ""}</span>
+                        <span>{_esc(si.get("name",""))}</span>
+                    </div>'''
+            else:
+                det_tasks = f'<span style="font-size:11px;color:{COLORS["text_muted"]};font-style:italic">No sub-tasks</span>'
+
+            items_html += f'''<div class="ai-item-detail" id="{detail_id}">
+                <div class="ic-detail-grid">
+                    <div class="ic-detail-section">
+                        <h4>Details</h4>{det_cols if det_cols else f'<span style="font-size:11px;color:{COLORS["text_muted"]}">No additional data</span>'}
+                    </div>
+                    <div>
+                        <div class="ic-detail-section">
+                            <h4>Notes ({len(updates)})</h4>{det_notes}
+                        </div>
+                        {f'<div class="ic-detail-section" style="margin-top:6px"><h4>Tasks ({len(subitems)})</h4>{det_tasks}</div>' if subitems else ''}
+                    </div>
+                </div>
+            </div>'''
+
+        html += f'''<div class="glass-card" style="margin-top:10px;padding:0;overflow:hidden;border-left:3px solid {cat_color}">
+            <div style="padding:10px 14px;border-bottom:1px solid {COLORS['card_border']};display:flex;justify-content:space-between;align-items:center">
+                <h3 class="card-title" style="margin-bottom:0;font-size:13px">{cat_icon} {cat_label}
+                    <span style="font-size:11px;font-weight:400;color:{COLORS['text_muted']}">({len(cat_items)} items)</span>
+                </h3>
+            </div>
+            <div class="board-container" style="border:none;border-radius:0">
+                <div style="display:grid;grid-template-columns:2fr 120px 100px 120px;padding:4px 12px;font-size:10px;font-weight:600;color:{COLORS['text_muted']};text-transform:uppercase;letter-spacing:0.04em;background:{COLORS['surface2']};border-bottom:1px solid {COLORS['card_border']}">
+                    <div>Item</div><div>Status</div><div>Owner</div><div>Updated</div>
+                </div>
+                {items_html}
+            </div>
+        </div>'''
+
+    # ── Board overview list ──
+    if boards:
+        board_rows = ""
+        for b in boards:
+            b_name = _esc(b.get("name", ""))
+            b_cat = b.get("category", "other")
+            b_label, b_color, _ = AI_CATEGORY_LABELS.get(b_cat, ("Other", "#6b7280", ""))
+            b_count = b.get("item_count", 0)
+            b_owners = ", ".join(b.get("owners", [])[:3]) or "—"
+            board_rows += f'''<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid {COLORS['card_border']}">
+                <div>
+                    <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:{b_color};margin-right:6px"></span>
+                    <span style="font-size:12px;font-weight:500;color:{COLORS['text']}">{b_name}</span>
+                    <span style="font-size:10px;color:{COLORS['text_muted']};margin-left:6px">{b_label}</span>
+                </div>
+                <div style="text-align:right">
+                    <span style="font-size:12px;font-weight:600;color:{COLORS['text']}">{b_count}</span>
+                    <span style="font-size:10px;color:{COLORS['text_muted']};margin-left:8px">{_esc(b_owners)}</span>
+                </div>
+            </div>'''
+
+        html += f'''<div class="glass-card" style="margin-top:10px">
+            <h3 class="card-title">AI Boards Overview</h3>
+            {board_rows}
+        </div>'''
+
+    # ── AI Detail toggle JS ──
+    html += '''<script>
+    window.toggleAIDetail = function(id) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        var isOpen = el.classList.contains('open');
+        document.querySelectorAll('.ai-item-detail.open').forEach(function(d) {
+            if (d.id !== id) d.classList.remove('open');
+        });
+        el.classList.toggle('open');
+    };
+    </script>'''
+
+    html += '</section>'
+    return html
+
+
+# ---------------------------------------------------------------------------
 # CSS stylesheet
 # ---------------------------------------------------------------------------
 
 def _build_css() -> str:
-    """Build the complete CSS for the dashboard."""
+    """Build the complete CSS for the dashboard — eComplete light theme."""
     return f'''
     <style>
         /* ============================================================
-           CSS Custom Properties
+           CSS Custom Properties — eComplete Brand
            ============================================================ */
         :root {{
             --bg:          {COLORS['bg']};
@@ -1513,8 +2852,8 @@ def _build_css() -> str:
             --surface2:    {COLORS['surface2']};
             --radius:      14px;
             --radius-sm:   8px;
-            --shadow:      0 4px 24px rgba(0,0,0,0.3);
-            --shadow-lg:   0 8px 40px rgba(0,0,0,0.45);
+            --shadow:      0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+            --shadow-lg:   0 4px 16px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04);
             --transition:  all 0.3s cubic-bezier(.25,.1,.25,1);
         }}
 
@@ -1522,105 +2861,172 @@ def _build_css() -> str:
            Reset & Base
            ============================================================ */
         *, *::before, *::after {{ box-sizing: border-box; margin: 0; padding: 0; }}
-        html {{ scroll-behavior: smooth; scroll-padding-top: 120px; }}
+        html {{ scroll-behavior: smooth; scroll-padding-top: 24px; }}
         body {{
             background: var(--bg);
             color: var(--text);
-            font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+            font-family: 'Assistant', 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
             line-height: 1.6;
             min-height: 100vh;
             -webkit-font-smoothing: antialiased;
             overflow-x: hidden;
+            display: flex;
         }}
 
         /* Scrollbar styling */
         ::-webkit-scrollbar {{ width: 8px; height: 8px; }}
         ::-webkit-scrollbar-track {{ background: var(--bg); }}
-        ::-webkit-scrollbar-thumb {{ background: var(--card-border); border-radius: 4px; }}
-        ::-webkit-scrollbar-thumb:hover {{ background: var(--text-muted); }}
+        ::-webkit-scrollbar-thumb {{ background: #d1d5db; border-radius: 4px; }}
+        ::-webkit-scrollbar-thumb:hover {{ background: #9ca3af; }}
 
         /* ============================================================
-           Top Navigation
+           Left Sidebar Navigation — eComplete Dark
            ============================================================ */
-        .top-nav {{
-            position: sticky;
+        .sidebar {{
+            position: fixed;
             top: 0;
-            z-index: 100;
-            background: rgba(15, 23, 42, 0.85);
-            backdrop-filter: blur(20px) saturate(180%);
-            -webkit-backdrop-filter: blur(20px) saturate(180%);
-            border-bottom: 1px solid var(--card-border);
-            padding: 0 24px;
-            transition: var(--transition);
+            left: 0;
+            bottom: 0;
+            width: 220px;
+            background: linear-gradient(180deg, #242833 0%, #1e2230 100%);
+            border-right: 1px solid rgba(255, 255, 255, 0.06);
+            z-index: 200;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255,255,255,0.1) transparent;
+            transition: transform 0.3s cubic-bezier(.25,.1,.25,1);
         }}
-        .nav-inner {{
-            max-width: 1400px;
-            margin: 0 auto;
+        .sidebar::-webkit-scrollbar {{ width: 4px; }}
+        .sidebar::-webkit-scrollbar-track {{ background: transparent; }}
+        .sidebar::-webkit-scrollbar-thumb {{ background: rgba(255,255,255,0.1); border-radius: 4px; }}
+
+        .sidebar-brand {{
+            padding: 20px 18px 16px;
             display: flex;
             align-items: center;
-            height: 60px;
-            gap: 8px;
+            gap: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
         }}
-        .nav-brand {{
-            font-weight: 800;
-            font-size: 16px;
-            color: var(--accent);
-            margin-right: 24px;
-            white-space: nowrap;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }}
-        .nav-brand .brand-dot {{
-            width: 8px;
-            height: 8px;
+        .sidebar-brand .brand-dot {{
+            width: 28px;
+            height: 28px;
             border-radius: 50%;
             background: var(--accent);
-            box-shadow: 0 0 8px var(--accent), 0 0 20px rgba(251,146,60,0.3);
-            animation: pulse-glow 2s ease-in-out infinite;
-        }}
-        @keyframes pulse-glow {{
-            0%, 100% {{ opacity: 1; transform: scale(1); }}
-            50% {{ opacity: 0.7; transform: scale(1.2); }}
-        }}
-        .nav-links {{
             display: flex;
             align-items: center;
-            gap: 2px;
-            overflow-x: auto;
-            scrollbar-width: none;
-            -ms-overflow-style: none;
-            flex: 1;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 800;
+            color: #fff;
+            flex-shrink: 0;
         }}
-        .nav-links::-webkit-scrollbar {{ display: none; }}
-        .nav-link {{
-            padding: 8px 14px;
-            font-size: 12px;
+        .sidebar-brand-text {{
+            font-weight: 800;
+            font-size: 16px;
+            color: #ffffff;
+            letter-spacing: -0.01em;
+        }}
+
+        .sidebar-nav {{
+            flex: 1;
+            padding: 12px 0;
+        }}
+        .sidebar-group {{
+            margin-bottom: 4px;
+        }}
+        .sidebar-group-label {{
+            padding: 8px 18px 4px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: rgba(255, 255, 255, 0.35);
+        }}
+        .sidebar-link {{
+            display: block;
+            padding: 7px 18px 7px 28px;
+            font-size: 13px;
             font-weight: 500;
-            color: var(--text-muted);
+            color: rgba(255, 255, 255, 0.55);
             text-decoration: none;
-            border-radius: var(--radius-sm);
-            white-space: nowrap;
-            transition: var(--transition);
+            border-left: 3px solid transparent;
+            transition: all 0.2s ease;
             position: relative;
         }}
-        .nav-link:hover {{
-            color: var(--text);
-            background: rgba(255,255,255,0.05);
+        .sidebar-link:hover {{
+            color: rgba(255, 255, 255, 0.9);
+            background: rgba(255,255,255,0.04);
+            border-left-color: rgba(255, 255, 255, 0.15);
         }}
-        .nav-link.active {{
+        .sidebar-link.active {{
             color: var(--accent);
-            background: rgba(251,146,60,0.1);
+            background: rgba(60, 180, 173, 0.1);
+            border-left-color: var(--accent);
+            font-weight: 600;
         }}
-        .nav-link.active::after {{
-            content: '';
-            position: absolute;
-            bottom: -1px;
+
+        .sidebar-footer {{
+            padding: 14px 18px;
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.25);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+        }}
+
+        /* Layout wrapper to the right of sidebar */
+        .layout-main {{
+            margin-left: 220px;
+            flex: 1;
+            min-width: 0;
+        }}
+
+        /* Sidebar hamburger toggle (hidden on desktop) */
+        .sidebar-toggle {{
+            display: none;
+            position: fixed;
+            top: 14px;
             left: 14px;
-            right: 14px;
+            z-index: 250;
+            background: rgba(36, 40, 51, 0.95);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 10px 11px;
+            cursor: pointer;
+            flex-direction: column;
+            gap: 4px;
+        }}
+        .sidebar-toggle span {{
+            display: block;
+            width: 20px;
             height: 2px;
-            background: var(--accent);
+            background: #ffffff;
             border-radius: 2px;
+            transition: all 0.3s ease;
+        }}
+        .sidebar-toggle.open span:nth-child(1) {{
+            transform: rotate(45deg) translate(4px, 4px);
+        }}
+        .sidebar-toggle.open span:nth-child(2) {{
+            opacity: 0;
+        }}
+        .sidebar-toggle.open span:nth-child(3) {{
+            transform: rotate(-45deg) translate(4px, -4px);
+        }}
+
+        /* Mobile overlay */
+        .sidebar-overlay {{
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.3);
+            z-index: 190;
+        }}
+        .sidebar-overlay.visible {{
+            display: block;
         }}
 
         /* ============================================================
@@ -1629,73 +3035,57 @@ def _build_css() -> str:
         .main-content {{
             max-width: 1400px;
             margin: 0 auto;
-            padding: 24px;
+            padding: 14px 20px;
         }}
 
         /* ============================================================
            Sections
            ============================================================ */
         .dashboard-section {{
-            margin-bottom: 48px;
-            opacity: 0;
-            transform: translateY(20px);
-            animation: fade-in-up 0.6s ease-out forwards;
+            margin-bottom: 20px;
         }}
-        .dashboard-section:nth-child(1) {{ animation-delay: 0.1s; }}
-        .dashboard-section:nth-child(2) {{ animation-delay: 0.15s; }}
-        .dashboard-section:nth-child(3) {{ animation-delay: 0.2s; }}
-        .dashboard-section:nth-child(4) {{ animation-delay: 0.25s; }}
-        .dashboard-section:nth-child(5) {{ animation-delay: 0.3s; }}
-        .dashboard-section:nth-child(6) {{ animation-delay: 0.35s; }}
-        .dashboard-section:nth-child(7) {{ animation-delay: 0.4s; }}
-        .dashboard-section:nth-child(8) {{ animation-delay: 0.45s; }}
 
         @keyframes fade-in-up {{
             to {{ opacity: 1; transform: translateY(0); }}
         }}
 
         .section-header {{
-            margin-bottom: 20px;
-            padding-bottom: 12px;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
             border-bottom: 1px solid var(--card-border);
         }}
         .section-title {{
-            font-size: 22px;
+            font-size: 18px;
             font-weight: 800;
             color: var(--text);
             letter-spacing: -0.02em;
         }}
         .section-subtitle {{
-            font-size: 13px;
+            font-size: 12px;
             color: var(--text-muted);
-            margin-top: 2px;
+            margin-top: 1px;
         }}
 
         /* ============================================================
-           Glassmorphism Cards
+           Cards — eComplete clean style
            ============================================================ */
         .glass-card {{
-            background: linear-gradient(135deg,
-                rgba(30, 41, 59, 0.8) 0%,
-                rgba(30, 41, 59, 0.5) 100%);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(51, 65, 85, 0.6);
+            background: var(--card);
+            border: 1px solid var(--card-border);
             border-radius: var(--radius);
-            padding: 24px;
+            padding: 14px 16px;
             box-shadow: var(--shadow);
             transition: var(--transition);
         }}
         .glass-card:hover {{
-            border-color: rgba(251,146,60,0.2);
-            box-shadow: var(--shadow-lg), 0 0 30px rgba(251,146,60,0.05);
-            transform: translateY(-2px);
+            border-color: rgba(60, 180, 173, 0.25);
+            box-shadow: var(--shadow-lg);
         }}
         .card-title {{
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 700;
             color: var(--text);
-            margin-bottom: 16px;
+            margin-bottom: 10px;
             text-transform: uppercase;
             letter-spacing: 0.04em;
         }}
@@ -1704,24 +3094,22 @@ def _build_css() -> str:
         }}
 
         /* ============================================================
-           Stat Cards (KPI)
+           Stat Cards (KPI) — eComplete
            ============================================================ */
         .kpi-grid {{
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 16px;
-            margin-bottom: 16px;
+            gap: 10px;
+            margin-bottom: 10px;
         }}
         .kpi-grid-3 {{
             grid-template-columns: repeat(3, 1fr);
         }}
         .stat-card {{
-            background: linear-gradient(135deg,
-                rgba(30, 41, 59, 0.9) 0%,
-                rgba(15, 23, 42, 0.7) 100%);
+            background: var(--card);
             border: 1px solid var(--card-border);
-            border-radius: var(--radius);
-            padding: 20px;
+            border-radius: var(--radius-sm);
+            padding: 12px 14px;
             transition: var(--transition);
             position: relative;
             overflow: hidden;
@@ -1738,9 +3126,8 @@ def _build_css() -> str:
             transition: opacity 0.3s ease;
         }}
         .stat-card:hover {{
-            border-color: rgba(251,146,60,0.3);
-            transform: translateY(-3px);
-            box-shadow: 0 8px 30px rgba(0,0,0,0.3), 0 0 20px rgba(251,146,60,0.06);
+            border-color: rgba(60, 180, 173, 0.3);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
         }}
         .stat-card:hover::before {{
             opacity: 1;
@@ -1771,13 +3158,13 @@ def _build_css() -> str:
             padding: 16px 20px;
             border: 2px solid var(--card-border);
             border-radius: var(--radius);
-            background: rgba(15,23,42,0.5);
+            background: var(--surface2);
             min-width: 100px;
             transition: var(--transition);
         }}
         .chain-item:hover {{
             transform: scale(1.05);
-            box-shadow: 0 0 20px rgba(251,146,60,0.1);
+            box-shadow: 0 4px 16px rgba(60, 180, 173, 0.12);
         }}
         .chain-value {{
             font-size: 24px;
@@ -1810,7 +3197,7 @@ def _build_css() -> str:
             font-size: 13px;
         }}
         .data-table th {{
-            background: rgba(15,23,42,0.6);
+            background: var(--surface2);
             color: var(--text-muted);
             font-weight: 600;
             text-transform: uppercase;
@@ -1823,14 +3210,14 @@ def _build_css() -> str:
         }}
         .data-table td {{
             padding: 10px 14px;
-            border-bottom: 1px solid rgba(51,65,85,0.3);
+            border-bottom: 1px solid var(--card-border);
             color: var(--text);
         }}
         .data-table tbody tr {{
             transition: background 0.15s ease;
         }}
         .data-table tbody tr:hover {{
-            background: rgba(251,146,60,0.04);
+            background: rgba(60, 180, 173, 0.04);
         }}
         .data-table tbody tr:last-child td {{
             border-bottom: none;
@@ -1848,11 +3235,11 @@ def _build_css() -> str:
            ============================================================ */
         .dashboard-footer {{
             text-align: center;
-            padding: 32px 24px;
+            padding: 16px 20px;
             color: var(--text-muted);
-            font-size: 12px;
+            font-size: 11px;
             border-top: 1px solid var(--card-border);
-            margin-top: 48px;
+            margin-top: 20px;
         }}
         .dashboard-footer .brand {{
             color: var(--accent);
@@ -1863,19 +3250,22 @@ def _build_css() -> str:
            Responsive
            ============================================================ */
         @media (max-width: 1024px) {{
+            .sidebar {{ transform: translateX(-100%); }}
+            .sidebar.open {{ transform: translateX(0); }}
+            .layout-main {{ margin-left: 0; }}
+            .sidebar-toggle {{ display: flex; }}
             .kpi-grid {{ grid-template-columns: repeat(2, 1fr); }}
             .kpi-grid-3 {{ grid-template-columns: repeat(2, 1fr); }}
             .grid-2 {{ grid-template-columns: 1fr; }}
             .volume-chain {{ gap: 8px; }}
             .chain-item {{ min-width: 80px; padding: 12px; }}
             .chain-value {{ font-size: 18px; }}
+            .main-content {{ padding: 16px 20px; }}
         }}
         @media (max-width: 640px) {{
             .kpi-grid {{ grid-template-columns: 1fr; }}
             .kpi-grid-3 {{ grid-template-columns: 1fr; }}
-            .nav-brand {{ font-size: 14px; margin-right: 12px; }}
-            .nav-link {{ font-size: 11px; padding: 6px 10px; }}
-            .main-content {{ padding: 16px; }}
+            .main-content {{ padding: 12px 14px; }}
             .glass-card {{ padding: 16px; }}
             .stat-card {{ padding: 14px; }}
             .section-title {{ font-size: 18px; }}
@@ -1884,16 +3274,16 @@ def _build_css() -> str:
         }}
 
         /* ============================================================
-           Filter Bar
+           Filter Bar — eComplete
            ============================================================ */
         .filter-bar {{
             position: sticky;
-            top: 60px;
+            top: 0;
             z-index: 99;
-            background: rgba(15, 23, 42, 0.88);
+            background: rgba(247, 248, 250, 0.92);
             backdrop-filter: blur(20px) saturate(180%);
             -webkit-backdrop-filter: blur(20px) saturate(180%);
-            border-bottom: 1px solid rgba(51, 65, 85, 0.4);
+            border-bottom: 1px solid var(--card-border);
             padding: 10px 24px;
         }}
         .filter-inner {{
@@ -1918,8 +3308,8 @@ def _build_css() -> str:
             font-size: 12px;
             font-weight: 600;
             color: var(--text-muted);
-            background: rgba(30, 41, 59, 0.6);
-            border: 1px solid rgba(51, 65, 85, 0.5);
+            background: var(--card);
+            border: 1px solid var(--card-border);
             border-radius: 20px;
             cursor: pointer;
             transition: all 0.25s cubic-bezier(.25,.1,.25,1);
@@ -1928,14 +3318,14 @@ def _build_css() -> str:
         }}
         .filter-btn:hover {{
             color: var(--text);
-            background: rgba(51, 65, 85, 0.5);
-            border-color: rgba(148, 163, 184, 0.3);
+            background: var(--surface2);
+            border-color: #d1d5db;
         }}
         .filter-btn.active {{
             color: #fff;
-            background: linear-gradient(135deg, var(--accent), #ea580c);
+            background: var(--accent);
             border-color: var(--accent);
-            box-shadow: 0 2px 12px rgba(251, 146, 60, 0.3);
+            box-shadow: 0 2px 12px rgba(60, 180, 173, 0.25);
         }}
         .filter-period-label {{
             margin-left: auto;
@@ -1955,19 +3345,19 @@ def _build_css() -> str:
             vertical-align: middle;
         }}
         .yoy-badge.up {{
-            color: #22c55e;
-            background: rgba(34, 197, 94, 0.12);
+            color: #16a34a;
+            background: rgba(34, 197, 94, 0.1);
         }}
         .yoy-badge.down {{
-            color: #ef4444;
-            background: rgba(239, 68, 68, 0.12);
+            color: #dc2626;
+            background: rgba(239, 68, 68, 0.1);
         }}
         .yoy-badge.neutral {{
             color: var(--text-muted);
-            background: rgba(148, 163, 184, 0.12);
+            background: rgba(107, 114, 128, 0.1);
         }}
         @media (max-width: 640px) {{
-            .filter-bar {{ padding: 8px 16px; top: 56px; }}
+            .filter-bar {{ padding: 8px 16px; top: 0; }}
             .filter-btn {{ padding: 5px 12px; font-size: 11px; }}
             .filter-period-label {{ display: none; }}
         }}
@@ -1976,20 +3366,398 @@ def _build_css() -> str:
            Print
            ============================================================ */
         @media print {{
-            body {{ background: white; color: #1a1a1a; }}
-            .top-nav {{ position: static; background: white; border-bottom: 2px solid #ccc; }}
+            body {{ background: white; color: #1a1a1a; display: block; }}
+            .sidebar {{ display: none; }}
+            .sidebar-toggle {{ display: none; }}
+            .layout-main {{ margin-left: 0; }}
             .glass-card, .stat-card {{
                 background: white;
                 border: 1px solid #ddd;
                 box-shadow: none;
                 break-inside: avoid;
             }}
-            .nav-link.active {{ color: #d97706; }}
             .dashboard-section {{ opacity: 1; transform: none; animation: none; }}
             .data-table th {{ background: #f5f5f5; color: #333; }}
             .data-table td {{ color: #333; }}
             .section-title {{ color: #1a1a1a; }}
             .section-subtitle, .card-title {{ color: #666; }}
+        }}
+
+        /* ============================================================
+           Page-based SPA
+           ============================================================ */
+        .dash-page {{
+            display: none;
+        }}
+        .dash-page.active {{
+            display: block;
+            animation: page-fade-in 0.4s ease-out;
+        }}
+        @keyframes page-fade-in {{
+            from {{ opacity: 0; transform: translateY(12px); }}
+            to {{ opacity: 1; transform: translateY(0); }}
+        }}
+
+        /* ============================================================
+           Deal Flow Navigation
+           ============================================================ */
+        .deal-flow-nav {{
+            display: flex;
+            align-items: center;
+            gap: 0;
+            overflow-x: auto;
+            padding: 16px 0;
+            margin-bottom: 16px;
+            scrollbar-width: thin;
+        }}
+        .deal-flow-step {{
+            display: flex;
+            align-items: center;
+            gap: 0;
+            white-space: nowrap;
+        }}
+        .deal-flow-step .step-dot {{
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 700;
+            color: #fff;
+            flex-shrink: 0;
+            transition: all 0.2s ease;
+        }}
+        .deal-flow-step .step-label {{
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-left: 6px;
+            letter-spacing: 0.01em;
+        }}
+        .deal-flow-step .step-arrow {{
+            font-size: 14px;
+            color: #d1d5db;
+            margin: 0 8px;
+        }}
+
+        /* ============================================================
+           Monday.com Board Styles — eComplete Light
+           ============================================================ */
+        .board-container {{
+            border-radius: var(--radius);
+            overflow: hidden;
+            border: 1px solid var(--card-border);
+        }}
+        .board-group {{
+            border-bottom: 1px solid var(--card-border);
+        }}
+        .board-group:last-child {{
+            border-bottom: none;
+        }}
+        .board-group-header {{
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 16px;
+            cursor: pointer;
+            transition: background 0.15s ease;
+            user-select: none;
+            background: var(--surface2);
+        }}
+        .board-group-header:hover {{
+            background: #eef0f3;
+        }}
+        .board-group-header .group-color {{
+            width: 6px;
+            height: 32px;
+            border-radius: 3px;
+            flex-shrink: 0;
+        }}
+        .board-group-header .group-title {{
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text);
+            flex: 1;
+        }}
+        .board-group-header .group-count {{
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }}
+        .board-group-header .group-arrow {{
+            font-size: 10px;
+            color: var(--text-muted);
+            transition: transform 0.2s ease;
+        }}
+        .board-group-header .group-arrow.expanded {{
+            transform: rotate(90deg);
+        }}
+
+        .board-rows {{
+            background: var(--card);
+        }}
+        .board-row {{
+            display: grid;
+            grid-template-columns: 2fr 120px 100px 120px 100px 90px 90px;
+            align-items: center;
+            padding: 8px 16px 8px 32px;
+            border-bottom: 1px solid var(--card-border);
+            font-size: 13px;
+            transition: background 0.12s ease;
+        }}
+        .board-row:hover {{
+            background: rgba(60, 180, 173, 0.04);
+        }}
+        .board-row:last-child {{
+            border-bottom: none;
+        }}
+        .board-header-row {{
+            display: grid;
+            grid-template-columns: 2fr 120px 100px 120px 100px 90px 90px;
+            padding: 6px 16px 6px 32px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            background: var(--surface2);
+            border-bottom: 1px solid var(--card-border);
+        }}
+
+        .status-pill {{
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            white-space: nowrap;
+            min-width: 80px;
+            text-align: center;
+        }}
+
+        .person-avatar {{
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+        }}
+        .person-avatar .avatar-circle {{
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 700;
+            color: #fff;
+            flex-shrink: 0;
+        }}
+
+        .progress-mini {{
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }}
+        .progress-mini .bar {{
+            flex: 1;
+            height: 6px;
+            background: #e5e7eb;
+            border-radius: 3px;
+            overflow: hidden;
+            min-width: 40px;
+        }}
+        .progress-mini .bar-fill {{
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.6s ease;
+        }}
+        .progress-mini .pct {{
+            font-size: 11px;
+            color: var(--text-muted);
+            min-width: 30px;
+            text-align: right;
+        }}
+
+        @media (max-width: 1024px) {{
+            .board-row, .board-header-row {{
+                grid-template-columns: 1.5fr 100px 80px 100px;
+            }}
+            .board-row > :nth-child(n+5),
+            .board-header-row > :nth-child(n+5) {{
+                display: none;
+            }}
+            .deal-flow-nav {{
+                padding: 12px 0;
+            }}
+            .deal-flow-step .step-label {{
+                font-size: 10px;
+            }}
+        }}
+        @media (max-width: 640px) {{
+            .board-row, .board-header-row {{
+                grid-template-columns: 1fr 90px;
+            }}
+            .board-row > :nth-child(n+3),
+            .board-header-row > :nth-child(n+3) {{
+                display: none;
+            }}
+            .deal-flow-step .step-label {{
+                display: none;
+            }}
+            .deal-flow-step .step-dot {{
+                width: 22px;
+                height: 22px;
+                font-size: 9px;
+            }}
+        }}
+
+        /* ============================================================
+           IC Project Detail Panels (expandable)
+           ============================================================ */
+        .ic-detail {{
+            display: none;
+            background: var(--surface2);
+            border-top: 1px solid var(--card-border);
+            padding: 12px 16px 12px 36px;
+            animation: detail-slide-in 0.25s ease;
+        }}
+        .ic-detail.open {{
+            display: block;
+        }}
+        @keyframes detail-slide-in {{
+            from {{ opacity: 0; max-height: 0; }}
+            to {{ opacity: 1; max-height: 600px; }}
+        }}
+        .ic-detail-grid {{
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }}
+        .ic-detail-section {{
+            background: var(--card);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-sm);
+            padding: 10px 12px;
+        }}
+        .ic-detail-section h4 {{
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }}
+        .ic-detail-row {{
+            display: flex;
+            justify-content: space-between;
+            padding: 3px 0;
+            font-size: 12px;
+            border-bottom: 1px solid var(--card-border);
+        }}
+        .ic-detail-row:last-child {{ border-bottom: none; }}
+        .ic-detail-row .label {{ color: var(--text-muted); }}
+        .ic-detail-row .value {{ color: var(--text); font-weight: 500; max-width: 60%; text-align: right; }}
+        .ic-next-step {{
+            display: flex;
+            align-items: flex-start;
+            gap: 6px;
+            padding: 4px 0;
+            font-size: 12px;
+            color: var(--text);
+        }}
+        .ic-next-step .bullet {{
+            color: var(--accent);
+            font-weight: 700;
+            flex-shrink: 0;
+        }}
+        .ic-gap-flag {{
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: 600;
+            background: rgba(239, 68, 68, 0.1);
+            color: #dc2626;
+            margin: 2px;
+        }}
+        .ic-task-item {{
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 12px;
+            padding: 2px 0;
+        }}
+        .ic-task-item .check {{
+            width: 14px;
+            height: 14px;
+            border-radius: 3px;
+            border: 1.5px solid var(--card-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 9px;
+            flex-shrink: 0;
+        }}
+        .ic-task-item .check.done {{
+            background: var(--success);
+            border-color: var(--success);
+            color: #fff;
+        }}
+        .board-row.ic-row {{ cursor: pointer; }}
+        .board-row.ic-row:hover {{ background: rgba(60, 180, 173, 0.06); }}
+        .ic-expand-arrow {{
+            font-size: 10px;
+            color: var(--text-muted);
+            transition: transform 0.2s ease;
+            margin-left: auto;
+        }}
+        .ic-expand-arrow.open {{ transform: rotate(90deg); }}
+
+        /* ============================================================
+           AI Section
+           ============================================================ */
+        .ai-board-card {{
+            background: var(--card);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-sm);
+            padding: 12px 14px;
+            transition: var(--transition);
+        }}
+        .ai-board-card:hover {{
+            border-color: rgba(60, 180, 173, 0.25);
+        }}
+        .ai-item-row {{
+            display: grid;
+            grid-template-columns: 2fr 120px 100px 120px;
+            align-items: center;
+            padding: 6px 12px;
+            font-size: 12px;
+            border-bottom: 1px solid var(--card-border);
+            cursor: pointer;
+            transition: background 0.12s ease;
+        }}
+        .ai-item-row:hover {{ background: rgba(60, 180, 173, 0.04); }}
+        .ai-item-row:last-child {{ border-bottom: none; }}
+        .ai-item-detail {{
+            display: none;
+            background: var(--surface2);
+            border-top: 1px solid var(--card-border);
+            padding: 10px 14px;
+            font-size: 12px;
+            animation: detail-slide-in 0.25s ease;
+        }}
+        .ai-item-detail.open {{ display: block; }}
+        @media (max-width: 1024px) {{
+            .ic-detail-grid {{ grid-template-columns: 1fr; }}
+            .ai-item-row {{ grid-template-columns: 1fr 100px; }}
+            .ai-item-row > :nth-child(n+3) {{ display: none; }}
         }}
     </style>'''
 
@@ -1999,37 +3767,77 @@ def _build_css() -> str:
 # ---------------------------------------------------------------------------
 
 def _build_js() -> str:
-    """Build the interactive JavaScript."""
+    """Build the interactive JavaScript for page-based SPA."""
     return '''
     <script>
     (function() {
         'use strict';
 
         // ------------------------------------------------------------------
-        // Intersection Observer for nav highlighting
+        // Sidebar toggle (mobile)
         // ------------------------------------------------------------------
-        const sections = document.querySelectorAll('.dashboard-section');
-        const navLinks = document.querySelectorAll('.nav-link');
-
-        const observerOpts = {
-            root: null,
-            rootMargin: '-80px 0px -60% 0px',
-            threshold: 0
+        window.toggleSidebar = function() {
+            var sidebar = document.getElementById('sidebar');
+            var toggle = document.getElementById('sidebar-toggle');
+            var overlay = document.getElementById('sidebar-overlay');
+            sidebar.classList.toggle('open');
+            toggle.classList.toggle('open');
+            if (overlay) overlay.classList.toggle('visible');
         };
 
-        const observer = new IntersectionObserver(function(entries) {
-            entries.forEach(function(entry) {
-                if (entry.isIntersecting) {
-                    const id = entry.target.id;
-                    navLinks.forEach(function(link) {
-                        link.classList.toggle('active',
-                            link.getAttribute('href') === '#' + id);
-                    });
+        // Close sidebar when a link is clicked (mobile)
+        document.querySelectorAll('.sidebar-link').forEach(function(link) {
+            link.addEventListener('click', function() {
+                if (window.innerWidth <= 1024) {
+                    var sidebar = document.getElementById('sidebar');
+                    var toggle = document.getElementById('sidebar-toggle');
+                    var overlay = document.getElementById('sidebar-overlay');
+                    sidebar.classList.remove('open');
+                    toggle.classList.remove('open');
+                    if (overlay) overlay.classList.remove('visible');
                 }
             });
-        }, observerOpts);
+        });
 
-        sections.forEach(function(sec) { observer.observe(sec); });
+        // ------------------------------------------------------------------
+        // Page-based SPA navigation
+        // ------------------------------------------------------------------
+        window.showPage = function(pageId) {
+            // Hide all pages
+            document.querySelectorAll('.dash-page').forEach(function(page) {
+                page.classList.remove('active');
+            });
+            // Show the target page
+            var target = document.getElementById('page-' + pageId);
+            if (target) {
+                target.classList.add('active');
+            }
+            // Update sidebar active link
+            document.querySelectorAll('.sidebar-link').forEach(function(link) {
+                link.classList.toggle('active', link.getAttribute('data-page') === pageId);
+            });
+            // Scroll to top of content area
+            var main = document.getElementById('layout-main');
+            if (main) main.scrollTop = 0;
+            window.scrollTo(0, 0);
+            // Re-trigger animations on the newly visible page
+            if (target) {
+                target.querySelectorAll('.glass-card, .stat-card').forEach(function(el) {
+                    el.style.opacity = '0';
+                    el.style.transform = 'translateY(20px)';
+                    setTimeout(function() {
+                        el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                        el.style.opacity = '1';
+                        el.style.transform = 'translateY(0)';
+                    }, 50);
+                });
+            }
+        };
+
+        // Show first page on load
+        document.addEventListener('DOMContentLoaded', function() {
+            showPage('executive');
+        });
 
         // ------------------------------------------------------------------
         // Sortable tables
@@ -2061,35 +3869,6 @@ def _build_js() -> str:
             table.setAttribute('data-sort-dir', asc ? 'asc' : 'desc');
         };
 
-        // ------------------------------------------------------------------
-        // Smooth scroll for nav links
-        // ------------------------------------------------------------------
-        navLinks.forEach(function(link) {
-            link.addEventListener('click', function(e) {
-                e.preventDefault();
-                var target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
-            });
-        });
-
-        // ------------------------------------------------------------------
-        // Animate elements on scroll (fade-in)
-        // ------------------------------------------------------------------
-        var animateObserver = new IntersectionObserver(function(entries) {
-            entries.forEach(function(entry) {
-                if (entry.isIntersecting) {
-                    entry.target.style.opacity = '1';
-                    entry.target.style.transform = 'translateY(0)';
-                }
-            });
-        }, { threshold: 0.05 });
-
-        document.querySelectorAll('.glass-card, .stat-card').forEach(function(el) {
-            animateObserver.observe(el);
-        });
-
     })();
     </script>'''
 
@@ -2098,36 +3877,99 @@ def _build_js() -> str:
 # Main assembly
 # ---------------------------------------------------------------------------
 
-def _build_nav() -> str:
-    """Build the sticky top navigation."""
-    nav_items = [
-        ("executive", "Executive"),
-        ("leads", "Leads"),
-        ("funnel", "Funnel"),
-        ("targets", "Targets"),
-        ("pipeline", "Pipeline"),
-        ("activities", "Activities"),
-        ("contacts", "Contacts"),
-        ("insights", "Insights"),
+def _build_sidebar() -> str:
+    """Build the fixed left-hand navy sidebar with grouped sections and page switching."""
+    nav_groups = [
+        {
+            "label": "Overview",
+            "icon": "&#9679;",
+            "items": [("executive", "Executive Summary")],
+        },
+        {
+            "label": "Sales",
+            "icon": "&#9733;",
+            "items": [
+                ("leads", "Leads & Sources"),
+                ("funnel", "Qualified Leads"),
+                ("pipeline", "Pipeline View"),
+            ],
+        },
+        {
+            "label": "Planning",
+            "icon": "&#9881;",
+            "items": [("targets", "Targets & Rev Eng")],
+        },
+        {
+            "label": "Activity",
+            "icon": "&#9993;",
+            "items": [
+                ("activities", "Activity Tracking"),
+                ("contacts", "Contacts & Co."),
+            ],
+        },
+        {
+            "label": "Intelligence",
+            "icon": "&#10024;",
+            "items": [("insights", "Insights & Forecast")],
+        },
+        {
+            "label": "M&A",
+            "icon": "&#128188;",
+            "items": [
+                ("monday-pipeline", "M&A Pipeline"),
+                ("monday-ic", "IC Scorecards"),
+                ("monday-workspaces", "Workspaces"),
+            ],
+        },
+        {
+            "label": "AI",
+            "icon": "&#129302;",
+            "items": [("ai-roadmap", "AI Roadmap")],
+        },
     ]
-    links = ''.join(
-        f'<a href="#{sid}" class="nav-link">{label}</a>'
-        for sid, label in nav_items
-    )
-    return f'''<nav class="top-nav">
-        <div class="nav-inner">
-            <div class="nav-brand">
-                <span class="brand-dot"></span> Annas AI Hub
-            </div>
-            <div class="nav-links">{links}</div>
+    groups_html = ''
+    for g in nav_groups:
+        items_html = ''.join(
+            f'<a href="javascript:void(0)" onclick="showPage(\'{sid}\')" '
+            f'class="sidebar-link" data-page="{sid}">{lbl}</a>'
+            for sid, lbl in g["items"]
+        )
+        groups_html += f'''
+            <div class="sidebar-group">
+                <div class="sidebar-group-label">{g["icon"]} {g["label"]}</div>
+                {items_html}
+            </div>'''
+    return f'''<aside class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+            <span class="brand-dot">e</span>
+            <span class="sidebar-brand-text">eComplete</span>
         </div>
-    </nav>'''
+        <nav class="sidebar-nav">
+            {groups_html}
+        </nav>
+        <div class="sidebar-footer">
+            Sales &amp; M&amp;A &amp; AI Intelligence
+        </div>
+    </aside>
+    <button class="sidebar-toggle" id="sidebar-toggle" onclick="toggleSidebar()" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+    </button>'''
 
 
 def generate_dashboard(data: dict) -> str:
     """Generate the complete HTML dashboard from metrics data."""
     _normalize_metrics(data)
     timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
+
+    # Load Monday.com metrics if available
+    monday_data_file = BASE_DIR / "data" / "processed" / "monday_metrics.json"
+    if monday_data_file.exists():
+        try:
+            with open(monday_data_file, "r", encoding="utf-8") as mf:
+                data["monday"] = json.load(mf)
+            logger.info("Loaded Monday.com metrics")
+        except Exception as exc:
+            logger.warning("Failed to load Monday.com metrics: %s", exc)
 
     section_builders = [
         ("Executive Summary", _build_executive_summary),
@@ -2138,14 +3980,25 @@ def generate_dashboard(data: dict) -> str:
         ("Activity Tracking", _build_activity_section),
         ("Contacts & Companies", _build_contacts_section),
         ("Insights & Forecast", _build_insights_section),
+        ("M&A Pipeline", _build_monday_pipeline),
+        ("IC Scorecards", _build_monday_ic),
+        ("Workspaces", _build_monday_workspaces),
+        ("AI Roadmap", _build_ai_section),
     ]
+    page_ids = ["executive", "leads", "funnel", "targets", "pipeline",
+                "activities", "contacts", "insights",
+                "monday-pipeline", "monday-ic", "monday-workspaces",
+                "ai-roadmap"]
+
     sections = []
-    for name, builder in section_builders:
+    for i, (name, builder) in enumerate(section_builders):
+        page_id = page_ids[i] if i < len(page_ids) else f"page-{i}"
         try:
-            sections.append(builder(data))
+            content = builder(data)
+            sections.append(f'<div class="dash-page" id="page-{page_id}">{content}</div>')
         except Exception as e:
             logger.warning(f"Section '{name}' failed: {e}")
-            sections.append(f'<section class="dashboard-section"><div class="glass-card" style="padding:40px;text-align:center;color:{COLORS["text_muted"]}"><h3>{_esc(name)}</h3><p>Data unavailable — {_esc(str(e))}</p></div></section>')
+            sections.append(f'<div class="dash-page" id="page-{page_id}"><section class="dashboard-section"><div class="glass-card" style="padding:40px;text-align:center;color:{COLORS["text_muted"]}"><h3>{_esc(name)}</h3><p>Data unavailable — {_esc(str(e))}</p></div></section></div>')
 
     record_counts = _safe_get(data, "record_counts", default={})
     footer_stats = " | ".join([
@@ -2322,9 +4175,9 @@ def generate_dashboard(data: dict) -> str:
             if (!el) return;
             maxItems = maxItems || 8;
             var sorted = Object.entries(data).sort(function(a, b) {{ return b[1] - a[1]; }}).slice(0, maxItems);
-            if (sorted.length === 0) {{ el.innerHTML = '<div style="text-align:center;padding:20px;color:#94a3b8;font-size:13px">No data for this period</div>'; return; }}
+            if (sorted.length === 0) {{ el.innerHTML = '<div style="text-align:center;padding:20px;color:#6b7280;font-size:13px">No data for this period</div>'; return; }}
             var maxVal = sorted[0][1] || 1;
-            var palette = ['#fb923c','#38bdf8','#a78bfa','#34d399','#f472b6','#facc15','#60a5fa','#f87171'];
+            var palette = ['#3CB4AD','#334FB4','#a78bfa','#34d399','#f472b6','#f59e0b','#60a5fa','#ef4444'];
             var html = '';
             sorted.forEach(function(item, i) {{
                 var label = item[0].length > 20 ? item[0].substring(0, 18) + '..' : item[0];
@@ -2333,9 +4186,9 @@ def generate_dashboard(data: dict) -> str:
                 var color = palette[i % palette.length];
                 html += '<div style="margin-bottom:8px">'
                     + '<div style="display:flex;justify-content:space-between;margin-bottom:3px;font-size:12px">'
-                    + '<span style="color:#94a3b8">' + label + '</span>'
-                    + '<span style="color:#e2e8f0;font-weight:600">' + fmtNum(val) + '</span></div>'
-                    + '<div style="height:6px;background:#334155;border-radius:3px;overflow:hidden">'
+                    + '<span style="color:#6b7280">' + label + '</span>'
+                    + '<span style="color:#121212;font-weight:600">' + fmtNum(val) + '</span></div>'
+                    + '<div style="height:6px;background:#e5e7eb;border-radius:3px;overflow:hidden">'
                     + '<div style="height:100%;width:' + pct.toFixed(1) + '%;background:' + color + ';border-radius:3px;'
                     + 'transition:width 0.6s cubic-bezier(.25,.1,.25,1)"></div></div></div>';
             }});
@@ -2345,7 +4198,7 @@ def generate_dashboard(data: dict) -> str:
         function renderSparkline(containerId, data, color) {{
             var el = document.getElementById(containerId);
             if (!el) return;
-            color = color || '#fb923c';
+            color = color || '#3CB4AD';
             var entries = Object.entries(data).sort();
             if (entries.length < 2) {{ el.innerHTML = ''; return; }}
             var vals = entries.map(function(e) {{ return e[1]; }});
@@ -2370,7 +4223,7 @@ def generate_dashboard(data: dict) -> str:
         // ----------------------------------------------------------------
         window.applyFilter = function(period) {{
             var range = getDateRange(period);
-            var showYoY = (period === 'ytd' || period === 'all');
+            var showYoY = (period === 'ytd' || period === 'all' || period === 'last_year');
 
             // Update button states
             document.querySelectorAll('.filter-btn').forEach(function(btn) {{
@@ -2400,10 +4253,9 @@ def generate_dashboard(data: dict) -> str:
                 var titleEl = card.querySelector('div[style*="text-transform:uppercase"]');
                 if (!titleEl) return;
                 var title = titleEl.textContent.trim().toLowerCase();
-                var valueEl = card.querySelector('div[style*="font-size:28px"]');
+                var valueEl = card.querySelector('[data-role="stat-value"]');
                 if (!valueEl) return;
 
-                var yoyHtml = '';
                 switch(title) {{
                     case 'total leads':
                         valueEl.innerHTML = fmtNum(leads) + (showYoY ? yoyBadge('leads') : '');
@@ -2426,6 +4278,28 @@ def generate_dashboard(data: dict) -> str:
                     case 'avg deal size':
                         valueEl.innerHTML = fmtCurrency(avgDeal) + (showYoY ? yoyBadge('avg_deal_size') : '');
                         break;
+                    case 'pipeline value':
+                    case 'total pipeline':
+                        valueEl.innerHTML = fmtCurrency(revenue) + (showYoY ? yoyBadge('revenue_won') : '');
+                        break;
+                    case 'open deals':
+                        valueEl.innerHTML = fmtNum(dealsCreated) + (showYoY ? yoyBadge('deals_won') : '');
+                        break;
+                    case 'calls':
+                        valueEl.innerHTML = fmtNum(actBreakdown.calls);
+                        break;
+                    case 'emails':
+                        valueEl.innerHTML = fmtNum(actBreakdown.emails);
+                        break;
+                    case 'meetings':
+                        valueEl.innerHTML = fmtNum(actBreakdown.meetings);
+                        break;
+                    case 'tasks':
+                        valueEl.innerHTML = fmtNum(actBreakdown.tasks);
+                        break;
+                    case 'notes':
+                        valueEl.innerHTML = fmtNum(actBreakdown.notes);
+                        break;
                 }}
             }});
 
@@ -2447,7 +4321,7 @@ def generate_dashboard(data: dict) -> str:
 
             // Leads over time sparkline
             var leadsMonthly = filterDailyToMonthly(TS.leads_by_day, range);
-            renderSparkline('dynamic-leads-sparkline', leadsMonthly, '#fb923c');
+            renderSparkline('dynamic-leads-sparkline', leadsMonthly, '#3CB4AD');
 
             // Activity trend sparkline
             var actDaily = {{}};
@@ -2496,23 +4370,28 @@ def generate_dashboard(data: dict) -> str:
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Annas AI Hub &mdash; HubSpot Sales Dashboard</title>
-    <meta name="description" content="HubSpot CRM Sales Dashboard - Generated by Annas AI Hub">
+    <title>eComplete &mdash; Sales &amp; M&amp;A Intelligence</title>
+    <meta name="description" content="eComplete Sales &amp; M&amp;A Intelligence Dashboard — HubSpot CRM + Monday.com">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&amp;display=swap" rel="stylesheet">
     {_build_css()}
 </head>
 <body>
-    {_build_nav()}
-    {filter_bar}
+    {_build_sidebar()}
+    <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
 
-    <main class="main-content">
-        {''.join(sections)}
-    </main>
+    <div class="layout-main" id="layout-main">
+        {filter_bar}
+        <main class="main-content">
+            {''.join(sections)}
+        </main>
 
-    <footer class="dashboard-footer">
-        <p><span class="brand">Annas AI Hub</span> &mdash; HubSpot Sales Dashboard v2</p>
-        <p style="margin-top:4px">{footer_stats}</p>
-        <p style="margin-top:4px">Generated: {timestamp}</p>
-    </footer>
+        <footer class="dashboard-footer">
+            <p><span class="brand">eComplete</span> &mdash; Sales &amp; M&amp;A Intelligence Dashboard</p>
+            <p style="margin-top:4px">{footer_stats}</p>
+            <p style="margin-top:4px">Generated: {timestamp}</p>
+        </footer>
+    </div>
 
     {_build_js()}
     {filter_js}
