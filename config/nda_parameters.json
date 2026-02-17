@@ -1,0 +1,96 @@
+{
+    "review_parameters": {
+        "term_length": {
+            "max_years": 5,
+            "flag_perpetual": true,
+            "description": "Flag NDAs with term exceeding 5 years or stated as perpetual"
+        },
+        "non_compete": {
+            "flag_any": true,
+            "description": "Flag any non-compete or non-solicitation clause"
+        },
+        "ip_assignment": {
+            "flag_beyond_confidential": true,
+            "description": "Flag if IP assignment extends beyond confidential information scope"
+        },
+        "jurisdiction": {
+            "accepted": ["England and Wales", "England & Wales"],
+            "flag_if_not_accepted": true,
+            "description": "Flag if governing law is not England & Wales"
+        },
+        "nda_type": {
+            "note_unilateral": true,
+            "preferred": "mutual",
+            "description": "Note whether NDA is mutual or unilateral"
+        },
+        "remedies": {
+            "flag_injunctive_without_court": true,
+            "description": "Flag injunctive relief clauses that bypass court order requirements"
+        },
+        "definition_scope": {
+            "flag_overly_broad": true,
+            "broad_indicators": [
+                "all information",
+                "any information",
+                "any and all",
+                "without limitation",
+                "including but not limited to all"
+            ],
+            "description": "Flag if confidential information definition is overly broad or catch-all"
+        },
+        "survival_clause": {
+            "max_years_post_termination": 3,
+            "description": "Flag survival obligations exceeding 3 years post-termination"
+        }
+    },
+    "risk_thresholds": {
+        "low": {
+            "max_flags": 1,
+            "description": "0-1 minor flags, safe to sign with awareness"
+        },
+        "medium": {
+            "max_flags": 3,
+            "description": "2-3 flags, review recommended before signing"
+        },
+        "high": {
+            "min_flags": 4,
+            "description": "4+ flags or any critical flag, legal review strongly advised"
+        },
+        "critical_flags": [
+            "ip_assignment_beyond_scope",
+            "perpetual_term",
+            "non_compete_present",
+            "injunctive_relief_no_court"
+        ]
+    },
+    "nda_detection": {
+        "filename_keywords": [
+            "nda", "non-disclosure", "non disclosure", "nondisclosure",
+            "confidentiality", "confidential agreement", "secrecy agreement",
+            "mutual nda", "unilateral nda"
+        ],
+        "content_keywords": [
+            "non-disclosure agreement",
+            "nondisclosure agreement",
+            "confidentiality agreement",
+            "confidential information",
+            "disclosing party",
+            "receiving party",
+            "mutual nda",
+            "proprietary information"
+        ],
+        "min_keyword_matches": 2
+    },
+    "email_templates": {
+        "clean_subject": "NDA Review Complete - Ready for Signature",
+        "flagged_subject": "NDA Review - Issues Flagged for Your Attention",
+        "non_nda_subject": "Attachment Received - Not Identified as NDA",
+        "sender_name": "Henson AI Assistant"
+    },
+    "polling": {
+        "interval_seconds": 60,
+        "inbox_folder": "INBOX",
+        "processed_label": "NDA/Processed",
+        "flagged_label": "NDA/Flagged"
+    }
+}

@@ -1,0 +1,1628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Week of Feb 09 - Feb 15, 2026 - eComplete Weekly Summary</title>
+<style>
+/* Reset & Base */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background: #f7f8fa;
+    color: #242833;
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+}
+.container {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 24px 16px;
+}
+/* Header */
+.header {
+    background: #242833;
+    color: #ffffff;
+    padding: 28px 24px 20px;
+    border-radius: 8px 8px 0 0;
+    text-align: center;
+}
+.header h1 {
+    margin: 0 0 4px;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+}
+.header .week-range {
+    font-size: 15px;
+    color: #3CB4AD;
+    font-weight: 600;
+}
+.header .generated {
+    font-size: 11px;
+    color: #888;
+    margin-top: 8px;
+}
+/* Cards */
+.card {
+    background: #ffffff;
+    border: 1px solid #e2e5ea;
+    border-radius: 8px;
+    margin: 16px 0;
+    overflow: hidden;
+}
+.card-header {
+    background: #242833;
+    color: #ffffff;
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.card-body {
+    padding: 16px;
+}
+/* Key Numbers Grid */
+.key-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    padding: 16px;
+}
+.key-item {
+    text-align: center;
+    padding: 12px 8px;
+    border-radius: 6px;
+    background: #f7f8fa;
+}
+.key-item .value {
+    font-size: 24px;
+    font-weight: 700;
+    color: #242833;
+    line-height: 1.2;
+}
+.key-item .label {
+    font-size: 11px;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin-top: 2px;
+}
+.key-item .change {
+    font-size: 11px;
+    font-weight: 600;
+    margin-top: 2px;
+}
+.change-up { color: #22c55e; }
+.change-down { color: #ef4444; }
+.change-flat { color: #6b7280; }
+/* Person Section */
+.person-block {
+    border-bottom: 1px solid #e2e5ea;
+    padding: 12px 16px;
+}
+.person-block:last-child {
+    border-bottom: none;
+}
+.person-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: #242833;
+    margin-bottom: 6px;
+}
+.person-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 6px;
+    font-size: 12px;
+}
+.stat {
+    display: inline-block;
+    padding: 3px 8px;
+    background: #f7f8fa;
+    border-radius: 4px;
+    color: #6b7280;
+}
+.stat strong {
+    color: #242833;
+}
+.person-tasks {
+    margin-top: 6px;
+    font-size: 12px;
+    color: #6b7280;
+}
+.person-tasks ul {
+    margin: 4px 0 0 16px;
+    padding: 0;
+}
+.person-tasks li {
+    margin-bottom: 2px;
+}
+/* Flags */
+.flag {
+    padding: 10px 14px;
+    border-left: 4px solid;
+    margin-bottom: 8px;
+    border-radius: 0 4px 4px 0;
+    font-size: 13px;
+    background: #f7f8fa;
+}
+.flag-danger {
+    border-color: #ef4444;
+}
+.flag-warning {
+    border-color: #f59e0b;
+}
+.flag-info {
+    border-color: #3CB4AD;
+}
+.flag-title {
+    font-weight: 600;
+    color: #242833;
+}
+.flag-detail {
+    color: #6b7280;
+    font-size: 12px;
+    margin-top: 2px;
+}
+/* Rollup table */
+.rollup-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+.rollup-table th {
+    text-align: left;
+    padding: 6px 10px;
+    border-bottom: 2px solid #e2e5ea;
+    color: #6b7280;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+.rollup-table td {
+    padding: 6px 10px;
+    border-bottom: 1px solid #e2e5ea;
+}
+.rollup-table tr:last-child td {
+    border-bottom: none;
+}
+/* Completed list */
+.completed-item {
+    display: flex;
+    align-items: center;
+    padding: 4px 0;
+    font-size: 13px;
+}
+.check {
+    color: #22c55e;
+    margin-right: 8px;
+    font-weight: bold;
+}
+.completed-owner {
+    color: #6b7280;
+    margin-left: 4px;
+    font-size: 12px;
+}
+/* Footer */
+.footer {
+    text-align: center;
+    padding: 16px;
+    font-size: 11px;
+    color: #6b7280;
+}
+.teal { color: #3CB4AD; }
+/* Responsive for email */
+@media screen and (max-width: 600px) {
+    .key-grid { grid-template-columns: repeat(2, 1fr); }
+    .person-stats { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- Header -->
+<div class="header">
+    <h1>eComplete Weekly Summary</h1>
+    <div class="week-range">Week of Feb 09 - Feb 15, 2026</div>
+    <div class="generated">Generated 2026-02-17 16:31:19 UTC</div>
+</div>
+
+<!-- Key Numbers -->
+<div class="card">
+    <div class="card-header">Key Numbers</div>
+    <div class="key-grid">
+        
+        <div class="key-item">
+            <div class="value">£0</div>
+            <div class="label">Revenue Closed</div>
+            
+        </div>
+
+        <div class="key-item">
+            <div class="value">0</div>
+            <div class="label">Deals Won</div>
+            
+        </div>
+
+        <div class="key-item">
+            <div class="value">49</div>
+            <div class="label">New Leads</div>
+            <div class="change change-up">&#9650; 26% vs last week</div>
+        </div>
+
+        <div class="key-item">
+            <div class="value">125</div>
+            <div class="label">Team Activities</div>
+            <div class="change change-down">&#9660; 35% vs last week</div>
+        </div>
+
+        <div class="key-item">
+            <div class="value">£699.7K</div>
+            <div class="label">Open Pipeline</div>
+            
+        </div>
+
+        <div class="key-item">
+            <div class="value">887</div>
+            <div class="label">Active M&amp;A Projects</div>
+            
+        </div>
+    </div>
+</div>
+
+<!-- Department Rollup -->
+<div class="card">
+    <div class="card-header">Department Rollup</div>
+    <div class="card-body">
+        
+    <table class="rollup-table">
+        <thead>
+            <tr>
+                <th>Metric</th>
+                <th style="text-align:right">This Week</th>
+                <th style="text-align:right">vs Last Week</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td>Total Team Activities</td><td style="text-align:right;font-weight:600">125</td><td style="text-align:right"> <span class="change-down" style="font-size:11px">&#9660;35%</span></td></tr>
+<tr><td>Emails</td><td style="text-align:right;font-weight:600">0</td><td style="text-align:right"></td></tr>
+<tr><td>Calls</td><td style="text-align:right;font-weight:600">0</td><td style="text-align:right"></td></tr>
+<tr><td>Meetings</td><td style="text-align:right;font-weight:600">33</td><td style="text-align:right"></td></tr>
+<tr><td>New Leads</td><td style="text-align:right;font-weight:600">49</td><td style="text-align:right"> <span class="change-up" style="font-size:11px">&#9650;26%</span></td></tr>
+<tr><td>New Deals Created</td><td style="text-align:right;font-weight:600">0</td><td style="text-align:right"> <span class="change-down" style="font-size:11px">&#9660;100%</span></td></tr>
+<tr><td>Deals Won</td><td style="text-align:right;font-weight:600">0</td><td style="text-align:right"></td></tr>
+<tr><td>Revenue Closed</td><td style="text-align:right;font-weight:600">£0</td><td style="text-align:right"></td></tr>
+<tr><td>Deals Lost</td><td style="text-align:right;font-weight:600">0</td><td style="text-align:right"></td></tr>
+<tr><td>Win Rate</td><td style="text-align:right;font-weight:600">27%</td><td style="text-align:right"></td></tr>
+<tr><td>Open Pipeline</td><td style="text-align:right;font-weight:600">£699.7K</td><td style="text-align:right"></td></tr>
+<tr><td>M&amp;A Active Projects</td><td style="text-align:right;font-weight:600">887</td><td style="text-align:right"></td></tr>
+<tr><td>M&amp;A Pipeline Value</td><td style="text-align:right;font-weight:600">£60.6M</td><td style="text-align:right"></td></tr>
+<tr><td>M&amp;A Updated This Week</td><td style="text-align:right;font-weight:600">20</td><td style="text-align:right"></td></tr>
+        </tbody>
+    </table>
+    </div>
+</div>
+
+<!-- Per Person Activity -->
+<div class="card">
+    <div class="card-header">Per-Person Activity</div>
+    
+        <div class="person-block">
+            <div class="person-name">Rose Galbally</div>
+            <div class="person-stats"><span class="stat"><strong>5</strong> meetings</span>
+<span class="stat"><strong>14</strong> tasks</span></div>
+            
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Caldon Henson</div>
+            <div class="person-stats"><span class="stat"><strong>11</strong> tasks</span>
+<span class="stat"><strong>1</strong> items updated</span>
+<span class="stat"><strong>1</strong> created</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Website we&#x27;ve developed <span style='color:#6b7280;font-size:11px'>(Not Started)</span></li>
+<li>Deal Process - Outline &amp; key steps <span style='color:#6b7280;font-size:11px'>(In Progress)</span></li>
+<li>Case Studies <span style='color:#6b7280;font-size:11px'>(In Progress)</span></li>
+<li>Case Study Snippets <span style='color:#6b7280;font-size:11px'>(In Progress)</span></li>
+<li>Onboarding Next Steps - Assumptive Close Email <span style='color:#6b7280;font-size:11px'>(In Progress)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Josh Elliott</div>
+            <div class="person-stats"><span class="stat"><strong>6</strong> meetings</span>
+<span class="stat"><strong>3</strong> tasks</span>
+<span class="stat"><strong>2</strong> items updated</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Years <span style='color:#6b7280;font-size:11px'>(IM Received)</span></li>
+<li>Alternative Stores / No Bloat / Be At One / V-Omega3 / VBites <span style='color:#6b7280;font-size:11px'>(Disqualified IM)</span></li>
+<li>Vidrate <span style='color:#6b7280;font-size:11px'>(Pending NDA)</span></li>
+<li>Groomie Club <span style='color:#6b7280;font-size:11px'>(IM Received)</span></li>
+<li>Cleens <span style='color:#6b7280;font-size:11px'>(IM Received)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Jake Heath</div>
+            <div class="person-stats"><span class="stat"><strong>1</strong> meetings</span>
+<span class="stat"><strong>2</strong> tasks</span>
+<span class="stat"><strong>7</strong> items updated</span>
+<span class="stat"><strong>7</strong> created</span>
+<span class="stat"><strong>6</strong> comments</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Discovery Workshop: Journeys, Goals, Compliance <span style='color:#6b7280;font-size:11px'>(Not started)</span></li>
+<li>Project Kick-off &amp; Scope Baseline <span style='color:#6b7280;font-size:11px'>(In progress)</span></li>
+<li>Weekly Governance Cadence &amp; Status Reporting <span style='color:#6b7280;font-size:11px'>(In progress)</span></li>
+<li>DNS Switch &amp; Go-Live <span style='color:#6b7280;font-size:11px'>(Not started)</span></li>
+<li>Cross-device &amp; Browser Testing <span style='color:#6b7280;font-size:11px'>(Not started)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">James Carberry</div>
+            <div class="person-stats"><span class="stat"><strong>2</strong> meetings</span>
+<span class="stat"><strong>7</strong> tasks</span></div>
+            
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Paul Gedman</div>
+            <div class="person-stats"><span class="stat"><strong>4</strong> meetings</span></div>
+            
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Jake Heath, Tim Fowler</div>
+            <div class="person-stats"><span class="stat"><strong>4</strong> items updated</span>
+<span class="stat"><strong>4</strong> created</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>UI Design (Shopify Theme) <span style='color:#6b7280;font-size:11px'>(Not started)</span></li>
+<li>Wireframes for Key Templates <span style='color:#6b7280;font-size:11px'>(In progress)</span></li>
+<li>Sitemap &amp; Content Architecture <span style='color:#6b7280;font-size:11px'>(In progress)</span></li>
+<li>Frontend Template Development <span style='color:#6b7280;font-size:11px'>(Not started)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Jake Heath, Louis Coughlan, Tim Fowler</div>
+            <div class="person-stats"><span class="stat"><strong>4</strong> items updated</span>
+<span class="stat"><strong>4</strong> created</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Subscription Flows: Trial to Paid <span style='color:#6b7280;font-size:11px'>(Not started)</span></li>
+<li>Tracking &amp; Data Layer Architecture <span style='color:#6b7280;font-size:11px'>(Not started)</span></li>
+<li>Matrixify API Content Migration <span style='color:#6b7280;font-size:11px'>(Not started)</span></li>
+<li>Shopify Environment Setup <span style='color:#6b7280;font-size:11px'>(Not started)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Skye Whitton</div>
+            <div class="person-stats"><span class="stat"><strong>2</strong> tasks</span></div>
+            
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Jake Heath, Louis Coughlan</div>
+            <div class="person-stats"><span class="stat"><strong>2</strong> items updated</span>
+<span class="stat"><strong>2</strong> created</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>URL Mapping &amp; Redirect Plan <span style='color:#6b7280;font-size:11px'>(In progress)</span></li>
+<li>Define Domain &amp; Subdomain Structure <span style='color:#6b7280;font-size:11px'>(In review)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Anna Younger</div>
+            <div class="person-stats"><span class="stat"><strong>1</strong> tasks</span></div>
+            
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Jake Heath, Tim Fowler, Louis Coughlan</div>
+            <div class="person-stats"><span class="stat"><strong>1</strong> items updated</span>
+<span class="stat"><strong>1</strong> created</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Product &amp; PDP Build <span style='color:#6b7280;font-size:11px'>(Not started)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Jake Heath, Caldon Henson</div>
+            <div class="person-stats"><span class="stat"><strong>1</strong> items updated</span>
+<span class="stat"><strong>1</strong> created</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Ordo - Creative Upsell <span style='color:#6b7280;font-size:11px'>(Live)</span></li>
+<li>Automation Client Decks <span style='color:#6b7280;font-size:11px'>(Working on it)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Kirill Kopica</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>International Roll Outs - Blueprint - tech and supply chain <span style='color:#6b7280;font-size:11px'>(Not Started)</span></li>
+<li>DIS Sales Playbook <span style='color:#6b7280;font-size:11px'>(In Progress)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Josephine Greenwood</div>
+            <div class="person-stats"><span class="stat"><strong>52</strong> comments</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>M&amp;A Deal Flow? <span style='color:#6b7280;font-size:11px'>(In Progress)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">AY</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Project Myford (Tom&#x27;s Studio) <span style='color:#6b7280;font-size:11px'>(LOI Offer)</span></li>
+<li>Project Kallos (Seranova) <span style='color:#6b7280;font-size:11px'>(Partial Data)</span></li>
+<li>Eleanor Bowmer <span style='color:#6b7280;font-size:11px'>(IM Received)</span></li>
+<li>Project Luxe (Abbott Lyon) <span style='color:#6b7280;font-size:11px'>(IM Received)</span></li>
+<li>Luxury Promise <span style='color:#6b7280;font-size:11px'>(Gate 0)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">AY, Paul Gedman</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Project Starlight (Happy Hair People) <span style='color:#6b7280;font-size:11px'>(IM Received)</span></li>
+<li>Project Starlight (COLAB Dry Shampoo) <span style='color:#6b7280;font-size:11px'>(IM Received)</span></li>
+<li>Project Starlight (Johnny&#x27;s Chop Shop) <span style='color:#6b7280;font-size:11px'>(IM Received)</span></li>
+<li>Project Starlight (Rhyme &amp; Reason) <span style='color:#6b7280;font-size:11px'>(IM Received)</span></li>
+<li>Project Starlight (Rhyme &amp; Reason) <span style='color:#6b7280;font-size:11px'>(IM Received)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Caldon Henson, AY</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Sigrid <span style='color:#6b7280;font-size:11px'>(Partial Data)</span></li>
+<li>Sigrid <span style='color:#6b7280;font-size:11px'>(Partial Data)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Austin Bland</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Noted Acquisition. Comms &amp; Hooks <span style='color:#6b7280;font-size:11px'>(In Progress)</span></li>
+<li>YMU <span style='color:#6b7280;font-size:11px'>(Not Started)</span></li>
+<li>Website <span style='color:#6b7280;font-size:11px'>(In Progress)</span></li>
+<li>Tom Daley - Web Build <span style='color:#6b7280;font-size:11px'>(Possible)</span></li>
+<li>MJL - Paid Social <span style='color:#6b7280;font-size:11px'>(Possible)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Louis Coughlan</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>SEO /Blog <span style='color:#6b7280;font-size:11px'>(Continuous)</span></li>
+<li>SEO strategy for website <span style='color:#6b7280;font-size:11px'>(In Progress)</span></li>
+<li>SEO <span style='color:#6b7280;font-size:11px'>(In Progress)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Pritesh Patel</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>DTC &amp; TikTok crossover insights <span style='color:#6b7280;font-size:11px'>(Not Started)</span></li>
+<li>Data Platform Sales Playbook <span style='color:#6b7280;font-size:11px'>(In Progress)</span></li>
+<li>Arne - Supply Chain <span style='color:#6b7280;font-size:11px'>(Possible)</span></li>
+<li>Data &amp; Reporting <span style='color:#6b7280;font-size:11px'>(In Progress)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Phoebe Powell</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Linkedin ads - Brand and Founding Story Narrative strengthened in landing pages <span style='color:#6b7280;font-size:11px'>(In Progress)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Luisiana</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Paid strategy for website <span style='color:#6b7280;font-size:11px'>(In Progress)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Zara Hill</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>PR <span style='color:#6b7280;font-size:11px'>(Not Started)</span></li>
+<li>3 month rolling events schedule: attendees &amp; ticket price <span style='color:#6b7280;font-size:11px'>(In Progress)</span></li>
+<li>POA for leveraging everyone&#x27;s LinkedIn <span style='color:#6b7280;font-size:11px'>(Not Started)</span></li>
+<li>Events <span style='color:#6b7280;font-size:11px'>(In Progress)</span></li>
+<li>Create LI Content Calendar <span style='color:#6b7280;font-size:11px'>(In Progress)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Caldon Henson, Jake Heath</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Bent&#x27;s Gardens  Margin <span style='color:#6b7280;font-size:11px'>(Probable)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Josh Elliott, Jake Heath</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>SXCY - CDD/Delivery <span style='color:#6b7280;font-size:11px'>(For Re-targetting)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Jake Heath, Josh Elliott, Kirill Kopica</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Lola&#x27;s Lashes - CDD/DIS <span style='color:#6b7280;font-size:11px'>(For Re-targetting)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Anna G, Caldon Henson, Josh Elliott, Jake Heath</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>MyPura <span style='color:#6b7280;font-size:11px'>(For Re-targetting)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Kirill Kopica, Rose Galbally</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Supply Chain Calculator on site? <span style='color:#6b7280;font-size:11px'>(In Progress)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Pritesh Patel, Zara Hill</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Data Platform <span style='color:#6b7280;font-size:11px'>(In Progress)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Paul Miller</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Ordo - Supply Chain - Storage and Logisitics - USA /EU <span style='color:#6b7280;font-size:11px'>(Possible)</span></li>
+<li>Glitterbells <span style='color:#6b7280;font-size:11px'>(Possible)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">vanessa.hope@ecomplete.com</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Damartex <span style='color:#6b7280;font-size:11px'>(Possible)</span></li>
+<li>Healf <span style='color:#6b7280;font-size:11px'>(Possible)</span></li>
+<li>Studio 10 - Supply Pitch <span style='color:#6b7280;font-size:11px'>(Possible)</span></li>
+<li>Naia  - Supply Chain US <span style='color:#6b7280;font-size:11px'>(Possible)</span></li>
+<li>iCandy <span style='color:#6b7280;font-size:11px'>(Possible)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Josh Elliott, AY</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Packaging - Cost Audit - GMC <span style='color:#6b7280;font-size:11px'>(Possible)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Jake Heath, Josh Elliott, Caldon Henson, vanessa.hope@ecomplete.com, Rose Galbally</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Lola&#x27;s Lashes - Supply Chain <span style='color:#6b7280;font-size:11px'>(Possible)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Jake Heath, Kirill Kopica</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>We The Wild - DIS <span style='color:#6b7280;font-size:11px'>(Possible)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Jake Heath, Pritesh Patel, Josh Elliott</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>ERA VC - Data Platform <span style='color:#6b7280;font-size:11px'>(Possible)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Rose Galbally, James Carberry</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>SC Sales Playbook <span style='color:#6b7280;font-size:11px'>(In Progress)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Daniel Arques</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Investor Login Page <span style='color:#6b7280;font-size:11px'>(Not Started)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Josh Elliott, Kirill Kopica</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Newsletter for CDD work via Hunter <span style='color:#6b7280;font-size:11px'>(Not Started)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Caldon Henson, vanessa.hope@ecomplete.com</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Mother Root London - US Ops <span style='color:#6b7280;font-size:11px'>(Strong Possible)</span></li>
+<li>Print Image Network - Supply Audit <span style='color:#6b7280;font-size:11px'>(Possible)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Austin Bland, Kirill Kopica</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>14DM - eCom/admin support <span style='color:#6b7280;font-size:11px'>(Live)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Jake Heath, Pritesh Patel</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Welle Co - Data Platform <span style='color:#6b7280;font-size:11px'>(Possible)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Jake Heath, Caldon Henson, vanessa.hope@ecomplete.com</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>We The Wild - Supply Chain <span style='color:#6b7280;font-size:11px'>(Possible)</span></li>
+<li>Welle Co - Supply Chain <span style='color:#6b7280;font-size:11px'>(Possible)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Jake Heath, Josh Elliott</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Welle Co - CDD <span style='color:#6b7280;font-size:11px'>(Possible)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Josephine Greenwood, Josh Elliott, Caldon Henson, Pritesh Patel, Austin Bland</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>SWOT Analysis <span style='color:#6b7280;font-size:11px'>(In Progress)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Jake Heath, George Davies</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Trading Analysis <span style='color:#6b7280;font-size:11px'>(In Progress)</span></li>
+<li>CRM <span style='color:#6b7280;font-size:11px'>(In Progress)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Josh Elliott, Rebecca Fulham, Austin Bland</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>TikTok Shop <span style='color:#6b7280;font-size:11px'>(In Progress)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Josh Elliott, Rebecca Fulham</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Organic Social <span style='color:#6b7280;font-size:11px'>(In Progress)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Josh Elliott, Josephine Greenwood</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Competitor Analysis <span style='color:#6b7280;font-size:11px'>(In Progress)</span></li>
+<li>Investment Analysis <span style='color:#6b7280;font-size:11px'>(Not Started)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Caldon Henson, Josh Elliott</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Organisational Review <span style='color:#6b7280;font-size:11px'>(In Progress)</span></li>
+<li>Organisational Structure <span style='color:#6b7280;font-size:11px'>(Not Started)</span></li>
+<li>Mole Valley - DIS / Org Transformation / Supply Chain <span style='color:#6b7280;font-size:11px'>(For Re-targetting)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Pritesh Patel, Josh Elliott</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Customer Services <span style='color:#6b7280;font-size:11px'>(In Progress)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Josh Elliott, Caldon Henson</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Spayne and Lyndsay - Follow Up <span style='color:#6b7280;font-size:11px'>(Possible)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Anna G</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Protein Works <span style='color:#6b7280;font-size:11px'>(Possible)</span></li>
+<li>Elia Beauty - Intro <span style='color:#6b7280;font-size:11px'>(Possible)</span></li>
+<li>Wild Nutrition <span style='color:#6b7280;font-size:11px'>(For Re-targetting)</span></li>
+<li>Sienna <span style='color:#6b7280;font-size:11px'>(For Re-targetting)</span></li>
+<li>Nutriburst <span style='color:#6b7280;font-size:11px'>(For Re-targetting)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Josephine Greenwood, Josh Elliott</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Exit Case Studies <span style='color:#6b7280;font-size:11px'>(Not Started)</span></li>
+<li>ICE Matrix <span style='color:#6b7280;font-size:11px'>(Not Started)</span></li>
+<li>Comparison to IM <span style='color:#6b7280;font-size:11px'>(Not Started)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Josh Elliott, Austin Bland</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Additional Channel Opps <span style='color:#6b7280;font-size:11px'>(In Progress)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Josephine Greenwood, Kirill Kopica</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>International <span style='color:#6b7280;font-size:11px'>(In Progress)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Rebecca Fulham</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Brand Position Suitability <span style='color:#6b7280;font-size:11px'>(In Progress)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Josephine Greenwood, Josh Elliott, Pritesh Patel, Austin Bland</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Opportunity Bridge <span style='color:#6b7280;font-size:11px'>(Not Started)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Austin Bland, Josephine Greenwood, Josh Elliott</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Strategic Vision <span style='color:#6b7280;font-size:11px'>(Not Started)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Josephine Greenwood, Josh Elliott, Austin Bland</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Key Projects <span style='color:#6b7280;font-size:11px'>(Not Started)</span></li>
+<li>Red Flag Analysis <span style='color:#6b7280;font-size:11px'>(Not Started)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Josh Elliott, Josephine Greenwood, Austin Bland</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Key Growth Initiatives <span style='color:#6b7280;font-size:11px'>(Not Started)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Les Yates, Josephine Greenwood</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Seller Presentation <span style='color:#6b7280;font-size:11px'>(Not Started)</span></li>
+<li>Investor Presentation <span style='color:#6b7280;font-size:11px'>(Not Started)</span></li>
+<li>Full CDD <span style='color:#6b7280;font-size:11px'>(In Progress)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Caldon Henson, Jake Heath, George Davies</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Belier  - Supply Chain <span style='color:#6b7280;font-size:11px'>(For Re-targetting)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Anna G, Josh Elliott</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Snag - Beechbrooke - DIS <span style='color:#6b7280;font-size:11px'>(For Re-targetting)</span></li>
+<li>Transfer Travel - DIS -&gt; Delivery <span style='color:#6b7280;font-size:11px'>(Live)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Lonya Sherief</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Balance Me - Supply Chain <span style='color:#6b7280;font-size:11px'>(For Re-targetting)</span></li>
+<li>Reiss <span style='color:#6b7280;font-size:11px'>(For Re-targetting)</span></li>
+<li>Bobhead <span style='color:#6b7280;font-size:11px'>(For Re-targetting)</span></li>
+<li>1821 Man Made <span style='color:#6b7280;font-size:11px'>(For Re-targetting)</span></li>
+<li>Skin Factory <span style='color:#6b7280;font-size:11px'>(For Re-targetting)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Anna G, Caldon Henson</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>The Hair Doctor - DIS <span style='color:#6b7280;font-size:11px'>(For Re-targetting)</span></li>
+<li>HelloKlean - Supply <span style='color:#6b7280;font-size:11px'>(For Re-targetting)</span></li>
+<li>FCUK <span style='color:#6b7280;font-size:11px'>(For Re-targetting)</span></li>
+<li>Acorn Agency <span style='color:#6b7280;font-size:11px'>(For Re-targetting)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Anna G, Les Yates</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Ruggable <span style='color:#6b7280;font-size:11px'>(For Re-targetting)</span></li>
+<li>7 Drops <span style='color:#6b7280;font-size:11px'>(For Re-targetting)</span></li>
+<li>Honey Love - DIS <span style='color:#6b7280;font-size:11px'>(Live)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Zara Hill, Anna G</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Jess Beauty / Gianni <span style='color:#6b7280;font-size:11px'>(For Re-targetting)</span></li>
+<li>Everything5pounds - DIS <span style='color:#6b7280;font-size:11px'>(For Re-targetting)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Caldon Henson, Anna G</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Studio 10 - Paid Social <span style='color:#6b7280;font-size:11px'>(For Re-targetting)</span></li>
+<li>Horwood Group - DIS <span style='color:#6b7280;font-size:11px'>(For Re-targetting)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Mark Johns, Caldon Henson</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Brow Down LA <span style='color:#6b7280;font-size:11px'>(For Re-targetting)</span></li>
+<li>Jivago <span style='color:#6b7280;font-size:11px'>(For Re-targetting)</span></li>
+<li>Ghassan <span style='color:#6b7280;font-size:11px'>(For Re-targetting)</span></li>
+<li>All my FY <span style='color:#6b7280;font-size:11px'>(For Re-targetting)</span></li>
+<li>Knspo <span style='color:#6b7280;font-size:11px'>(For Re-targetting)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Zara Hill, Lonya Sherief</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Underdays <span style='color:#6b7280;font-size:11px'>(For Re-targetting)</span></li>
+<li>HSNF - Supply Chain <span style='color:#6b7280;font-size:11px'>(For Re-targetting)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Anna G, Caldon Henson, Les Yates</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>TOMM Jewellery <span style='color:#6b7280;font-size:11px'>(For Re-targetting)</span></li>
+<li>Troy - Digital Transformation <span style='color:#6b7280;font-size:11px'>(Live)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Zara Hill, Les Yates, Anna G, Mon</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>MUA Makeup Academy <span style='color:#6b7280;font-size:11px'>(For Re-targetting)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Alice Oakford</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Miss Kick <span style='color:#6b7280;font-size:11px'>(For Re-targetting)</span></li>
+<li>Smidge <span style='color:#6b7280;font-size:11px'>(For Re-targetting)</span></li>
+<li>Heist <span style='color:#6b7280;font-size:11px'>(For Re-targetting)</span></li>
+<li>Quiz <span style='color:#6b7280;font-size:11px'>(For Re-targetting)</span></li>
+<li>Remington Workshop <span style='color:#6b7280;font-size:11px'>(For Re-targetting)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Les Yates</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Miami Beach Bum <span style='color:#6b7280;font-size:11px'>(For Re-targetting)</span></li>
+<li>Honey Love - DIS Upsell <span style='color:#6b7280;font-size:11px'>(For Re-targetting)</span></li>
+<li>Blissy <span style='color:#6b7280;font-size:11px'>(For Re-targetting)</span></li>
+<li>Jess Beauty <span style='color:#6b7280;font-size:11px'>(For Re-targetting)</span></li>
+<li>Rule Mens Hair <span style='color:#6b7280;font-size:11px'>(For Re-targetting)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Anna G, Josh Elliott, Les Yates</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Colleen Rothschild - DIS -&gt; Delivery <span style='color:#6b7280;font-size:11px'>(Possible)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Mon</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Manapura - Supply Chain <span style='color:#6b7280;font-size:11px'>(Live)</span></li>
+<li>Kiltane - SEO Upsell / Supply Reach Out <span style='color:#6b7280;font-size:11px'>(For Re-targetting)</span></li>
+<li>Happy Place (Fearne) - Supply Chain <span style='color:#6b7280;font-size:11px'>(Possible)</span></li>
+<li>Go Thrift <span style='color:#6b7280;font-size:11px'>(For Re-targetting)</span></li>
+<li>Karma Beauty <span style='color:#6b7280;font-size:11px'>(For Re-targetting)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Josh Elliott, Carsten Cramer, Jake Heath</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Bents Garden &amp; Home - Delivery (post-DIS) <span style='color:#6b7280;font-size:11px'>(Strong Possible)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Anna G, vanessa.hope@ecomplete.com</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Meloway <span style='color:#6b7280;font-size:11px'>(For Re-targetting)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Carsten Cramer</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Lovevery <span style='color:#6b7280;font-size:11px'>(For Re-targetting)</span></li>
+<li>Louis US to UK SC Op <span style='color:#6b7280;font-size:11px'>(For Re-targetting)</span></li>
+<li>Sneak - Supply Chain <span style='color:#6b7280;font-size:11px'>(For Re-targetting)</span></li>
+<li>Azio - SEO <span style='color:#6b7280;font-size:11px'>(For Re-targetting)</span></li>
+<li>Wolfson - Tiktok Youchew <span style='color:#6b7280;font-size:11px'>(For Re-targetting)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Josh Elliott, Zara Hill, Les Yates</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Larry King <span style='color:#6b7280;font-size:11px'>(For Re-targetting)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Les Yates, Anna G, Caldon Henson</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Ethical Bedding <span style='color:#6b7280;font-size:11px'>(For Re-targetting)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Josh Elliott, Anna G</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>DNA - Data <span style='color:#6b7280;font-size:11px'>(For Re-targetting)</span></li>
+<li>4th &amp; Reckless - DIS <span style='color:#6b7280;font-size:11px'>(For Re-targetting)</span></li>
+<li>DNA - Dev <span style='color:#6b7280;font-size:11px'>(Possible)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Zara Hill, Caldon Henson</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Waschies - DIS - US Launch <span style='color:#6b7280;font-size:11px'>(For Re-targetting)</span></li>
+<li>Fang Collective <span style='color:#6b7280;font-size:11px'>(For Re-targetting)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Mark Johns, Les Yates</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Spotlight - Supply Chain <span style='color:#6b7280;font-size:11px'>(For Re-targetting)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Carsten Cramer, Anna G</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Sneak - Delivery <span style='color:#6b7280;font-size:11px'>(For Re-targetting)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Josh Elliott, Les Yates</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Snuggle Hunny <span style='color:#6b7280;font-size:11px'>(For Re-targetting)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Mollie Roe, Les Yates</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Space Lift by Empro <span style='color:#6b7280;font-size:11px'>(Possible)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Mon, vanessa.hope@ecomplete.com</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>doddl <span style='color:#6b7280;font-size:11px'>(For Re-targetting)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Zara Hill, Mon</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Olverum <span style='color:#6b7280;font-size:11px'>(For Re-targetting)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Mon, Josh Elliott</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Umberto Giannini <span style='color:#6b7280;font-size:11px'>(For Re-targetting)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Zara Hill, Josh Elliott</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Solv <span style='color:#6b7280;font-size:11px'>(For Re-targetting)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Mollie Roe</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Johns Blend <span style='color:#6b7280;font-size:11px'>(For Re-targetting)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Mark Johns</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Buddy Care <span style='color:#6b7280;font-size:11px'>(For Re-targetting)</span></li>
+<li>Troy - Supply Chain <span style='color:#6b7280;font-size:11px'>(Live)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Mark Johns, Les Yates, Caldon Henson</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Manic Panic <span style='color:#6b7280;font-size:11px'>(For Re-targetting)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Anna G, Lonya Sherief</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Gothrift - Supply Chain <span style='color:#6b7280;font-size:11px'>(For Re-targetting)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Les Yates, Alice Oakford</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Neo Nails - Delivery <span style='color:#6b7280;font-size:11px'>(For Re-targetting)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Caldon Henson, Les Yates</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Waschies -  TT Shop <span style='color:#6b7280;font-size:11px'>(Live)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Caldon Henson, Mon</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Sam Naish - Web Build <span style='color:#6b7280;font-size:11px'>(Live)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Austin Bland, Mon</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Superfoods - Delivery <span style='color:#6b7280;font-size:11px'>(Live)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Anna G, Caldon Henson, Josh Elliott</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Sedulo <span style='color:#6b7280;font-size:11px'>(Possible)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Anna G, Austin Bland, Les Yates</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Lulabelle Dupe (Tip C) <span style='color:#6b7280;font-size:11px'>(Live)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Gov Rayt</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Dr David Jack - Shopify sample products functionality <span style='color:#6b7280;font-size:11px'>(Live)</span></li>
+<li>Kiltane - Shop by Colourway <span style='color:#6b7280;font-size:11px'>(Live)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Caldon Henson, Alice Oakford</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Ordo - Tiktok Upsell <span style='color:#6b7280;font-size:11px'>(Live)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Caldon Henson, Gov Rayt, Tim Fowler</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Dev &amp; Maintenance <span style='color:#6b7280;font-size:11px'>(Live)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">emma.papworth@ecomplete.com</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Finance <span style='color:#6b7280;font-size:11px'>(Live)</span></li></ul>
+            </div>
+        </div>
+
+        <div class="person-block">
+            <div class="person-name">Les Yates, Lonya Sherief</div>
+            <div class="person-stats"><span class="stat">No activity recorded</span></div>
+            
+            <div class="person-tasks">
+                Active items:
+                <ul><li>Azio Beauty - Supply Chain <span style='color:#6b7280;font-size:11px'>(Live)</span></li></ul>
+            </div>
+        </div>
+</div>
+
+<!-- Completed This Week -->
+
+
+<!-- Needs Attention -->
+<div class="card">
+    <div class="card-header" style="background:#ef4444">Needs Attention</div>
+    <div class="card-body">
+        
+        <div class="flag flag-danger">
+            <div class="flag-title">Stuck deal: GMC - Evri - Rebate</div>
+            <div class="flag-detail">No update in 222 days. Stage: Contract Sent. Value: £25.0K</div>
+        </div>
+
+        <div class="flag flag-danger">
+            <div class="flag-title">Stuck deal: The Ayurveda Experience - Freight</div>
+            <div class="flag-detail">No update in 67 days. Stage: Engaged. Value: £60.0K</div>
+        </div>
+
+        <div class="flag flag-danger">
+            <div class="flag-title">Stuck deal: Glow Hub - M&amp;A</div>
+            <div class="flag-detail">No update in 181 days. Stage: Engaged. Value: £10.0K</div>
+        </div>
+
+        <div class="flag flag-danger">
+            <div class="flag-title">Stuck deal: Cascadia Capital - CDD</div>
+            <div class="flag-detail">No update in 77 days. Stage: Proposal Shared. Value: £200.0K</div>
+        </div>
+
+        <div class="flag flag-danger">
+            <div class="flag-title">Stuck deal: Nuovaluce Beauty</div>
+            <div class="flag-detail">No update in 96 days. Stage: Decision Maker Bought-In. Value: £50.0K</div>
+        </div>
+
+        <div class="flag flag-danger">
+            <div class="flag-title">Stale: Doc Updates</div>
+            <div class="flag-detail">No update in 1647 days. Owner: Unassigned. Board: Resource</div>
+        </div>
+
+        <div class="flag flag-danger">
+            <div class="flag-title">Stale: Doc Updates</div>
+            <div class="flag-detail">No update in 1647 days. Owner: Unassigned. Board: External calls</div>
+        </div>
+
+        <div class="flag flag-danger">
+            <div class="flag-title">Stale: Doc Updates</div>
+            <div class="flag-detail">No update in 1647 days. Owner: Unassigned. Board: Dev Targets (WIP)</div>
+        </div>
+
+        <div class="flag flag-danger">
+            <div class="flag-title">Stale: Doc Updates</div>
+            <div class="flag-detail">No update in 1647 days. Owner: Unassigned. Board: Appendix Notes</div>
+        </div>
+
+        <div class="flag flag-danger">
+            <div class="flag-title">Stale: Doc Updates</div>
+            <div class="flag-detail">No update in 1647 days. Owner: Unassigned. Board: Feedback</div>
+        </div>
+
+        <div class="flag flag-danger">
+            <div class="flag-title">Stale: Doc updates</div>
+            <div class="flag-detail">No update in 1647 days. Owner: Unassigned. Board: Resource</div>
+        </div>
+
+        <div class="flag flag-danger">
+            <div class="flag-title">Stale: Doc updates</div>
+            <div class="flag-detail">No update in 1647 days. Owner: Unassigned. Board: External calls</div>
+        </div>
+
+        <div class="flag flag-danger">
+            <div class="flag-title">Stale: Doc updates</div>
+            <div class="flag-detail">No update in 1647 days. Owner: Unassigned. Board: Dev Targets (WIP)</div>
+        </div>
+
+        <div class="flag flag-danger">
+            <div class="flag-title">Stale: Doc updates</div>
+            <div class="flag-detail">No update in 1647 days. Owner: Unassigned. Board: SEO Targets</div>
+        </div>
+
+        <div class="flag flag-danger">
+            <div class="flag-title">Stale: Doc updates</div>
+            <div class="flag-detail">No update in 1647 days. Owner: Unassigned. Board: Feedback</div>
+        </div>
+
+        <div class="flag flag-warning">
+            <div class="flag-title">Low activity: Anna Younger</div>
+            <div class="flag-detail">Anna Younger had 1 activities this week (team avg: 11)</div>
+        </div>
+
+        <div class="flag flag-warning">
+            <div class="flag-title">Low activity: Jake Heath</div>
+            <div class="flag-detail">Jake Heath had 3 activities this week (team avg: 11)</div>
+        </div>
+
+        <div class="flag flag-warning">
+            <div class="flag-title">Low activity: Kirill Kopica</div>
+            <div class="flag-detail">Kirill Kopica had 0 activities this week (team avg: 11)</div>
+        </div>
+
+        <div class="flag flag-warning">
+            <div class="flag-title">Low activity: Paul Gedman</div>
+            <div class="flag-detail">Paul Gedman had 4 activities this week (team avg: 11)</div>
+        </div>
+
+        <div class="flag flag-warning">
+            <div class="flag-title">Low activity: Skye Whitton</div>
+            <div class="flag-detail">Skye Whitton had 2 activities this week (team avg: 11)</div>
+        </div>
+
+        <div class="flag flag-warning">
+            <div class="flag-title">Stuck deal: MAYAH - Investment</div>
+            <div class="flag-detail">No update in 43 days. Stage: Contract Sent. Value: £1</div>
+        </div>
+
+        <div class="flag flag-warning">
+            <div class="flag-title">Stuck deal: Finishing Line</div>
+            <div class="flag-detail">No update in 34 days. Stage: Engaged. Value: £40.0K</div>
+        </div>
+
+        <div class="flag flag-info">
+            <div class="flag-title">No deals closed this week</div>
+            <div class="flag-detail">Zero deals marked as won during this reporting period.</div>
+        </div>
+    </div>
+</div>
+
+<!-- Upcoming / Next Week -->
+<div class="card">
+    <div class="card-header" style="background:#3CB4AD">Coming Up Next Week</div>
+    <div class="card-body">
+        <p style='font-weight:600;margin-bottom:4px'>Stale Items Needing Attention:</p><ul><li><strong>Doc Updates</strong> (Unassigned) - 1647 days stale</li>
+<li><strong>Doc Updates</strong> (Unassigned) - 1647 days stale</li>
+<li><strong>Doc Updates</strong> (Unassigned) - 1647 days stale</li>
+<li><strong>Doc Updates</strong> (Unassigned) - 1647 days stale</li>
+<li><strong>Doc Updates</strong> (Unassigned) - 1647 days stale</li></ul>
+<p><strong>38</strong> open deals with <strong>£699.7K</strong> in pipeline.</p>
+    </div>
+</div>
+
+<!-- Footer -->
+<div class="footer">
+    <span class="teal">eComplete</span> &middot; Weekly Team Summary &middot; Auto-generated
+</div>
+
+</div>
+</body>
+</html>

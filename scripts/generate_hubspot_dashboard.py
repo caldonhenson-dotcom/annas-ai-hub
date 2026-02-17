@@ -3874,6 +3874,122 @@ def _build_js() -> str:
 
 
 # ---------------------------------------------------------------------------
+# Quick Actions
+# ---------------------------------------------------------------------------
+
+def _build_quick_actions(data: dict) -> str:
+    """Build the Quick Actions page with email templates and recommended actions."""
+    actions_file = BASE_DIR / "data" / "processed" / "email_actions.json"
+    actions: dict = {}
+    if actions_file.exists():
+        try:
+            with open(actions_file, "r", encoding="utf-8") as f:
+                actions = json.load(f)
+        except Exception:
+            pass
+
+    templates = actions.get("scheduling_templates", [])
+    quick_responses = actions.get("quick_responses", [])
+    suggestions = actions.get("suggested_actions", [])
+    constraints = actions.get("scheduling_constraints", {})
+    booking_link = actions.get("booking_link", "")
+
+    html = '<section class="dashboard-section">'
+    html += f'''<div class="section-header">
+        <h2 class="section-title">Quick Actions</h2>
+        <p class="section-subtitle">Email templates, scheduling, and recommended actions</p>
+    </div>'''
+
+    # KPIs
+    html += '<div class="kpi-grid" style="grid-template-columns:repeat(4,1fr)">'
+    html += _stat_card("Templates", str(len(templates)), "scheduling", "", COLORS["accent"])
+    html += _stat_card("Quick Responses", str(len(quick_responses)), "pre-built", "", COLORS["accent2"])
+    html += _stat_card("Suggested Actions", str(len(suggestions)), "from live data", "", COLORS["accent3"])
+    days_str = ", ".join(constraints.get("days", []))
+    html += _stat_card("Meeting Days", days_str or "Not set", f"{constraints.get('earliest', '')}-{constraints.get('latest', '')}", "", COLORS["accent4"])
+    html += '</div>'
+
+    # Suggested Actions (from live data)
+    if suggestions:
+        html += f'<div class="glass-card"><div class="card-title">Recommended Actions</div>'
+        for s in suggestions:
+            priority = s.get("priority", "medium")
+            p_color = {"high": COLORS["danger"], "medium": "#f59e0b", "low": COLORS["accent"]}.get(priority, COLORS["text_muted"])
+            p_icon = {"high": "&#9888;", "medium": "&#9679;", "low": "&#10003;"}.get(priority, "&#9679;")
+            action_type = s.get("action", "")
+            btn_label = {"schedule_call": "Schedule Call", "schedule_meeting": "Book Meeting", "send_email": "Send Email"}.get(action_type, "Take Action")
+
+            html += f'''<div style="display:flex;align-items:center;gap:10px;padding:8px 0;
+                border-bottom:1px solid {COLORS["card_border"]}">
+                <span style="color:{p_color};font-size:14px">{p_icon}</span>
+                <div style="flex:1">
+                    <div style="font-size:13px;font-weight:600;color:{COLORS["text"]}">{_esc(s.get("title", ""))}</div>
+                    <div style="font-size:11px;color:{COLORS["text_muted"]}">{_esc(s.get("detail", ""))}</div>
+                </div>
+                <span style="font-size:10px;font-weight:600;color:{p_color};
+                    text-transform:uppercase;letter-spacing:0.05em;
+                    padding:2px 8px;border-radius:4px;
+                    background:{p_color}15">{priority}</span>
+            </div>'''
+        html += '</div>'
+
+    # Scheduling Templates
+    html += f'<div class="glass-card"><div class="card-title">Scheduling Templates</div>'
+    if booking_link:
+        html += f'<div style="margin-bottom:10px;padding:8px 12px;background:{COLORS["accent"]}10;border-radius:8px;border:1px solid {COLORS["accent"]}30">'
+        html += f'<span style="font-size:11px;color:{COLORS["text_muted"]}">Booking Link:</span> '
+        html += f'<span style="font-size:12px;font-weight:600;color:{COLORS["accent"]}">{_esc(booking_link)}</span></div>'
+    else:
+        html += f'<div style="margin-bottom:10px;padding:8px 12px;background:#f59e0b10;border-radius:8px;border:1px solid #f59e0b30">'
+        html += f'<span style="font-size:11px;color:#f59e0b">Set your HubSpot booking link in config/email_templates.json</span></div>'
+
+    for tmpl in templates:
+        html += f'''<div style="display:flex;align-items:center;gap:10px;padding:8px 0;
+            border-bottom:1px solid {COLORS["card_border"]}">
+            <div style="width:28px;height:28px;border-radius:6px;background:{COLORS["accent"]}15;
+                display:flex;align-items:center;justify-content:center;font-size:12px;
+                color:{COLORS["accent"]}">&#9993;</div>
+            <div style="flex:1">
+                <div style="font-size:13px;font-weight:600;color:{COLORS["text"]}">{_esc(tmpl.get("name", ""))}</div>
+                <div style="font-size:11px;color:{COLORS["text_muted"]}">{_esc(tmpl.get("use_when", ""))}</div>
+            </div>
+            <span style="font-size:10px;color:{COLORS["accent2"]};background:{COLORS["accent2"]}12;
+                padding:2px 8px;border-radius:4px">{_esc(tmpl.get("key", ""))}</span>
+        </div>'''
+    html += '</div>'
+
+    # Quick Responses
+    html += f'<div class="glass-card"><div class="card-title">Quick Responses</div>'
+    for qr in quick_responses:
+        html += f'''<div style="display:flex;align-items:center;gap:10px;padding:8px 0;
+            border-bottom:1px solid {COLORS["card_border"]}">
+            <div style="width:28px;height:28px;border-radius:6px;background:{COLORS["accent3"]}15;
+                display:flex;align-items:center;justify-content:center;font-size:12px;
+                color:{COLORS["accent3"]}">&#9889;</div>
+            <div style="flex:1">
+                <div style="font-size:13px;font-weight:600;color:{COLORS["text"]}">{_esc(qr.get("name", ""))}</div>
+            </div>
+            <span style="font-size:10px;color:{COLORS["accent4"]};background:{COLORS["accent4"]}12;
+                padding:2px 8px;border-radius:4px">{_esc(qr.get("key", ""))}</span>
+        </div>'''
+    html += '</div>'
+
+    # Setup instructions
+    html += f'''<div class="glass-card" style="background:{COLORS["surface2"]}">
+        <div class="card-title">Setup</div>
+        <div style="font-size:12px;color:{COLORS["text_muted"]};line-height:1.6">
+            <strong>1.</strong> Set your HubSpot booking link in <code>config/email_templates.json</code><br>
+            <strong>2.</strong> Customise templates to match your tone and style<br>
+            <strong>3.</strong> Run <code>python scripts/email_actions.py --generate-dashboard</code> to refresh actions<br>
+            <strong>4.</strong> Use <code>--template london_meeting --to email@example.com</code> for CLI mailto links
+        </div>
+    </div>'''
+
+    html += '</section>'
+    return html
+
+
+# ---------------------------------------------------------------------------
 # Main assembly
 # ---------------------------------------------------------------------------
 
@@ -3925,6 +4041,11 @@ def _build_sidebar() -> str:
             "label": "AI",
             "icon": "&#129302;",
             "items": [("ai-roadmap", "AI Roadmap")],
+        },
+        {
+            "label": "Actions",
+            "icon": "&#9889;",
+            "items": [("quick-actions", "Quick Actions")],
         },
     ]
     groups_html = ''
@@ -3984,11 +4105,12 @@ def generate_dashboard(data: dict) -> str:
         ("IC Scorecards", _build_monday_ic),
         ("Workspaces", _build_monday_workspaces),
         ("AI Roadmap", _build_ai_section),
+        ("Quick Actions", _build_quick_actions),
     ]
     page_ids = ["executive", "leads", "funnel", "targets", "pipeline",
                 "activities", "contacts", "insights",
                 "monday-pipeline", "monday-ic", "monday-workspaces",
-                "ai-roadmap"]
+                "ai-roadmap", "quick-actions"]
 
     sections = []
     for i, (name, builder) in enumerate(section_builders):

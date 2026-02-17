@@ -1,0 +1,112 @@
+{
+  "scheduling_constraints": {
+    "days": [
+      "Wednesday",
+      "Thursday"
+    ],
+    "earliest": "11:00",
+    "latest": "15:00",
+    "timezone": "Europe/London"
+  },
+  "booking_link": "",
+  "scheduling_templates": [
+    {
+      "key": "london_meeting",
+      "name": "London Meeting - In Person",
+      "use_when": "Decent-sized brand, PE firm, adviser, or high-value contact"
+    },
+    {
+      "key": "phone_call",
+      "name": "Phone Call - Remote",
+      "use_when": "Smaller brand, initial outreach, or below threshold for in-person"
+    },
+    {
+      "key": "follow_up",
+      "name": "Follow Up - Post Meeting",
+      "use_when": "After an initial meeting to recap and set next steps"
+    },
+    {
+      "key": "nda_request",
+      "name": "NDA Exchange",
+      "use_when": "When an NDA needs to be exchanged before sharing information"
+    },
+    {
+      "key": "info_pack",
+      "name": "Information Pack",
+      "use_when": "Sending detailed information after NDA is signed"
+    }
+  ],
+  "quick_responses": [
+    {
+      "key": "acknowledge",
+      "name": "Acknowledge & Schedule"
+    },
+    {
+      "key": "not_right_now",
+      "name": "Polite Decline"
+    },
+    {
+      "key": "more_info",
+      "name": "Request More Info"
+    }
+  ],
+  "active_ma_projects": 887,
+  "suggested_actions": [
+    {
+      "type": "follow_up",
+      "priority": "high",
+      "title": "Follow up: Deal Process - Outline & key steps",
+      "detail": "No update in 210 days \u2014 stage: dd in progress",
+      "action": "schedule_call"
+    },
+    {
+      "type": "follow_up",
+      "priority": "high",
+      "title": "Follow up: SEO /Blog",
+      "detail": "No update in 215 days \u2014 stage: continuous",
+      "action": "schedule_call"
+    },
+    {
+      "type": "follow_up",
+      "priority": "high",
+      "title": "Follow up: PR",
+      "detail": "No update in 216 days \u2014 stage: not started",
+      "action": "schedule_call"
+    },
+    {
+      "type": "follow_up",
+      "priority": "high",
+      "title": "Follow up: Events",
+      "detail": "No update in 230 days \u2014 stage: dd in progress",
+      "action": "schedule_call"
+    },
+    {
+      "type": "follow_up",
+      "priority": "high",
+      "title": "Follow up: Partner Portal",
+      "detail": "No update in 216 days \u2014 stage: dd in progress",
+      "action": "schedule_call"
+    },
+    {
+      "type": "ic_review",
+      "priority": "medium",
+      "title": "IC review needed: New Brand",
+      "detail": "Score: 0.0 \u2014 no IC decision recorded",
+      "action": "schedule_meeting"
+    },
+    {
+      "type": "ic_review",
+      "priority": "medium",
+      "title": "IC review needed: Project Lime (Made By Mitchell)",
+      "detail": "Score: 0.0 \u2014 no IC decision recorded",
+      "action": "schedule_meeting"
+    },
+    {
+      "type": "ic_review",
+      "priority": "medium",
+      "title": "IC review needed: Healf",
+      "detail": "Score: 0.0 \u2014 no IC decision recorded",
+      "action": "schedule_meeting"
+    }
+  ]
+}

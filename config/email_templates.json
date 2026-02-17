@@ -1,0 +1,66 @@
+{
+    "scheduling": {
+        "description": "Meeting scheduling templates with HubSpot booking link",
+        "booking_link": "",
+        "constraints": {
+            "days": ["Wednesday", "Thursday"],
+            "earliest": "11:00",
+            "latest": "15:00",
+            "timezone": "Europe/London"
+        },
+        "templates": {
+            "london_meeting": {
+                "name": "London Meeting - In Person",
+                "use_when": "Decent-sized brand, PE firm, adviser, or high-value contact",
+                "subject": "Great to connect — let's meet in London",
+                "body": "Hi {first_name},\n\nGreat to hear from you — I'd love to meet.\n\nI'm typically in London on Wednesdays and Thursdays. Here's a link to find a time that works:\n\n{booking_link}\n\nLooking forward to it.\n\nBest,\n{sender_name}"
+            },
+            "phone_call": {
+                "name": "Phone Call - Remote",
+                "use_when": "Smaller brand, initial outreach, or below threshold for in-person",
+                "subject": "Let's arrange a quick call",
+                "body": "Hi {first_name},\n\nThanks for reaching out. I'd be happy to jump on a call to discuss further.\n\nHere's a link to book a convenient time:\n\n{booking_link}\n\nSpeak soon.\n\nBest,\n{sender_name}"
+            },
+            "follow_up": {
+                "name": "Follow Up - Post Meeting",
+                "use_when": "After an initial meeting to recap and set next steps",
+                "subject": "Great meeting — next steps",
+                "body": "Hi {first_name},\n\nGreat to meet today. Just wanted to follow up with a quick summary:\n\n{meeting_notes}\n\nNext steps:\n{next_steps}\n\nLet me know if I've missed anything.\n\nBest,\n{sender_name}"
+            },
+            "nda_request": {
+                "name": "NDA Exchange",
+                "use_when": "When an NDA needs to be exchanged before sharing information",
+                "subject": "NDA for your review",
+                "body": "Hi {first_name},\n\nAs discussed, please find attached our mutual NDA for review.\n\nOnce signed, we'll be happy to share the detailed information pack.\n\nPlease let me know if you have any questions or require any amendments.\n\nBest,\n{sender_name}"
+            },
+            "info_pack": {
+                "name": "Information Pack",
+                "use_when": "Sending detailed information after NDA is signed",
+                "subject": "Information pack as discussed",
+                "body": "Hi {first_name},\n\nFurther to our conversation and with the NDA now in place, please find attached the information pack.\n\nKey highlights:\n{highlights}\n\nHappy to walk through this in more detail — let me know a good time.\n\nBest,\n{sender_name}"
+            }
+        }
+    },
+    "quick_responses": {
+        "description": "Short pre-built responses for common inbound messages",
+        "templates": {
+            "acknowledge": {
+                "name": "Acknowledge & Schedule",
+                "body": "Thanks for getting in touch. I'll take a look and come back to you shortly. In the meantime, if you'd like to book a call, here's my calendar: {booking_link}"
+            },
+            "not_right_now": {
+                "name": "Polite Decline",
+                "body": "Thanks for reaching out. This isn't quite the right fit for us at the moment, but I appreciate you thinking of us. Happy to stay in touch for the future."
+            },
+            "more_info": {
+                "name": "Request More Info",
+                "body": "Thanks for this. Could you send over a bit more detail? Specifically:\n\n- A brief overview of the business\n- Key financials (revenue, EBITDA)\n- What you're looking to achieve\n\nHappy to arrange a call once I've had a chance to review."
+            }
+        }
+    },
+    "sender_defaults": {
+        "sender_name": "",
+        "sender_email": "",
+        "company": "eComplete"
+    }
+}
