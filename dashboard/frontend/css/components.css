@@ -39,33 +39,27 @@
 .stat-card {
     background: var(--card);
     border: 1px solid var(--card-border);
+    border-left: 3px solid var(--accent, var(--card-border));
     border-radius: var(--radius);
     padding: var(--space-4);
     transition: var(--transition);
     position: relative;
     overflow: hidden;
 }
-.stat-card::before {
-    content: '';
-    position: absolute; top: 0; left: 0; right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, var(--accent), transparent);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
 .stat-card:hover {
-    border-color: rgba(60, 180, 173, 0.3);
+    border-left-color: var(--accent);
     box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    transform: translateY(-1px);
 }
-.stat-card:hover::before { opacity: 1; }
 
 /* Clickable KPI cards */
 .stat-card[data-nav-page] { cursor: pointer; }
 .stat-card[data-nav-page]:hover {
-    border-color: var(--accent);
+    border-color: rgba(60, 180, 173, 0.3);
+    border-left-color: var(--accent);
     box-shadow: 0 4px 16px rgba(60, 180, 173, 0.12);
+    transform: translateY(-2px);
 }
-.stat-card[data-nav-page]:hover::before { opacity: 1; }
 
 /* ============================================================
    Grid Layouts

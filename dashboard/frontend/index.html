@@ -17,6 +17,8 @@
     <link rel="stylesheet" href="css/anna.css">
     <link rel="stylesheet" href="css/outreach.css">
     <link rel="stylesheet" href="css/responsive.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 </head>
 <body>
     <div class="login-overlay" id="login-overlay">
@@ -32,7 +34,7 @@
         </div>
     </div>
 
-    <aside class="sidebar" id="sidebar">
+    <aside class="sidebar" id="sidebar" role="navigation" aria-label="Main navigation">
         <div class="sidebar-brand">
             <span class="brand-dot">e</span>
             <span class="sidebar-brand-text">eComplete</span>
@@ -90,7 +92,7 @@
     <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
 
     <div class="layout-main" id="layout-main">
-        <div class="filter-bar" id="filter-bar">
+        <div class="filter-bar" id="filter-bar" role="toolbar" aria-label="Time period filter">
             <div class="filter-inner">
                 <span class="filter-label">Period</span>
                 <button class="filter-btn" data-period="this_week" onclick="applyFilter('this_week')">This Week</button>
@@ -108,20 +110,20 @@
             <span class="freshness-pill" title="Last sync">Queue: --</span>
         </div>
 
-        <main class="main-content">
+        <main class="main-content" role="main" aria-label="Dashboard content">
             <!-- Page containers — content loaded lazily from pages/ -->
-            <div class="dash-page" id="page-anna"></div>
-            <div class="dash-page" id="page-executive"></div>
-            <div class="dash-page" id="page-leads"></div>
-            <div class="dash-page" id="page-pipeline"></div>
-            <div class="dash-page" id="page-targets"></div>
-            <div class="dash-page" id="page-activities"></div>
-            <div class="dash-page" id="page-insights"></div>
-            <div class="dash-page" id="page-monday-pipeline"></div>
-            <div class="dash-page" id="page-monday-ic"></div>
-            <div class="dash-page" id="page-ai-roadmap"></div>
-            <div class="dash-page" id="page-inbound-queue"></div>
-            <div class="dash-page" id="page-outreach"></div>
+            <div class="dash-page" id="page-anna" role="region" aria-label="eComplete AI"></div>
+            <div class="dash-page" id="page-executive" role="region" aria-label="Executive Summary"></div>
+            <div class="dash-page" id="page-leads" role="region" aria-label="Leads and Conversion"></div>
+            <div class="dash-page" id="page-pipeline" role="region" aria-label="Pipeline View"></div>
+            <div class="dash-page" id="page-targets" role="region" aria-label="Targets"></div>
+            <div class="dash-page" id="page-activities" role="region" aria-label="Activity Tracking"></div>
+            <div class="dash-page" id="page-insights" role="region" aria-label="Insights and Forecast"></div>
+            <div class="dash-page" id="page-monday-pipeline" role="region" aria-label="M and A Pipeline"></div>
+            <div class="dash-page" id="page-monday-ic" role="region" aria-label="IC Scorecards"></div>
+            <div class="dash-page" id="page-ai-roadmap" role="region" aria-label="AI Roadmap"></div>
+            <div class="dash-page" id="page-inbound-queue" role="region" aria-label="Inbound Queue"></div>
+            <div class="dash-page" id="page-outreach" role="region" aria-label="Outreach Engine"></div>
         </main>
 
         <footer class="dashboard-footer">
