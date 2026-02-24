@@ -1,0 +1,711 @@
+# ============================================
+# ANNAS AI HUB — eComplete Service Pillars
+# ============================================
+# Defines all outreach pillars, ICP criteria,
+# messaging angles, and sequence templates.
+# Loaded into Supabase via: python scripts/outreach/load_pillars.py
+# ============================================
+
+pillars:
+
+  # ──────────────────────────────────────────
+  # 1. Mergers & Acquisitions
+  # ──────────────────────────────────────────
+  - slug: m-and-a
+    name: "Mergers & Acquisitions"
+    description: >
+      eComplete's core M&A advisory for DTC and eCommerce brands.
+      Buy-side and sell-side mandates, valuation, due diligence coordination,
+      and post-acquisition integration.
+    icp_criteria:
+      titles:
+        - Founder
+        - CEO
+        - Managing Director
+        - Owner
+        - Chief Executive
+        - Partner
+      industries:
+        - eCommerce
+        - Direct-to-Consumer
+        - Consumer Goods
+        - Health & Wellness
+        - Beauty & Personal Care
+        - Sports Nutrition
+        - Pet Care
+        - Food & Beverage
+      company_size: "10-500"
+      revenue_range: "£1M-£50M"
+      signals:
+        - Recently raised funding
+        - Exploring exit options
+        - Revenue plateau
+        - Founder fatigue
+        - Multiple brand portfolio
+        - International expansion stalled
+    messaging_angles:
+      - "eComplete has completed 20+ DTC acquisitions — we know the playbook"
+      - "Most DTC founders leave 30-40% on the table without specialist M&A advisors"
+      - "We buy, build, and scale DTC brands — not just advise from the sidelines"
+      - "Our portfolio includes Naturecan, and we actively seek complementary brands"
+    research_prompts:
+      - "Research this DTC brand's revenue trajectory, funding history, and market position. Identify signs of acquisition readiness."
+      - "Analyse the competitive landscape in their niche. How would this brand fit eComplete's portfolio?"
+    objection_handlers:
+      not_selling: "Completely understand — most of our best conversations started the same way. We're building relationships for whenever the timing is right."
+      have_advisor: "Great to hear you're well-supported. We specialise exclusively in DTC/eCommerce M&A which gives us niche buyer networks others don't have."
+      too_early: "That's fair. We find founders who plan 18-24 months ahead get significantly better outcomes. Happy to share what that prep looks like."
+      valuation_concern: "We typically achieve 15-30% higher multiples than generalist brokers because our buyer network is hyper-targeted to eCommerce."
+    sequences:
+      - name: "M&A — Cold Outreach"
+        channel: linkedin
+        total_steps: 4
+        delay_days: [3, 5, 7]
+        templates:
+          - step: 1
+            name: "Initial Connection"
+            body_template: >
+              Hi {{first_name}}, I came across {{company_name}} and was impressed by what you've built in {{industry}}.
+
+              I'm with eComplete — we acquire and scale DTC brands (Naturecan is one of ours). Always keen to connect with founders doing interesting work in the space.
+
+              Would be great to connect.
+          - step: 2
+            name: "Value Add Follow-up"
+            body_template: >
+              Thanks for connecting, {{first_name}}. I noticed {{research_insight}}.
+
+              We recently published our DTC M&A Market Report — covers multiples, buyer appetite, and what's driving valuations in {{industry}} right now. Happy to share if useful.
+          - step: 3
+            name: "Social Proof"
+            body_template: >
+              {{first_name}}, just wrapped a deal in a similar space to {{company_name}}. The founder went from "not ready to sell" to closing at a 20% premium in 8 months.
+
+              Not suggesting you're looking to exit — but if you ever want a confidential benchmark of where {{company_name}} sits, we do those regularly for founders we know.
+          - step: 4
+            name: "Soft Close"
+            body_template: >
+              {{first_name}}, last one from me on this. If M&A or strategic growth is ever on your radar, I'd genuinely enjoy a 15-min chat — no pitch, just two people in the DTC world trading notes.
+
+              Either way, I'll keep sharing useful content. All the best with {{company_name}}.
+
+  # ──────────────────────────────────────────
+  # 2. Capital Investments
+  # ──────────────────────────────────────────
+  - slug: capital-investments
+    name: "Capital Investments"
+    description: >
+      Growth capital and strategic investment for DTC brands.
+      Minority stakes, growth equity, and working capital facilities
+      backed by eComplete's operational expertise.
+    icp_criteria:
+      titles:
+        - Founder
+        - CEO
+        - CFO
+        - Finance Director
+        - Managing Director
+      industries:
+        - eCommerce
+        - Direct-to-Consumer
+        - Consumer Goods
+        - SaaS for eCommerce
+      company_size: "5-200"
+      revenue_range: "£500K-£20M"
+      signals:
+        - Rapid growth needing capital
+        - Inventory financing challenges
+        - International expansion planned
+        - Marketing budget constraints
+        - Seasonal cash flow gaps
+    messaging_angles:
+      - "Smart money > dumb money — we invest AND operate DTC brands daily"
+      - "Most DTC founders dilute too much too early. We structure capital to protect your equity."
+      - "We've deployed £50M+ into DTC brands and know exactly what good growth investment looks like"
+    research_prompts:
+      - "Research this company's growth trajectory and funding history. Identify capital needs based on their expansion plans."
+      - "Assess the unit economics and scalability of this DTC brand."
+    objection_handlers:
+      not_raising: "No pressure at all. We find the best investment conversations happen before there's urgency. Happy to be a sounding board when you're thinking about it."
+      have_investors: "Great that you're funded. We're different because we're operators — our capital comes with DTC-specific growth playbooks, not just a board seat."
+      bootstrapped: "Respect that massively. Some of our best portfolio companies bootstrapped to £5M+ before taking smart capital to 10x from there."
+    sequences:
+      - name: "Capital — Cold Outreach"
+        channel: linkedin
+        total_steps: 3
+        delay_days: [4, 6]
+        templates:
+          - step: 1
+            name: "Initial Connection"
+            body_template: >
+              Hi {{first_name}}, I've been following {{company_name}}'s growth — {{research_insight}}.
+
+              I'm with eComplete's investment team. We back DTC brands with capital + operational support (we own Naturecan among others). Always looking to meet ambitious founders.
+          - step: 2
+            name: "Value Add"
+            body_template: >
+              {{first_name}}, we recently helped a {{industry}} brand structure a growth round that let the founder keep 80%+ equity while scaling 3x in 18 months.
+
+              If capital or growth strategy is ever on your mind, would love to share how we think about it differently.
+          - step: 3
+            name: "Soft Close"
+            body_template: >
+              {{first_name}}, one last thought — if {{company_name}} ever hits a point where the right capital partner could accelerate things, I'd welcome a no-strings chat.
+
+              No rush — these conversations are always better before you need the capital.
+
+  # ──────────────────────────────────────────
+  # 3. Commercial Due Diligence
+  # ──────────────────────────────────────────
+  - slug: commercial-dd
+    name: "Commercial Due Diligence"
+    description: >
+      Independent commercial due diligence for PE firms, acquirers,
+      and investors evaluating DTC/eCommerce targets. Market sizing,
+      competitive analysis, customer cohort analysis, unit economics validation.
+    icp_criteria:
+      titles:
+        - Partner
+        - Principal
+        - Director
+        - VP of Investments
+        - Investment Manager
+        - Head of M&A
+        - Corporate Development
+      industries:
+        - Private Equity
+        - Venture Capital
+        - Investment Banking
+        - Corporate M&A
+        - Family Office
+      company_size: "10-500"
+      revenue_range: "N/A"
+      signals:
+        - Active deal pipeline
+        - Looking at eCommerce targets
+        - Previous DTC investments
+        - Consumer sector focus
+        - Recently closed a fund
+    messaging_angles:
+      - "We've done CDD on 50+ DTC deals — we know where the bodies are buried"
+      - "PE firms use us because we're operators, not consultants. We've run the P&L ourselves."
+      - "Our CDD catches the things generalist advisors miss: CAC trends, LTV decay, platform risk"
+    research_prompts:
+      - "Research this PE firm's investment thesis and recent portfolio activity in consumer/eCommerce."
+      - "Identify their current fund vintage, deal cadence, and likely upcoming deal activity."
+    objection_handlers:
+      have_advisors: "Totally understand. Most PE firms we work with use us specifically for DTC/eCommerce targets where generalist CDD providers lack depth."
+      too_expensive: "Our reports pay for themselves — we've saved acquirers millions by identifying hidden risks. Happy to share a sample scope."
+      do_internally: "Makes sense for many deals. We tend to get called in on eCommerce-specific deals where the nuances of CAC, LTV, and platform dependency need specialist eyes."
+    sequences:
+      - name: "CDD — PE Outreach"
+        channel: linkedin
+        total_steps: 3
+        delay_days: [4, 7]
+        templates:
+          - step: 1
+            name: "Initial Connection"
+            body_template: >
+              Hi {{first_name}}, I noticed {{company_name}} has been active in the consumer space. {{research_insight}}.
+
+              I lead commercial due diligence at eComplete — we specialise in DTC/eCommerce targets for PE firms. Would be great to connect.
+          - step: 2
+            name: "Credibility"
+            body_template: >
+              {{first_name}}, we recently completed CDD on a £15M eCommerce acquisition where our analysis identified a 40% LTV overstatement that completely changed the deal terms.
+
+              If you're ever evaluating DTC targets, we bring a unique operator perspective most CDD firms can't.
+          - step: 3
+            name: "Soft Close"
+            body_template: >
+              {{first_name}}, last note — if you have any eCommerce or DTC targets in your pipeline, I'd welcome a quick chat about how we approach CDD differently. No commitment, just an introduction.
+
+  # ──────────────────────────────────────────
+  # 4. Supply Chain Optimisation
+  # ──────────────────────────────────────────
+  - slug: supply-chain
+    name: "Supply Chain Optimisation"
+    description: >
+      End-to-end supply chain consulting for DTC brands.
+      Procurement, 3PL selection, inventory planning, landed cost reduction,
+      and fulfilment network design.
+    icp_criteria:
+      titles:
+        - Founder
+        - CEO
+        - COO
+        - Operations Director
+        - Head of Operations
+        - Supply Chain Manager
+        - Head of Logistics
+      industries:
+        - eCommerce
+        - Direct-to-Consumer
+        - Consumer Goods
+        - Health & Wellness
+        - Beauty & Personal Care
+        - Food & Beverage
+      company_size: "10-500"
+      revenue_range: "£1M-£30M"
+      signals:
+        - High shipping costs
+        - 3PL issues or switching
+        - International expansion
+        - Inventory management challenges
+        - Margin pressure
+        - Scaling fulfilment
+    messaging_angles:
+      - "We manage supply chain for Naturecan across 40 markets — we've seen every DTC logistics challenge"
+      - "Most DTC brands overpay on fulfilment by 15-25%. We audit and fix it."
+      - "Our supply chain team has saved portfolio brands £2M+ in landed costs through procurement and 3PL optimisation"
+    research_prompts:
+      - "Research this brand's fulfilment model, shipping markets, and likely supply chain pain points."
+      - "Identify their product category's typical supply chain challenges (perishability, regulations, customs)."
+    objection_handlers:
+      happy_with_3pl: "Great to hear. We often find brands are happy with their 3PL until we benchmark — then they discover 15-20% savings opportunities."
+      too_small: "Some of our best results come from brands at your stage. The supply chain decisions you make now determine your margins at scale."
+      handle_internally: "That's impressive. We typically help founders like you free up their time by systemising the supply chain so they can focus on growth."
+    sequences:
+      - name: "Supply Chain — Cold Outreach"
+        channel: linkedin
+        total_steps: 3
+        delay_days: [3, 6]
+        templates:
+          - step: 1
+            name: "Initial Connection"
+            body_template: >
+              Hi {{first_name}}, I noticed {{company_name}} is doing great things in {{industry}}. {{research_insight}}.
+
+              I lead supply chain optimisation at eComplete (we run logistics for Naturecan across 40+ markets). Always keen to connect with DTC operators.
+          - step: 2
+            name: "Value Add"
+            body_template: >
+              {{first_name}}, we recently helped a {{industry}} brand cut their landed costs by 22% and halve their delivery times by restructuring their 3PL network.
+
+              If supply chain or fulfilment is ever a bottleneck for {{company_name}}, I'd love to share how we think about it.
+          - step: 3
+            name: "Soft Close"
+            body_template: >
+              {{first_name}}, we offer a free supply chain health check for DTC brands — takes 30 mins and usually uncovers 10-20% savings.
+
+              No strings attached. Want me to send over the details?
+
+  # ──────────────────────────────────────────
+  # 5. Data & Analytics
+  # ──────────────────────────────────────────
+  - slug: data-analytics
+    name: "Data & Analytics"
+    description: >
+      Data infrastructure, BI dashboards, attribution modelling,
+      and analytics consulting for eCommerce brands.
+      From raw data to actionable insights.
+    icp_criteria:
+      titles:
+        - Founder
+        - CEO
+        - CMO
+        - Head of Growth
+        - Head of eCommerce
+        - Marketing Director
+        - Data Lead
+      industries:
+        - eCommerce
+        - Direct-to-Consumer
+        - Consumer Goods
+        - Retail
+      company_size: "10-300"
+      revenue_range: "£1M-£30M"
+      signals:
+        - No centralised data
+        - Attribution challenges
+        - Scaling ad spend
+        - Multiple sales channels
+        - Decision-making by gut feel
+    messaging_angles:
+      - "Most DTC brands are sitting on a goldmine of data they're not using. We fix that."
+      - "We built the analytics stack that powers Naturecan across 40 markets — same approach, your brand"
+      - "Stop guessing which channels drive revenue. Our attribution modelling gives you the real picture."
+    research_prompts:
+      - "Research this brand's tech stack, data maturity, and likely analytics gaps."
+      - "Identify their sales channels and where data fragmentation is likely creating blind spots."
+    objection_handlers:
+      have_analytics: "Great foundation. We typically help brands go from basic reporting to predictive analytics — things like CLV forecasting and attribution modelling."
+      too_early: "Actually, brands at your stage benefit the most. Getting your data right now means every decision from here is data-driven."
+      too_expensive: "Our data projects typically pay for themselves within 90 days through better ad allocation and inventory planning."
+    sequences:
+      - name: "Data — Cold Outreach"
+        channel: linkedin
+        total_steps: 3
+        delay_days: [3, 5]
+        templates:
+          - step: 1
+            name: "Initial Connection"
+            body_template: >
+              Hi {{first_name}}, {{company_name}} caught my eye — {{research_insight}}.
+
+              I run data & analytics at eComplete. We help DTC brands turn scattered data into a single source of truth for growth decisions. Always good to connect with smart operators.
+          - step: 2
+            name: "Value Add"
+            body_template: >
+              {{first_name}}, quick question — do you have full visibility on your true CAC and LTV across all channels?
+
+              We recently helped a brand at a similar stage discover they were over-investing in one channel by 40% and under-investing in their most profitable one. Happy to share the framework.
+          - step: 3
+            name: "Soft Close"
+            body_template: >
+              {{first_name}}, we do a free 30-min "Data Health Check" for DTC brands — identifies quick wins in attribution, reporting, and data infrastructure.
+
+              Interested?
+
+  # ──────────────────────────────────────────
+  # 6. Insights & Strategy
+  # ──────────────────────────────────────────
+  - slug: insights-strategy
+    name: "Insights & Strategy"
+    description: >
+      Market research, competitive intelligence, brand strategy,
+      and growth planning for DTC brands. Consumer insights,
+      category analysis, and strategic planning.
+    icp_criteria:
+      titles:
+        - Founder
+        - CEO
+        - CMO
+        - Brand Director
+        - Strategy Director
+        - Head of Growth
+      industries:
+        - eCommerce
+        - Direct-to-Consumer
+        - Consumer Goods
+        - Health & Wellness
+        - Beauty & Personal Care
+      company_size: "10-300"
+      revenue_range: "£1M-£30M"
+      signals:
+        - Entering new markets
+        - Brand repositioning
+        - Competitive pressure
+        - Growth plateau
+        - Category expansion
+    messaging_angles:
+      - "We've mapped the competitive landscape in DTC health, beauty, and wellness — and we share those insights with brands we work with"
+      - "Strategy without data is guesswork. We combine market intelligence with operational DTC experience."
+      - "We've helped brands identify £5M+ growth opportunities hiding in their existing customer data"
+    research_prompts:
+      - "Research this brand's market position, key competitors, and potential strategic opportunities."
+      - "Analyse recent market trends in their category and how they're positioned to capitalise."
+    objection_handlers:
+      have_agency: "Agencies are great for execution. We provide the strategic intelligence layer — market sizing, competitive mapping, growth modelling — that informs what the agency should execute."
+      know_our_market: "No doubt. What we bring is cross-category DTC intelligence from our portfolio — patterns and opportunities that are hard to see from inside one brand."
+    sequences:
+      - name: "Strategy — Cold Outreach"
+        channel: linkedin
+        total_steps: 3
+        delay_days: [4, 6]
+        templates:
+          - step: 1
+            name: "Initial Connection"
+            body_template: >
+              Hi {{first_name}}, {{research_insight}} — impressive work with {{company_name}}.
+
+              I lead insights & strategy at eComplete. We help DTC brands identify and capitalise on growth opportunities using deep market intelligence. Great to connect.
+          - step: 2
+            name: "Value Add"
+            body_template: >
+              {{first_name}}, we just published our Q{{quarter}} DTC {{industry}} Market Report — covers emerging trends, consumer sentiment shifts, and competitor moves.
+
+              Happy to share a copy if you're interested. No strings attached.
+          - step: 3
+            name: "Soft Close"
+            body_template: >
+              {{first_name}}, if you're ever thinking about new markets, product extensions, or just want a second opinion on your growth strategy, I'd welcome a 15-min chat.
+
+              We bring a unique perspective from operating across 15+ DTC brands.
+
+  # ──────────────────────────────────────────
+  # 7. Digital Marketing
+  # ──────────────────────────────────────────
+  - slug: digital-marketing
+    name: "Digital Marketing"
+    description: >
+      Performance marketing, SEO, paid social, content strategy,
+      email/SMS marketing, and CRO for DTC brands.
+      Full-funnel digital growth.
+    icp_criteria:
+      titles:
+        - Founder
+        - CEO
+        - CMO
+        - Marketing Director
+        - Head of Growth
+        - Head of eCommerce
+        - Head of Digital
+      industries:
+        - eCommerce
+        - Direct-to-Consumer
+        - Consumer Goods
+        - Health & Wellness
+        - Beauty & Personal Care
+        - Fashion
+        - Food & Beverage
+      company_size: "5-300"
+      revenue_range: "£500K-£30M"
+      signals:
+        - Scaling ad spend
+        - CAC increasing
+        - Poor ROAS
+        - SEO neglected
+        - Email revenue low
+        - No CRO programme
+    messaging_angles:
+      - "We've scaled Naturecan to 40 markets through digital — same team, your brand"
+      - "Most DTC brands waste 30% of their ad spend. We know because we've audited hundreds."
+      - "Our in-house team manages £20M+ in annual DTC ad spend across Meta, Google, TikTok"
+    research_prompts:
+      - "Research this brand's digital marketing presence: ad library, SEO visibility, social channels, email programme."
+      - "Identify their likely digital marketing pain points based on their size, category, and growth stage."
+    objection_handlers:
+      have_agency: "Understood. The difference with us is we're operators — we manage the same channels for our own portfolio brands, so our incentives are aligned with yours."
+      doing_well: "That's great. We often find brands doing well have untapped upside — usually in channels they haven't prioritised yet. Happy to share what those might be."
+      budget_limited: "We've helped brands start with a single high-ROI channel and scale from there. Often the first win funds everything else."
+    sequences:
+      - name: "Digital Marketing — Cold Outreach"
+        channel: linkedin
+        total_steps: 4
+        delay_days: [3, 5, 7]
+        templates:
+          - step: 1
+            name: "Initial Connection"
+            body_template: >
+              Hi {{first_name}}, I've been admiring {{company_name}}'s brand. {{research_insight}}.
+
+              I lead digital marketing at eComplete — we run performance marketing for DTC brands like Naturecan across 40 markets. Always keen to connect with fellow DTC operators.
+          - step: 2
+            name: "Value Add"
+            body_template: >
+              {{first_name}}, I ran a quick look at {{company_name}}'s digital footprint. {{research_insight}}.
+
+              We recently helped a similar brand in {{industry}} increase their ROAS by 45% in 90 days by restructuring their ad account and fixing attribution. Happy to share the approach.
+          - step: 3
+            name: "Social Proof"
+            body_template: >
+              {{first_name}}, one stat that surprises most DTC founders: brands with a proper CRO + email programme see 25-40% higher revenue per visitor.
+
+              Most are leaving that on the table. Want me to send over our DTC Digital Health Check framework?
+          - step: 4
+            name: "Soft Close"
+            body_template: >
+              {{first_name}}, we offer a free 30-min DTC Digital Audit — covers paid, organic, email, and conversion. No pitch, just actionable insights.
+
+              Interested?
+
+  # ──────────────────────────────────────────
+  # 8. Web Development
+  # ──────────────────────────────────────────
+  - slug: web-dev
+    name: "Web Development"
+    description: >
+      Shopify Plus builds, headless commerce, custom development,
+      platform migrations, and ongoing optimisation for DTC brands.
+    icp_criteria:
+      titles:
+        - Founder
+        - CEO
+        - CTO
+        - Head of eCommerce
+        - Head of Digital
+        - eCommerce Manager
+      industries:
+        - eCommerce
+        - Direct-to-Consumer
+        - Consumer Goods
+        - Retail
+      company_size: "5-300"
+      revenue_range: "£500K-£30M"
+      signals:
+        - Outdated website
+        - Platform migration needed
+        - Poor site speed
+        - Low conversion rate
+        - Shopify Basic hitting limits
+        - International expansion needs
+    messaging_angles:
+      - "We built and maintain Naturecan's Shopify Plus store across 40 markets — same team, your brand"
+      - "Platform migrations are our bread and butter. We've moved 20+ brands to Shopify Plus without losing a day of revenue."
+      - "Your website is your most important salesperson. Most DTC sites are leaving 20-30% of revenue on the table."
+    research_prompts:
+      - "Research this brand's current eCommerce platform, site speed, and tech stack."
+      - "Identify their website's strengths and weaknesses from a conversion and UX perspective."
+    objection_handlers:
+      happy_with_site: "Glad to hear it's working well. We find even good sites have 15-20% conversion upside hiding in checkout flow, page speed, and mobile UX."
+      have_dev_team: "Great foundation. We often work alongside internal teams on complex builds — Shopify Plus, headless, and international multi-store setups are our specialism."
+      just_launched: "Perfect timing actually — the first 6-12 months is when the right optimisations compound the most."
+    sequences:
+      - name: "Web Dev — Cold Outreach"
+        channel: linkedin
+        total_steps: 3
+        delay_days: [4, 6]
+        templates:
+          - step: 1
+            name: "Initial Connection"
+            body_template: >
+              Hi {{first_name}}, I took a look at {{company_name}}'s site — {{research_insight}}.
+
+              I lead web development at eComplete. We build and optimise Shopify Plus stores for DTC brands (Naturecan being our flagship). Great to connect.
+          - step: 2
+            name: "Value Add"
+            body_template: >
+              {{first_name}}, we recently helped a {{industry}} brand increase their conversion rate by 35% through a focused checkout optimisation and page speed project.
+
+              If you're ever looking at site improvements or a platform upgrade, I'd be happy to share what moves the needle most.
+          - step: 3
+            name: "Soft Close"
+            body_template: >
+              {{first_name}}, we do a free Conversion Audit for DTC sites — covers speed, UX, checkout flow, and mobile experience. Takes 2 days and comes with prioritised recommendations.
+
+              Worth a look?
+
+  # ──────────────────────────────────────────
+  # 9. Resource & Talent
+  # ──────────────────────────────────────────
+  - slug: resource-talent
+    name: "Resource & Talent"
+    description: >
+      Specialist DTC/eCommerce recruitment and resourcing.
+      Permanent hires, interim management, and embedded teams
+      for brands scaling their operations.
+    icp_criteria:
+      titles:
+        - Founder
+        - CEO
+        - COO
+        - HR Director
+        - Head of People
+        - Head of eCommerce
+      industries:
+        - eCommerce
+        - Direct-to-Consumer
+        - Consumer Goods
+        - Digital Agency
+        - Retail
+      company_size: "10-500"
+      revenue_range: "£1M-£50M"
+      signals:
+        - Rapid growth hiring
+        - Key role unfilled
+        - Founder wearing too many hats
+        - Post-acquisition integration
+        - Scaling operations
+    messaging_angles:
+      - "We recruit for our own DTC portfolio daily — we know exactly what great eCommerce talent looks like"
+      - "Most DTC brands struggle to hire because they don't know where the talent is. We do."
+      - "Need an interim Head of eCommerce? We can embed someone within a week who's done it before."
+    research_prompts:
+      - "Research this company's team size, recent hires, and likely talent gaps based on their growth stage."
+      - "Identify the roles they're most likely to need based on their current team composition and business stage."
+    objection_handlers:
+      not_hiring: "Totally understand. We find the best time to build a talent pipeline is before you need it urgently. Happy to stay in touch."
+      use_recruiters: "Most generalist recruiters don't understand DTC. Our candidates come pre-vetted against eCommerce-specific competencies."
+      handle_internally: "Smart approach. We tend to help when the role is niche or senior enough that internal teams need specialist support."
+    sequences:
+      - name: "Talent — Cold Outreach"
+        channel: linkedin
+        total_steps: 3
+        delay_days: [3, 6]
+        templates:
+          - step: 1
+            name: "Initial Connection"
+            body_template: >
+              Hi {{first_name}}, {{company_name}} looks like it's growing fast — {{research_insight}}.
+
+              I lead resourcing at eComplete. We specialise in placing DTC/eCommerce talent — from marketing to operations to C-suite. Great to connect.
+          - step: 2
+            name: "Value Add"
+            body_template: >
+              {{first_name}}, we recently placed a Head of Growth for a {{industry}} brand who increased revenue 60% in their first year.
+
+              If you're ever looking for specialist eCommerce talent — permanent, interim, or embedded — we'd love to help.
+          - step: 3
+            name: "Soft Close"
+            body_template: >
+              {{first_name}}, even if you're not hiring right now, we maintain a curated network of pre-vetted DTC talent. Happy to keep you in the loop on exceptional candidates who could be a fit for {{company_name}}.
+
+  # ──────────────────────────────────────────
+  # 10. End-to-End eCommerce
+  # ──────────────────────────────────────────
+  - slug: end-to-end-ecommerce
+    name: "End-to-End eCommerce"
+    description: >
+      Full-stack eCommerce management for brands that want
+      expert operators running their entire DTC channel.
+      Strategy, marketing, fulfilment, tech, and customer service
+      all under one roof.
+    icp_criteria:
+      titles:
+        - Founder
+        - CEO
+        - Managing Director
+        - Brand Director
+        - Head of DTC
+        - VP of eCommerce
+      industries:
+        - Consumer Goods
+        - FMCG
+        - Health & Wellness
+        - Beauty & Personal Care
+        - Sports & Fitness
+        - Fashion
+        - Food & Beverage
+        - Pet Care
+      company_size: "20-2000"
+      revenue_range: "£2M-£100M"
+      signals:
+        - Wholesale brand going DTC
+        - DTC underperforming
+        - No in-house eCommerce team
+        - Retailer dependency
+        - International DTC expansion
+        - Post-acquisition brand needing operator
+    messaging_angles:
+      - "We run Naturecan end-to-end across 40 markets — same model, your brand"
+      - "Think of us as your outsourced eCommerce department. Strategy through to fulfilment, one team."
+      - "Brands working with us see 30-50% DTC revenue growth in year one because we bring a proven playbook"
+    research_prompts:
+      - "Research this brand's current DTC setup: website, marketing, fulfilment, customer service."
+      - "Identify the biggest opportunities for this brand to grow their DTC channel."
+    objection_handlers:
+      want_control: "Completely understand. We work in a hybrid model too — you keep strategic control, we handle execution. Think of it as an extension of your team."
+      too_expensive: "Our model is typically profit-share or performance-based. We win when you win."
+      not_ready: "Most brands aren't ready for end-to-end on day one. We can start with one pillar — say digital marketing — and expand as you see results."
+      doing_ok: "If your DTC is already working, imagine what it could do with a team that's scaled brands from £2M to £20M. We usually unlock 30-50% growth."
+    sequences:
+      - name: "End-to-End — Cold Outreach"
+        channel: linkedin
+        total_steps: 4
+        delay_days: [3, 5, 7]
+        templates:
+          - step: 1
+            name: "Initial Connection"
+            body_template: >
+              Hi {{first_name}}, {{company_name}} is a brand I've been watching for a while — {{research_insight}}.
+
+              I'm with eComplete. We run end-to-end DTC operations for brands like Naturecan across 40 markets. Strategy, marketing, fulfilment, tech — the full stack. Always great to connect with impressive brand leaders.
+          - step: 2
+            name: "Value Add"
+            body_template: >
+              {{first_name}}, I was thinking about {{company_name}}'s DTC potential. {{research_insight}}.
+
+              We recently took a {{industry}} brand from £3M to £12M in DTC revenue in 18 months by applying our end-to-end playbook. Happy to share the case study.
+          - step: 3
+            name: "Social Proof"
+            body_template: >
+              {{first_name}}, one thing that sets eComplete apart: we're not consultants. We actually operate the P&L for our brand partners.
+
+              That means our incentives are 100% aligned — we only win when {{company_name}} wins.
+          - step: 4
+            name: "Soft Close"
+            body_template: >
+              {{first_name}}, if you ever want to explore what a dedicated DTC growth partner could do for {{company_name}}, I'd love a 15-min chat. No pitch — just a conversation about what's possible.
+
+              Either way, keep up the great work.

@@ -1,0 +1,40 @@
+# ================================================
+# LinkedIn Voyager API Configuration
+# ================================================
+
+linkedin:
+  # Rate limiting — mimic human browsing patterns
+  rate_limit:
+    requests_per_second: 0.5        # Max 1 request per 2 seconds
+    jitter_range: [0.5, 1.5]        # Random delay multiplier
+
+  # Retry configuration
+  retry:
+    max_attempts: 3
+    backoff_multiplier: 1
+    min_wait_seconds: 2
+    max_wait_seconds: 10
+
+  # Background sync configuration
+  sync:
+    enabled: true
+    interval_seconds: 60             # Poll every 60 seconds
+    full_sync_on_startup: false
+    batch_size: 50                   # Conversations per batch
+
+  # Cache TTLs
+  cache:
+    conversation_list_ttl: 300       # 5 minutes
+    message_list_ttl: 600            # 10 minutes
+    profile_ttl: 3600                # 1 hour
+
+  # Session management
+  session:
+    validate_on_startup: true
+    revalidate_interval: 3600        # Re-validate every hour
+    session_duration_days: 365
+
+  # Security
+  security:
+    encrypt_credentials: true
+    log_message_content: false       # NEVER log message bodies

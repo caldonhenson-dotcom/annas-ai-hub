@@ -1,14 +1,16 @@
 # ================================================
-# ANNAS AI HUB - HubSpot Integration Dependencies
+# ANNAS AI HUB - Dependencies
 # ================================================
 
 # Web Framework
 fastapi==0.104.1
 uvicorn[standard]==0.24.0
+websockets==12.0
 
-# HTTP Client (for HubSpot API calls)
+# HTTP Client
 aiohttp==3.9.0
 requests==2.31.0
+httpx==0.27.0
 
 # Configuration
 python-dotenv==1.0.0
@@ -16,6 +18,19 @@ pydantic==2.5.0
 
 # CORS
 starlette==0.27.0
+
+# Supabase
+supabase==2.11.0
+
+# AI Providers
+anthropic==0.42.0
+groq==0.5.0
+
+# Outreach Engine
+cryptography>=41.0.0
+pyyaml==6.0.1
+tenacity==8.2.0
+python-multipart==0.0.6
 
 # Testing
 pytest==7.4.3
