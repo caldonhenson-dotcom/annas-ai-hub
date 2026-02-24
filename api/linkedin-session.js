@@ -14,6 +14,7 @@
  */
 
 const crypto = require("crypto");
+const { setCors, rateLimit, supabaseHeaders, supabaseUrl, errorResponse } = require("./_helpers");
 
 // ---- Encryption helpers ----------------------------------------------------
 
@@ -39,24 +40,6 @@ function decrypt(blob, keyHex) {
   let decrypted = decipher.update(encHex, "hex", "utf8");
   decrypted += decipher.final("utf8");
   return decrypted;
-}
-
-// ---- Supabase REST helpers -------------------------------------------------
-
-function supabaseHeaders() {
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  return {
-    apikey: key,
-    Authorization: `Bearer ${key}`,
-    "Content-Type": "application/json",
-    Prefer: "return=representation",
-  };
-}
-
-function supabaseUrl(path) {
-  const base =
-    process.env.SUPABASE_URL || "https://rsvhflnpaexhzjhidgzk.supabase.co";
-  return `${base}/rest/v1/${path}`;
 }
 
 // ---- LinkedIn validation ---------------------------------------------------
@@ -181,7 +164,7 @@ async function handleAuth(req, res) {
     console.error("Supabase insert error:", errText);
     return res
       .status(500)
-      .json({ error: "Failed to store session", detail: errText });
+      .json({ error: "Failed to store session" });
   }
 
   return res.status(200).json({
@@ -261,12 +244,14 @@ async function handleHeartbeat(req, res) {
 // ---- Main handler ----------------------------------------------------------
 
 module.exports = async function handler(req, res) {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "POST, GET, DELETE, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  setCors(req, res);
 
   if (req.method === "OPTIONS") {
     return res.status(204).end();
+  }
+
+  if (!rateLimit(req, 10)) {
+    return res.status(429).json({ error: "Too many requests. Try again in a minute." });
   }
 
   try {
@@ -285,9 +270,6 @@ module.exports = async function handler(req, res) {
     }
     return res.status(405).json({ error: "Method not allowed" });
   } catch (err) {
-    console.error("Unhandled error:", err);
-    return res
-      .status(500)
-      .json({ error: "Internal error", detail: String(err) });
+    return errorResponse(res, 500, "An unexpected error occurred", err);
   }
 };

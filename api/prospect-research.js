@@ -15,23 +15,7 @@
  *   SUPABASE_SERVICE_ROLE_KEY — For storing research results
  */
 
-// ---- Supabase helpers ------------------------------------------------------
-
-function supabaseHeaders() {
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  return {
-    apikey: key,
-    Authorization: `Bearer ${key}`,
-    "Content-Type": "application/json",
-    Prefer: "return=representation",
-  };
-}
-
-function supabaseUrl(path) {
-  const base =
-    process.env.SUPABASE_URL || "https://rsvhflnpaexhzjhidgzk.supabase.co";
-  return `${base}/rest/v1/${path}`;
-}
+const { setCors, rateLimit, supabaseHeaders, supabaseUrl, errorResponse, sanitizeForPrompt } = require("./_helpers");
 
 // ---- Prompts ---------------------------------------------------------------
 
@@ -101,9 +85,7 @@ const OUTPUT_SCHEMA = JSON.stringify(
 // ---- Main handler ----------------------------------------------------------
 
 module.exports = async function handler(req, res) {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  setCors(req, res);
 
   if (req.method === "OPTIONS") {
     return res.status(204).end();
@@ -111,6 +93,10 @@ module.exports = async function handler(req, res) {
 
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
+  }
+
+  if (!rateLimit(req, 8)) {
+    return res.status(429).json({ error: "Too many requests. Try again in a minute." });
   }
 
   try {
@@ -135,7 +121,7 @@ module.exports = async function handler(req, res) {
 
     const groqKey = process.env.GROQ_API_KEY;
     if (!groqKey) {
-      return res.status(500).json({ error: "GROQ_API_KEY not configured" });
+      return errorResponse(res, 500, "AI service not configured");
     }
 
     // Build user prompt with prospect details
@@ -203,8 +189,7 @@ module.exports = async function handler(req, res) {
     } catch (e) {
       console.error("JSON parse error:", e, "Raw:", rawContent.substring(0, 200));
       return res.status(502).json({
-        error: "AI returned invalid JSON",
-        raw_preview: rawContent.substring(0, 500),
+        error: "AI returned invalid response — please retry",
       });
     }
 
@@ -261,9 +246,6 @@ module.exports = async function handler(req, res) {
       },
     });
   } catch (err) {
-    console.error("Unhandled error:", err);
-    return res
-      .status(500)
-      .json({ error: "Internal error", detail: String(err) });
+    return errorResponse(res, 500, "An unexpected error occurred", err);
   }
 };

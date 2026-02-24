@@ -14791,6 +14791,12 @@
         // ---- DOM refs ----
         function $(id) { return document.getElementById(id); }
 
+        // ---- HTML escape (XSS prevention) ----
+        function escHtml(s) {
+            if (!s) return '';
+            return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        }
+
         // ---- Markdown-lite renderer ----
         function md(text) {
             if (!text) return '';
@@ -15081,7 +15087,7 @@
                 })
                 .catch(function(err) {
                     w.document.open();
-                    w.document.write('<html><body style="font-family:Assistant,sans-serif;padding:40px"><h2>Error generating report</h2><p>' + (err.message || String(err)) + '</p></body></html>');
+                    w.document.write('<html><body style="font-family:Assistant,sans-serif;padding:40px"><h2>Error generating report</h2><p>' + escHtml(err.message || String(err)) + '</p></body></html>');
                     w.document.close();
                 });
             }
@@ -16016,6 +16022,9 @@
                         self._profile = null;
                         self._updateUI({ authenticated: false });
                         self._showMsg('Disconnected', 'success');
+                    })
+                    .catch(function() {
+                        self._showMsg('Disconnect failed — try again', 'error');
                     });
             },
 
@@ -16282,11 +16291,11 @@
                         self._prospect.research_brief = data.research;
                         self._renderResearch();
                     } else {
-                        container.innerHTML = '<div style="text-align:center;padding:40px;color:#ef4444">Research failed: ' + (data.error || 'Unknown error') + '</div>';
+                        container.innerHTML = '<div style="text-align:center;padding:40px;color:#ef4444">Research failed: ' + escHtml(data.error || 'Unknown error') + '</div>';
                     }
                 })
                 .catch(function(e) {
-                    container.innerHTML = '<div style="text-align:center;padding:40px;color:#ef4444">Error: ' + e.message + '</div>';
+                    container.innerHTML = '<div style="text-align:center;padding:40px;color:#ef4444">Error: ' + escHtml(e.message) + '</div>';
                 });
             },
 

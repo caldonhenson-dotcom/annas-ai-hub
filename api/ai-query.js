@@ -227,11 +227,10 @@ You are NOT a general-purpose chatbot. Only answer questions related to the dash
 
 // ---- Main handler -----------------------------------------------------------
 
+const { setCors, rateLimit, getSupabaseUrl, errorResponse } = require("./_helpers");
+
 module.exports = async function handler(req, res) {
-  // CORS
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  setCors(req, res);
 
   if (req.method === "OPTIONS") {
     return res.status(204).end();
@@ -241,20 +240,30 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
+  if (!rateLimit(req, 15)) {
+    return res.status(429).json({ error: "Too many requests. Try again in a minute." });
+  }
+
   try {
     const { question, history, report } = req.body;
 
     if (!question || typeof question !== "string" || question.trim().length === 0) {
       return res.status(400).json({ error: "Missing 'question' field" });
     }
+    if (question.length > 2000) {
+      return res.status(400).json({ error: "Question too long (max 2000 characters)" });
+    }
 
     const groqKey = process.env.GROQ_API_KEY;
     if (!groqKey) {
-      return res.status(500).json({ error: "GROQ_API_KEY not configured" });
+      return errorResponse(res, 500, "AI service not configured");
     }
 
-    const supabaseUrl = process.env.SUPABASE_URL || "https://rsvhflnpaexhzjhidgzk.supabase.co";
-    const storageBase = supabaseUrl + "/storage/v1/object/public/dashboard-data";
+    let sbUrl;
+    try { sbUrl = getSupabaseUrl(); } catch (e) {
+      return errorResponse(res, 500, "Database not configured");
+    }
+    const storageBase = sbUrl + "/storage/v1/object/public/dashboard-data";
 
     // Fetch latest metrics from Supabase Storage
     const files = [
@@ -333,7 +342,6 @@ module.exports = async function handler(req, res) {
       ),
     });
   } catch (err) {
-    console.error("Unhandled error:", err);
-    return res.status(500).json({ error: "Internal error", detail: String(err) });
+    return errorResponse(res, 500, "An unexpected error occurred", err);
   }
 };

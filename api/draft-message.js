@@ -15,23 +15,7 @@
  *   SUPABASE_SERVICE_ROLE_KEY — For storing drafted messages
  */
 
-// ---- Supabase helpers ------------------------------------------------------
-
-function supabaseHeaders() {
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  return {
-    apikey: key,
-    Authorization: `Bearer ${key}`,
-    "Content-Type": "application/json",
-    Prefer: "return=representation",
-  };
-}
-
-function supabaseUrl(path) {
-  const base =
-    process.env.SUPABASE_URL || "https://rsvhflnpaexhzjhidgzk.supabase.co";
-  return `${base}/rest/v1/${path}`;
-}
+const { setCors, rateLimit, supabaseHeaders, supabaseUrl, errorResponse, sanitizeForPrompt } = require("./_helpers");
 
 // ---- Prompts ---------------------------------------------------------------
 
@@ -87,9 +71,7 @@ const STEP_LABELS = {
 // ---- Main handler ----------------------------------------------------------
 
 module.exports = async function handler(req, res) {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  setCors(req, res);
 
   if (req.method === "OPTIONS") {
     return res.status(204).end();
@@ -97,6 +79,10 @@ module.exports = async function handler(req, res) {
 
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
+  }
+
+  if (!rateLimit(req, 10)) {
+    return res.status(429).json({ error: "Too many requests. Try again in a minute." });
   }
 
   try {
@@ -113,15 +99,17 @@ module.exports = async function handler(req, res) {
       return res.status(400).json({ error: "prospect object with first_name is required" });
     }
 
+    // Validate sequence_step and channel
+    const step = Math.max(1, Math.min(4, parseInt(sequence_step, 10) || 1));
+    const ch = ["linkedin", "email"].includes(channel) ? channel : "linkedin";
+
     const groqKey = process.env.GROQ_API_KEY;
     if (!groqKey) {
-      return res.status(500).json({ error: "GROQ_API_KEY not configured" });
+      return errorResponse(res, 500, "AI service not configured");
     }
 
     const isReply = !!reply_to;
     const systemPrompt = isReply ? REPLY_SYSTEM_PROMPT : DRAFT_SYSTEM_PROMPT;
-    const step = sequence_step || 1;
-    const ch = channel || "linkedin";
 
     // Build context prompt
     const parts = [];
@@ -285,9 +273,6 @@ module.exports = async function handler(req, res) {
       },
     });
   } catch (err) {
-    console.error("Unhandled error:", err);
-    return res
-      .status(500)
-      .json({ error: "Internal error", detail: String(err) });
+    return errorResponse(res, 500, "An unexpected error occurred", err);
   }
 };
