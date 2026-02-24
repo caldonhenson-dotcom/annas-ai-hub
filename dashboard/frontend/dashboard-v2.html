@@ -13678,7 +13678,7 @@
         <div class="glass-card" style="margin-top:18px">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
                 <div class="card-title" style="margin:0">Outreach Bot</div>
-                <button class="composer-btn primary" onclick="window.LinkedInAuth.open()" id="li-connect-btn-main" style="font-size:11px;padding:5px 12px">
+                <button class="composer-btn primary" onclick="window.LinkedInAuth.quickConnect()" id="li-connect-btn-main" style="font-size:11px;padding:5px 12px">
                     &#128279; Connect LinkedIn
                 </button>
             </div>
@@ -13881,41 +13881,41 @@
                 </div>
             </div>
 
-            <!-- Auth Flow (shown when not connected) -->
+            <!-- Single-click connect (via Chrome Extension) -->
             <div id="li-auth-methods">
-                <!-- Step 1: Open LinkedIn -->
-                <div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:10px;padding:16px;margin-bottom:12px">
-                    <div style="font-size:12px;font-weight:700;color:#0077B5;margin-bottom:8px">STEP 1 &mdash; Open LinkedIn</div>
-                    <div style="font-size:13px;color:#374151;margin-bottom:10px">Make sure you're logged into LinkedIn in your browser.</div>
-                    <button class="li-submit-btn" style="background:#0077B5" onclick="window.open('https://www.linkedin.com/feed/','_blank')">
-                        Open LinkedIn &#8599;
+                <!-- Primary: One-click via extension -->
+                <div id="li-oneclick-area" style="text-align:center;padding:16px 0">
+                    <button class="li-submit-btn" id="li-oneclick-btn" style="background:linear-gradient(135deg,#0077B5,#005885);font-size:15px;padding:14px 20px;border-radius:12px;letter-spacing:0.3px" onclick="window.LinkedInAuth.oneClick()">
+                        <span id="li-oneclick-label">&#128279; Connect My LinkedIn</span>
                     </button>
+                    <div id="li-oneclick-status" style="margin-top:12px;font-size:12px;color:#6b7280"></div>
                 </div>
 
-                <!-- Step 2: Run capture script -->
-                <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:16px;margin-bottom:12px">
-                    <div style="font-size:12px;font-weight:700;color:#059669;margin-bottom:8px">STEP 2 &mdash; Capture Session</div>
-                    <div style="font-size:13px;color:#374151;margin-bottom:6px">
-                        On the LinkedIn tab, press <kbd style="background:#e5e7eb;padding:2px 6px;border-radius:3px;font-size:12px;font-weight:600">F12</kbd> to open DevTools, go to the <strong>Console</strong> tab, then paste this script:
-                    </div>
-                    <div style="position:relative;margin-top:8px">
-                        <pre id="li-capture-script" style="background:#1e293b;color:#e2e8f0;padding:12px;border-radius:8px;font-size:11px;overflow-x:auto;white-space:pre-wrap;word-break:break-all;margin:0;line-height:1.5;max-height:80px"></pre>
-                        <button onclick="window.LinkedInAuth.copyScript()" id="li-copy-btn" style="position:absolute;top:6px;right:6px;background:#334155;color:#e2e8f0;border:none;border-radius:4px;padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer">
-                            Copy
+                <!-- Extension install prompt (hidden by default, shown if extension not detected) -->
+                <div id="li-ext-install" style="display:none;margin-top:12px">
+                    <div style="background:#fffbeb;border:1px solid #fcd34d;border-radius:10px;padding:14px">
+                        <div style="font-size:12px;font-weight:700;color:#92400e;margin-bottom:6px">One-time setup needed</div>
+                        <div style="font-size:13px;color:#374151;line-height:1.6;margin-bottom:10px">
+                            Install the <strong>Annas AI Hub LinkedIn Connector</strong> Chrome extension for single-click login:
+                        </div>
+                        <ol style="font-size:12px;color:#4b5563;line-height:1.8;margin:0 0 10px 16px;padding:0">
+                            <li>Open <strong>chrome://extensions</strong> in a new tab</li>
+                            <li>Enable <strong>Developer mode</strong> (top-right toggle)</li>
+                            <li>Click <strong>Load unpacked</strong></li>
+                            <li>Select the <code style="background:#f3f4f6;padding:1px 4px;border-radius:3px">chrome-extension</code> folder from your project</li>
+                        </ol>
+                        <button class="li-submit-btn" style="background:#0077B5;font-size:12px;padding:8px 14px" onclick="window.LinkedInAuth.retryExtension()">
+                            I've installed it &mdash; try again
                         </button>
                     </div>
-                    <div id="li-polling-status" style="display:none;margin-top:10px;text-align:center">
-                        <span class="loading-spinner" style="vertical-align:middle"></span>
-                        <span style="font-size:12px;color:#6b7280;margin-left:6px;vertical-align:middle">Waiting for connection...</span>
-                    </div>
                 </div>
 
-                <!-- Fallback: Manual paste -->
-                <details style="margin-top:4px">
-                    <summary style="font-size:12px;color:#6b7280;cursor:pointer;padding:6px 0">Alternative: Paste cookies manually</summary>
+                <!-- Fallback: Manual paste (always available) -->
+                <details style="margin-top:12px">
+                    <summary style="font-size:12px;color:#6b7280;cursor:pointer;padding:6px 0">Manual connection (without extension)</summary>
                     <div style="padding-top:10px">
                         <div style="font-size:12px;color:#374151;line-height:1.6;margin-bottom:10px">
-                            In DevTools &rarr; <strong>Application</strong> tab &rarr; <strong>Cookies</strong> &rarr; <strong>linkedin.com</strong>, copy these two values:
+                            In Chrome DevTools (<kbd style="background:#e5e7eb;padding:2px 6px;border-radius:3px;font-size:11px">F12</kbd>) &rarr; <strong>Application</strong> &rarr; <strong>Cookies</strong> &rarr; <strong>linkedin.com</strong>:
                         </div>
                         <input class="li-input" id="li-input-li_at" placeholder="li_at cookie value..." autocomplete="off" />
                         <input class="li-input" id="li-input-csrf" placeholder="JSESSIONID value (without quotes)..." autocomplete="off" />
@@ -15758,24 +15758,242 @@
         }
 
         // ══════════════════════════════════════════════════════
-        // LINKEDIN AUTH CONTROLLER
+        // LINKEDIN AUTH CONTROLLER (Extension-powered single-click)
         // ══════════════════════════════════════════════════════
+        // Chrome extension ID — set after loading unpacked extension
+        // The extension's externally_connectable matches our origin
+        var LI_EXTENSION_ID = null;
+
         window.LinkedInAuth = {
             _connected: false,
             _profile: null,
-            _pollTimer: null,
+            _extensionReady: false,
+
+            // Called from the main "Connect LinkedIn" button in the bot panel
+            // If extension is ready, does single-click without opening modal
+            // If already connected, opens modal to show status / disconnect
+            quickConnect: function() {
+                if (this._connected) {
+                    this.open();
+                    return;
+                }
+                if (LI_EXTENSION_ID) {
+                    // Single-click: skip the modal entirely
+                    var mainBtn = document.getElementById('li-connect-btn-main');
+                    if (mainBtn) {
+                        mainBtn.disabled = true;
+                        mainBtn.innerHTML = '<span class="loading-spinner" style="vertical-align:middle;border-width:2px;width:12px;height:12px"></span> Connecting...';
+                    }
+                    var self = this;
+                    chrome.runtime.sendMessage(LI_EXTENSION_ID, { action: 'GET_LINKEDIN_COOKIES' }, function(response) {
+                        if (chrome.runtime.lastError || !response || !response.success) {
+                            if (mainBtn) { mainBtn.disabled = false; mainBtn.innerHTML = '&#128279; Connect LinkedIn'; }
+                            self.open(); // Fall back to modal
+                            return;
+                        }
+                        self._authenticate(response.li_at, response.csrf_token, function(ok, data) {
+                            if (mainBtn) mainBtn.disabled = false;
+                            if (ok) {
+                                // Done! Button updates via _updateUI
+                            } else {
+                                if (mainBtn) mainBtn.innerHTML = '&#128279; Connect LinkedIn';
+                                self.open();
+                                self._showMsg(data.error || 'Connection failed', 'error');
+                            }
+                        });
+                    });
+                } else {
+                    this.open();
+                }
+            },
 
             open: function() {
                 document.getElementById('linkedin-auth-overlay').classList.remove('hidden');
-                this._generateScript();
                 this.checkStatus();
+                this._detectExtension();
             },
 
             close: function() {
                 document.getElementById('linkedin-auth-overlay').classList.add('hidden');
-                this._stopPolling();
             },
 
+            // ── Single-click flow ──────────────────────────────
+            oneClick: function() {
+                var btn = document.getElementById('li-oneclick-btn');
+                var label = document.getElementById('li-oneclick-label');
+                var status = document.getElementById('li-oneclick-status');
+                var self = this;
+
+                // If extension is detected, use it
+                if (LI_EXTENSION_ID) {
+                    label.innerHTML = '<span class="loading-spinner" style="vertical-align:middle;border-width:2px;width:14px;height:14px"></span> Connecting...';
+                    btn.disabled = true;
+                    status.textContent = 'Reading LinkedIn cookies via extension...';
+
+                    chrome.runtime.sendMessage(
+                        LI_EXTENSION_ID,
+                        { action: 'GET_LINKEDIN_COOKIES' },
+                        function(response) {
+                            if (chrome.runtime.lastError) {
+                                label.innerHTML = '&#128279; Connect My LinkedIn';
+                                btn.disabled = false;
+                                status.textContent = '';
+                                self._showExtInstall('Extension communication error. Reinstall or reload the extension.');
+                                return;
+                            }
+                            if (!response || !response.success) {
+                                label.innerHTML = '&#128279; Connect My LinkedIn';
+                                btn.disabled = false;
+                                status.textContent = '';
+                                self._showMsg(response ? response.error : 'No response from extension', 'error');
+                                return;
+                            }
+
+                            // Got cookies — now validate via our API
+                            status.textContent = 'Validating with LinkedIn...';
+                            self._authenticate(response.li_at, response.csrf_token, function(ok, data) {
+                                label.innerHTML = '&#128279; Connect My LinkedIn';
+                                btn.disabled = false;
+                                status.textContent = '';
+                                if (ok) {
+                                    self._showMsg('Connected as ' + data.display_name, 'success');
+                                } else {
+                                    self._showMsg(data.error || 'Connection failed', 'error');
+                                }
+                            });
+                        }
+                    );
+                } else {
+                    // No extension — show install instructions
+                    this._showExtInstall();
+                }
+            },
+
+            retryExtension: function() {
+                var self = this;
+                this._detectExtension(function(found) {
+                    if (found) {
+                        document.getElementById('li-ext-install').style.display = 'none';
+                        self._showMsg('Extension detected! Click the button above to connect.', 'success');
+                    } else {
+                        self._showMsg('Extension not detected yet. Make sure it is loaded and enabled.', 'error');
+                    }
+                });
+            },
+
+            // ── Extension detection ────────────────────────────
+            _detectExtension: function(callback) {
+                var self = this;
+
+                // Already have the ID from content script broadcast
+                if (LI_EXTENSION_ID) {
+                    self._extensionReady = true;
+                    var installArea = document.getElementById('li-ext-install');
+                    if (installArea) installArea.style.display = 'none';
+                    if (callback) callback(true);
+                    return;
+                }
+
+                // Check localStorage for previously-saved ID
+                var savedId = localStorage.getItem('li_ext_id');
+                if (savedId && typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.sendMessage) {
+                    try {
+                        chrome.runtime.sendMessage(savedId, { action: 'GET_LINKEDIN_COOKIES' }, function(resp) {
+                            if (!chrome.runtime.lastError && resp) {
+                                LI_EXTENSION_ID = savedId;
+                                self._extensionReady = true;
+                                var installArea = document.getElementById('li-ext-install');
+                                if (installArea) installArea.style.display = 'none';
+                                if (callback) callback(true);
+                            } else {
+                                self._extensionReady = false;
+                                if (callback) callback(false);
+                            }
+                        });
+                        return;
+                    } catch(e) { /* fall through */ }
+                }
+
+                // Send a ping in case the content script is ready but we missed it
+                window.postMessage({ type: 'ANNAS_LI_EXT_PING' }, '*');
+
+                // Wait briefly for a response
+                var timeout = setTimeout(function() {
+                    self._extensionReady = false;
+                    if (callback) callback(false);
+                }, 500);
+
+                var handler = function(event) {
+                    if (event.data && event.data.type === 'ANNAS_LI_EXT_READY' && event.data.extensionId) {
+                        clearTimeout(timeout);
+                        window.removeEventListener('message', handler);
+                        LI_EXTENSION_ID = event.data.extensionId;
+                        localStorage.setItem('li_ext_id', LI_EXTENSION_ID);
+                        self._extensionReady = true;
+                        var installArea = document.getElementById('li-ext-install');
+                        if (installArea) installArea.style.display = 'none';
+                        if (callback) callback(true);
+                    }
+                };
+                window.addEventListener('message', handler);
+            },
+
+            _showExtInstall: function(customMsg) {
+                var area = document.getElementById('li-ext-install');
+                if (area) area.style.display = '';
+                if (customMsg) this._showMsg(customMsg, 'error');
+            },
+
+            // ── Core authenticate call ─────────────────────────
+            _authenticate: function(liAt, csrfToken, callback) {
+                var self = this;
+                fetch(API.session, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ li_at: liAt, csrf_token: csrfToken })
+                })
+                .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+                .then(function(res) {
+                    if (res.ok && res.data.authenticated) {
+                        self._connected = true;
+                        self._profile = res.data;
+                        self._updateUI(res.data);
+                        callback(true, res.data);
+                    } else {
+                        callback(false, res.data);
+                    }
+                })
+                .catch(function(e) {
+                    callback(false, { error: 'Network error: ' + e.message });
+                });
+            },
+
+            // ── Manual fallback ────────────────────────────────
+            submit: function() {
+                var liAt = document.getElementById('li-input-li_at').value.trim();
+                var csrf = document.getElementById('li-input-csrf').value.trim().replace(/"/g, '');
+                if (!liAt || liAt.length < 50) { this._showMsg('li_at cookie must be at least 50 characters', 'error'); return; }
+                if (!csrf || csrf.length < 10) { this._showMsg('JSESSIONID must be at least 10 characters', 'error'); return; }
+
+                var btn = document.getElementById('li-submit-btn');
+                btn.disabled = true;
+                btn.innerHTML = '<span class="loading-spinner"></span> Validating...';
+                var self = this;
+
+                this._authenticate(liAt, csrf, function(ok, data) {
+                    btn.disabled = false;
+                    btn.textContent = 'Connect & Validate';
+                    if (ok) {
+                        self._showMsg('Connected as ' + data.display_name, 'success');
+                        document.getElementById('li-input-li_at').value = '';
+                        document.getElementById('li-input-csrf').value = '';
+                    } else {
+                        self._showMsg(data.error || 'Connection failed', 'error');
+                    }
+                });
+            },
+
+            // ── Status & session management ────────────────────
             checkStatus: function() {
                 var self = this;
                 fetch(API.session)
@@ -15788,98 +16006,6 @@
                     .catch(function() {
                         self._updateUI({ authenticated: false });
                     });
-            },
-
-            // Generate the capture script shown in the modal
-            _generateScript: function() {
-                var origin = window.location.origin;
-                var script = 'fetch("' + origin + '/api/linkedin-session",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({li_at:document.cookie.match(/li_at=([^;]+)/)[1],csrf_token:decodeURIComponent(document.cookie.match(/JSESSIONID=([^;]+)/)[1]).replace(/"/g,"")})}).then(r=>r.json()).then(d=>d.authenticated?console.log("%c Connected as "+d.display_name+" ","background:#10b981;color:#fff;font-size:14px;padding:4px 12px;border-radius:4px"):console.log("%c Failed: "+(d.error||"Unknown"),"background:#ef4444;color:#fff;padding:4px 12px")).catch(e=>console.log("Error:",e))';
-                var el = document.getElementById('li-capture-script');
-                if (el) el.textContent = script;
-            },
-
-            copyScript: function() {
-                var el = document.getElementById('li-capture-script');
-                if (!el) return;
-                navigator.clipboard.writeText(el.textContent).then(function() {
-                    var btn = document.getElementById('li-copy-btn');
-                    btn.textContent = 'Copied!';
-                    btn.style.background = '#10b981';
-                    setTimeout(function() { btn.textContent = 'Copy'; btn.style.background = '#334155'; }, 2000);
-                });
-                // Start auto-polling for the session
-                window.LinkedInAuth._startPolling();
-            },
-
-            _startPolling: function() {
-                var polling = document.getElementById('li-polling-status');
-                if (polling) polling.style.display = '';
-                this._stopPolling();
-                var self = this;
-                var attempts = 0;
-                this._pollTimer = setInterval(function() {
-                    attempts++;
-                    if (attempts > 40) { self._stopPolling(); return; } // Stop after 2 min
-                    fetch(API.session)
-                        .then(function(r) { return r.json(); })
-                        .then(function(d) {
-                            if (d.authenticated) {
-                                self._connected = true;
-                                self._profile = d;
-                                self._updateUI(d);
-                                self._stopPolling();
-                                self._showMsg('Connected as ' + d.display_name, 'success');
-                            }
-                        })
-                        .catch(function() {});
-                }, 3000);
-            },
-
-            _stopPolling: function() {
-                if (this._pollTimer) {
-                    clearInterval(this._pollTimer);
-                    this._pollTimer = null;
-                }
-                var polling = document.getElementById('li-polling-status');
-                if (polling) polling.style.display = 'none';
-            },
-
-            submit: function() {
-                var liAt = document.getElementById('li-input-li_at').value.trim();
-                var csrf = document.getElementById('li-input-csrf').value.trim().replace(/"/g, '');
-                if (!liAt || liAt.length < 50) { this._showMsg('li_at cookie must be at least 50 characters', 'error'); return; }
-                if (!csrf || csrf.length < 10) { this._showMsg('JSESSIONID must be at least 10 characters', 'error'); return; }
-
-                var btn = document.getElementById('li-submit-btn');
-                btn.disabled = true;
-                btn.innerHTML = '<span class="loading-spinner"></span> Validating...';
-                var self = this;
-
-                fetch(API.session, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ li_at: liAt, csrf_token: csrf })
-                })
-                .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
-                .then(function(res) {
-                    btn.disabled = false;
-                    btn.textContent = 'Connect & Validate';
-                    if (res.ok && res.data.authenticated) {
-                        self._connected = true;
-                        self._profile = res.data;
-                        self._updateUI(res.data);
-                        self._showMsg('Connected as ' + res.data.display_name, 'success');
-                        document.getElementById('li-input-li_at').value = '';
-                        document.getElementById('li-input-csrf').value = '';
-                    } else {
-                        self._showMsg(res.data.error || 'Connection failed', 'error');
-                    }
-                })
-                .catch(function(e) {
-                    btn.disabled = false;
-                    btn.textContent = 'Connect & Validate';
-                    self._showMsg('Network error: ' + e.message, 'error');
-                });
             },
 
             disconnect: function() {
@@ -15943,6 +16069,15 @@
 
         // Check session on page load
         window.LinkedInAuth.checkStatus();
+
+        // Listen for Chrome extension broadcasting its ID (content script)
+        window.addEventListener('message', function(event) {
+            if (event.data && event.data.type === 'ANNAS_LI_EXT_READY' && event.data.extensionId) {
+                LI_EXTENSION_ID = event.data.extensionId;
+                localStorage.setItem('li_ext_id', event.data.extensionId);
+                window.LinkedInAuth._extensionReady = true;
+            }
+        });
 
         // ══════════════════════════════════════════════════════
         // PROSPECT DETAIL PANEL

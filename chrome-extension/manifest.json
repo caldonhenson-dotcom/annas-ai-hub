@@ -1,0 +1,34 @@
+{
+  "manifest_version": 3,
+  "name": "Annas AI Hub — LinkedIn Connector",
+  "version": "1.0.0",
+  "description": "Single-click LinkedIn session capture for Annas AI Hub outreach.",
+  "permissions": ["cookies"],
+  "host_permissions": ["https://www.linkedin.com/*"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "externally_connectable": {
+    "matches": [
+      "https://annas-ai-hub.vercel.app/*",
+      "https://annas-ai-hub-*.vercel.app/*",
+      "http://localhost:*/*",
+      "https://localhost:*/*"
+    ]
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://annas-ai-hub.vercel.app/*",
+        "https://annas-ai-hub-*.vercel.app/*",
+        "http://localhost:*/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "icons": {
+    "48": "icon48.png",
+    "128": "icon128.png"
+  }
+}
