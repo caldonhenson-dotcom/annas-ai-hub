@@ -1,0 +1,65 @@
+/* ============================================================
+   Design Tokens — eComplete Brand
+   ============================================================ */
+:root {
+    /* Colors — Brand */
+    --accent:      #3CB4AD;
+    --accent2:     #334FB4;
+    --accent3:     #8B5CF6;
+    --accent4:     #10B981;
+    --accent5:     #F472B6;
+    --accent6:     #F59E0B;
+
+    /* Colors — Semantic */
+    --success:     #22C55E;
+    --danger:      #EF4444;
+    --warning:     #F59E0B;
+    --info:        #3B82F6;
+
+    /* Colors — Surfaces */
+    --bg:          #F7F8FA;
+    --card:        #FFFFFF;
+    --card-border: #E5E7EB;
+    --surface:     #FFFFFF;
+    --surface2:    #F3F4F6;
+
+    /* Colors — Text */
+    --text:        #111827;
+    --text-muted:  #6B7280;
+    --text-tertiary:#9CA3AF;
+
+    /* Spacing (8px base) */
+    --space-1:  4px;
+    --space-2:  8px;
+    --space-3:  12px;
+    --space-4:  16px;
+    --space-5:  20px;
+    --space-6:  24px;
+    --space-8:  32px;
+    --space-10: 40px;
+
+    /* Typography */
+    --font:       'Assistant', 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    --text-xs:    11px;
+    --text-sm:    13px;
+    --text-base:  14px;
+    --text-md:    16px;
+    --text-lg:    20px;
+    --text-xl:    24px;
+    --text-2xl:   28px;
+    --text-3xl:   36px;
+
+    /* Radii */
+    --radius:     10px;
+    --radius-sm:  6px;
+    --radius-lg:  12px;
+    --radius-xl:  16px;
+
+    /* Shadows */
+    --shadow:     0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md:  0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.04);
+    --shadow-lg:  0 4px 16px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04);
+
+    /* Transitions */
+    --transition: all 0.3s cubic-bezier(.25,.1,.25,1);
+}

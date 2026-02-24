@@ -1,0 +1,199 @@
+/* ============================================================
+   Anna AI — Full-page chat interface
+   ============================================================ */
+.anna-section { padding: 0 !important; margin: 0; }
+.anna-layout {
+    display: grid; grid-template-columns: 260px 1fr;
+    height: calc(100vh - 56px); background: var(--card);
+    border-radius: var(--radius-lg); overflow: hidden;
+    border: 1px solid var(--card-border);
+}
+
+/* Sidebar */
+.anna-sidebar {
+    background: var(--surface2); border-right: 1px solid var(--card-border);
+    padding: var(--space-3); display: flex; flex-direction: column;
+    gap: var(--space-1); overflow-y: auto;
+}
+.anna-new-chat {
+    width: 100%; padding: 10px 14px;
+    background: linear-gradient(135deg, #3CB4AD, #334FB4);
+    color: #fff; border: none; border-radius: var(--radius-sm);
+    font-size: var(--text-sm); font-weight: 700; font-family: var(--font);
+    cursor: pointer; margin-bottom: var(--space-2); transition: opacity 0.15s;
+}
+.anna-new-chat:hover { opacity: 0.9; }
+.anna-conv-list {
+    display: flex; flex-direction: column; gap: 2px;
+    flex: 1; overflow-y: auto;
+}
+.anna-conv-item {
+    display: flex; align-items: center; gap: var(--space-2);
+    padding: var(--space-2) 10px; border-radius: 6px; cursor: pointer;
+    font-size: 12px; color: var(--text); transition: background 0.15s;
+    border: none; background: none; text-align: left;
+    font-family: var(--font); width: 100%;
+}
+.anna-conv-item:hover { background: rgba(226,229,234,0.38); }
+.anna-conv-item.active {
+    background: var(--card); font-weight: 700;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+.anna-conv-item .conv-icon { font-size: 14px; flex-shrink: 0; }
+.anna-conv-item .conv-label { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.anna-conv-item .conv-delete {
+    opacity: 0; font-size: 11px; color: var(--text-muted); cursor: pointer;
+    border: none; background: none; padding: 2px 4px; border-radius: 4px;
+}
+.anna-conv-item:hover .conv-delete { opacity: 1; }
+.anna-conv-item .conv-delete:hover { color: #ef4444; background: rgba(239,68,68,0.08); }
+.anna-sidebar-divider { height: 1px; background: var(--card-border); margin: var(--space-2) 0; }
+.anna-sidebar-label {
+    font-size: var(--text-xs); font-weight: 700; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.04em; padding: 4px 10px 6px;
+}
+.anna-report-btn {
+    display: flex; align-items: center; gap: var(--space-2);
+    width: 100%; padding: 7px 10px; border: none; border-radius: 6px;
+    background: transparent; color: var(--text); font-size: 12px;
+    font-family: var(--font); font-weight: 600; cursor: pointer;
+    text-align: left; transition: all 0.15s;
+}
+.anna-report-btn:hover { background: rgba(60,180,173,0.07); color: var(--accent); }
+.anna-report-btn span { font-size: 13px; }
+
+/* Chat area */
+.anna-chat-area { display: flex; flex-direction: column; min-width: 0; }
+.anna-chat-header {
+    display: flex; align-items: center; gap: 10px;
+    padding: var(--space-3) var(--space-5); border-bottom: 1px solid var(--card-border);
+    flex-shrink: 0;
+}
+.anna-avatar {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: linear-gradient(135deg, #3CB4AD, #334FB4);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-weight: 800; font-size: 14px; flex-shrink: 0;
+}
+.anna-header-info { flex: 1; }
+.anna-header-name { font-size: var(--text-base); font-weight: 700; color: var(--text); }
+.anna-header-status { font-size: var(--text-xs); color: var(--text-muted); }
+.anna-header-btn {
+    background: none; border: 1px solid var(--card-border);
+    border-radius: 6px; padding: 5px 8px; cursor: pointer;
+    font-size: 13px; color: var(--text-muted); transition: all 0.15s;
+}
+.anna-header-btn:hover { color: var(--text); border-color: var(--text-muted); }
+.anna-messages {
+    flex: 1; overflow-y: auto; padding: var(--space-5) var(--space-6);
+    display: flex; flex-direction: column; gap: var(--space-3);
+}
+
+/* Welcome screen */
+.anna-welcome {
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; flex: 1; min-height: 300px;
+    text-align: center; padding: var(--space-10) var(--space-5);
+}
+.anna-welcome-avatar {
+    width: 56px; height: 56px; border-radius: 50%;
+    background: linear-gradient(135deg, #3CB4AD, #334FB4);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-weight: 800; font-size: 24px; margin-bottom: var(--space-4);
+}
+.anna-welcome-title { font-size: 22px; font-weight: 800; color: var(--text); margin-bottom: 6px; }
+.anna-welcome-sub {
+    font-size: var(--text-sm); color: var(--text-muted);
+    max-width: 400px; margin-bottom: var(--space-6); line-height: 1.5;
+}
+.anna-suggestions {
+    display: flex; flex-wrap: wrap; gap: 6px;
+    justify-content: center; max-width: 500px;
+}
+.anna-suggest-btn {
+    padding: 7px 14px; border: 1px solid var(--card-border);
+    border-radius: 20px; background: var(--card); color: var(--text);
+    font-size: 12px; font-family: var(--font); cursor: pointer;
+    transition: all 0.15s;
+}
+.anna-suggest-btn:hover {
+    border-color: var(--accent); color: var(--accent);
+    background: rgba(60,180,173,0.03);
+}
+
+/* Message bubbles (overrides for full-page) */
+.anna-messages .chat-msg {
+    font-size: var(--text-sm); line-height: 1.6;
+    padding: 10px 14px; border-radius: 12px; max-width: 80%; word-wrap: break-word;
+}
+.anna-messages .chat-msg.user {
+    background: #3CB4AD; color: #fff;
+    align-self: flex-end; border-bottom-right-radius: 4px;
+}
+.anna-messages .chat-msg.assistant {
+    background: var(--surface2); color: var(--text);
+    align-self: flex-start; border-bottom-left-radius: 4px; max-width: 90%;
+}
+.anna-messages .chat-msg.system {
+    background: transparent; color: var(--text-muted); font-size: 12px;
+    text-align: center; align-self: center; max-width: 100%;
+}
+
+/* Inline report card */
+.anna-report-card {
+    align-self: flex-start; max-width: 95%; width: 100%;
+    border: 1px solid var(--card-border); border-radius: 12px;
+    overflow: hidden; background: var(--card);
+}
+.anna-report-card-header {
+    display: flex; align-items: center; gap: 10px;
+    padding: 14px 18px; background: linear-gradient(135deg, rgba(60,180,173,0.03), rgba(51,79,180,0.03));
+    border-bottom: 2px solid var(--accent);
+}
+.anna-report-card-dot {
+    width: 24px; height: 24px; border-radius: 50%; background: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 800; color: #fff;
+}
+.anna-report-card-title { font-size: var(--text-base); font-weight: 700; color: var(--text); flex: 1; }
+.anna-report-card-meta { font-size: 10px; color: var(--text-muted); }
+.anna-report-card-body {
+    padding: 18px; font-size: var(--text-sm); line-height: 1.65; color: var(--text);
+}
+.anna-report-card-body strong { font-weight: 700; }
+.anna-report-card-body ul, .anna-report-card-body ol { margin: 6px 0; padding-left: 20px; }
+.anna-report-card-body li { margin-bottom: 3px; }
+.anna-report-card-body code { background: var(--surface2); padding: 1px 5px; border-radius: 3px; font-size: 12px; }
+.anna-report-card-footer {
+    display: flex; gap: 6px; padding: 10px 18px;
+    border-top: 1px solid var(--card-border); background: var(--surface2);
+}
+.anna-report-action {
+    padding: 5px 12px; border: 1px solid var(--card-border);
+    border-radius: 6px; background: var(--card); color: var(--text);
+    font-size: var(--text-xs); font-weight: 600; font-family: var(--font);
+    cursor: pointer; transition: all 0.15s;
+}
+.anna-report-action:hover { border-color: var(--accent); color: var(--accent); }
+
+/* Input area */
+.anna-input-area {
+    display: flex; gap: var(--space-2); padding: 14px var(--space-5);
+    border-top: 1px solid var(--card-border); flex-shrink: 0;
+}
+.anna-input {
+    flex: 1; padding: 10px var(--space-4);
+    border: 1px solid var(--card-border); border-radius: 10px;
+    font-size: var(--text-sm); font-family: var(--font);
+    outline: none; background: var(--surface2); color: var(--text);
+    transition: border-color 0.2s;
+}
+.anna-input:focus { border-color: var(--accent); }
+.anna-send-btn {
+    padding: 10px 18px;
+    background: linear-gradient(135deg, #3CB4AD, #334FB4);
+    color: #fff; border: none; border-radius: 10px;
+    font-size: var(--text-base); font-weight: 700;
+    cursor: pointer; transition: opacity 0.15s;
+}
+.anna-send-btn:hover { opacity: 0.9; }

@@ -1,0 +1,214 @@
+/* ============================================================
+   Cards — 3-tier hierarchy
+   ============================================================ */
+
+/* Standard card */
+.glass-card {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    padding: var(--space-4) var(--space-5);
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+}
+.glass-card:hover {
+    border-color: rgba(60, 180, 173, 0.25);
+    box-shadow: var(--shadow-lg);
+}
+.card-title {
+    font-size: var(--text-md);
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: var(--space-2);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+.alert-card { border-left: 3px solid var(--warning); }
+
+/* ============================================================
+   Stat Cards (KPI)
+   ============================================================ */
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-4);
+    margin-bottom: var(--space-4);
+}
+.kpi-grid-3 { grid-template-columns: repeat(3, 1fr); }
+
+.stat-card {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    padding: var(--space-4);
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+}
+.stat-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), transparent);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+.stat-card:hover {
+    border-color: rgba(60, 180, 173, 0.3);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+}
+.stat-card:hover::before { opacity: 1; }
+
+/* Clickable KPI cards */
+.stat-card[data-nav-page] { cursor: pointer; }
+.stat-card[data-nav-page]:hover {
+    border-color: var(--accent);
+    box-shadow: 0 4px 16px rgba(60, 180, 173, 0.12);
+}
+.stat-card[data-nav-page]:hover::before { opacity: 1; }
+
+/* ============================================================
+   Grid Layouts
+   ============================================================ */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: var(--space-4); }
+
+/* ============================================================
+   Data Tables — Enhanced
+   ============================================================ */
+.table-wrapper {
+    overflow-x: auto;
+    border-radius: var(--radius-sm);
+}
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--text-base);
+}
+.data-table th {
+    background: var(--surface2);
+    color: var(--text-muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-size: 12px;
+    padding: var(--space-3) var(--space-4);
+    text-align: left;
+    border-bottom: 2px solid var(--card-border);
+    white-space: nowrap;
+    position: sticky;
+    top: 0;
+    z-index: 5;
+}
+.data-table td {
+    padding: 10px var(--space-4);
+    border-bottom: 1px solid var(--card-border);
+    color: var(--text);
+    font-size: var(--text-base);
+}
+.data-table tbody tr { transition: background 0.15s ease; }
+.data-table tbody tr:nth-child(even) { background: rgba(0,0,0,0.015); }
+.data-table tbody tr:hover { background: rgba(60, 180, 173, 0.06); }
+.data-table tbody tr:last-child td { border-bottom: none; }
+
+/* Sort indicator */
+.data-table th[onclick] { cursor: pointer; user-select: none; }
+.data-table th[onclick]:hover { color: var(--accent); }
+
+/* ============================================================
+   Progress Bars
+   ============================================================ */
+.progress-mini {
+    display: flex; align-items: center; gap: 6px;
+}
+.progress-mini .bar {
+    flex: 1; height: 6px;
+    background: #e5e7eb; border-radius: 3px;
+    overflow: hidden; min-width: 40px;
+}
+.progress-mini .bar-fill {
+    height: 100%; border-radius: 3px;
+    transition: width 0.6s ease;
+}
+.progress-mini .pct {
+    font-size: var(--text-xs); color: var(--text-muted);
+    min-width: 30px; text-align: right;
+}
+
+/* ============================================================
+   Status Pills & Badges
+   ============================================================ */
+.status-pill {
+    display: inline-flex; align-items: center; justify-content: center;
+    padding: var(--space-1) var(--space-3);
+    border-radius: 12px; font-size: var(--text-xs); font-weight: 600;
+    white-space: nowrap; min-width: 80px; text-align: center;
+}
+.yoy-badge {
+    display: inline-flex; align-items: center; gap: 3px;
+    font-size: var(--text-xs); font-weight: 600;
+    padding: 2px var(--space-2); border-radius: 12px;
+    margin-left: 6px; vertical-align: middle;
+}
+.yoy-badge.up { color: #16a34a; background: rgba(34, 197, 94, 0.1); }
+.yoy-badge.down { color: #dc2626; background: rgba(239, 68, 68, 0.1); }
+.yoy-badge.neutral { color: var(--text-muted); background: rgba(107, 114, 128, 0.1); }
+
+/* ============================================================
+   Person Avatar
+   ============================================================ */
+.person-avatar {
+    display: inline-flex; align-items: center;
+    gap: 6px; font-size: 12px;
+}
+.person-avatar .avatar-circle {
+    width: 26px; height: 26px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 700; color: #fff; flex-shrink: 0;
+}
+
+/* ============================================================
+   Volume Chain (Reverse Engineering)
+   ============================================================ */
+.volume-chain {
+    display: flex; align-items: center; justify-content: center;
+    gap: 0; flex-wrap: wrap; padding: var(--space-2) 0;
+}
+.chain-item {
+    text-align: center; padding: var(--space-3) var(--space-4);
+    border: 2px solid var(--card-border);
+    border-radius: var(--radius);
+    background: var(--surface2); min-width: 80px;
+    transition: var(--transition);
+}
+.chain-item:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 16px rgba(60, 180, 173, 0.12);
+}
+.chain-value { font-size: 18px; font-weight: 800; line-height: 1.2; }
+.chain-label {
+    font-size: var(--text-xs); color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.05em; margin-top: var(--space-1);
+}
+.chain-arrow { font-size: 20px; color: var(--text-muted); padding: 0 var(--space-2); }
+
+/* ============================================================
+   Deal Flow Navigation
+   ============================================================ */
+.deal-flow-nav {
+    display: flex; align-items: center; gap: 0;
+    overflow-x: auto; padding: var(--space-2) 0;
+    margin-bottom: var(--space-2); scrollbar-width: thin;
+}
+.deal-flow-step { display: flex; align-items: center; gap: 0; white-space: nowrap; }
+.deal-flow-step .step-dot {
+    width: 22px; height: 22px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 700; color: #fff;
+    flex-shrink: 0; transition: all 0.2s ease;
+}
+.deal-flow-step .step-label {
+    font-size: var(--text-xs); font-weight: 600;
+    color: var(--text-muted); margin-left: 6px; letter-spacing: 0.01em;
+}
+.deal-flow-step .step-arrow { font-size: 14px; color: #d1d5db; margin: 0 var(--space-2); }

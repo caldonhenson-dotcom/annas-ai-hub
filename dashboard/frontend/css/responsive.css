@@ -1,0 +1,116 @@
+/* ============================================================
+   Responsive — All breakpoints consolidated
+   ============================================================ */
+
+/* ---- 1100px: Executive pillars ---- */
+@media (max-width: 1100px) {
+    .exec-pillars { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ---- 1024px: Tablet ---- */
+@media (max-width: 1024px) {
+    /* Sidebar */
+    .sidebar { transform: translateX(-100%); }
+    .sidebar.open { transform: translateX(0); }
+    .layout-main { margin-left: 0; }
+    .sidebar-toggle { display: flex; }
+
+    /* Grids */
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .kpi-grid-3 { grid-template-columns: repeat(2, 1fr); }
+    .grid-2 { grid-template-columns: 1fr; }
+    .grid-3 { grid-template-columns: 1fr; }
+
+    /* Content */
+    .main-content { padding: var(--space-4) var(--space-5); }
+    .volume-chain { gap: var(--space-2); }
+    .chain-item { min-width: 80px; padding: var(--space-3); }
+
+    /* Monday boards */
+    .board-row, .board-header-row {
+        grid-template-columns: 1.5fr 100px 80px 100px;
+    }
+    .board-row > :nth-child(n+5),
+    .board-header-row > :nth-child(n+5) { display: none; }
+
+    /* Deal flow */
+    .deal-flow-nav { padding: var(--space-3) 0; }
+    .deal-flow-step .step-label { font-size: 10px; }
+
+    /* IC details + AI items */
+    .ic-detail-grid { grid-template-columns: 1fr; }
+    .ai-item-row { grid-template-columns: 1fr 100px; }
+    .ai-item-row > :nth-child(n+3) { display: none; }
+}
+
+/* ---- 900px: Anna AI layout ---- */
+@media (max-width: 900px) {
+    .anna-layout { grid-template-columns: 1fr; height: auto; min-height: calc(100vh - 56px); }
+    .anna-sidebar { display: none; }
+}
+
+/* ---- 768px: Outreach ---- */
+@media (max-width: 768px) {
+    .outreach-subnav { gap: var(--space-1); }
+    .outreach-subnav-btn { padding: 5px 10px; font-size: var(--text-xs); }
+    .pillar-grid { grid-template-columns: 1fr; }
+    .funnel-bar { flex-direction: column; gap: var(--space-2); }
+    .funnel-arrow { transform: rotate(90deg); }
+}
+
+/* ---- 640px: Mobile ---- */
+@media (max-width: 640px) {
+    /* Grids */
+    .kpi-grid { grid-template-columns: 1fr; }
+    .kpi-grid-3 { grid-template-columns: 1fr; }
+    .main-content { padding: var(--space-3) var(--space-4); }
+
+    /* Cards */
+    .glass-card { padding: var(--space-4); }
+    .stat-card { padding: var(--space-4); }
+    .section-title { font-size: 18px; }
+
+    /* Volume chain */
+    .volume-chain { flex-direction: column; }
+    .chain-arrow { transform: rotate(90deg); }
+
+    /* Monday boards */
+    .board-row, .board-header-row { grid-template-columns: 1fr 90px; }
+    .board-row > :nth-child(n+3),
+    .board-header-row > :nth-child(n+3) { display: none; }
+
+    /* Deal flow */
+    .deal-flow-step .step-label { display: none; }
+    .deal-flow-step .step-dot { width: 22px; height: 22px; font-size: 9px; }
+
+    /* Filter bar */
+    .filter-bar { padding: var(--space-2) var(--space-4); }
+    .filter-btn { padding: 5px var(--space-3); font-size: var(--text-xs); }
+    .filter-period-label { display: none; }
+}
+
+/* ---- 600px: Executive compact ---- */
+@media (max-width: 600px) {
+    .exec-kpi-strip { flex-wrap: wrap; }
+    .exec-kpi { min-width: 70px; }
+    .exec-pillars { grid-template-columns: 1fr; }
+}
+
+/* ============================================================
+   Print
+   ============================================================ */
+@media print {
+    body { background: white; color: #1a1a1a; display: block; }
+    .sidebar, .sidebar-toggle, .filter-bar, .freshness-bar { display: none; }
+    .layout-main { margin-left: 0; }
+    .glass-card, .stat-card {
+        background: white; border: 1px solid #ddd;
+        box-shadow: none; break-inside: avoid;
+    }
+    .dashboard-section { opacity: 1; transform: none; animation: none; }
+    .data-table th { background: #f5f5f5; color: #333; }
+    .data-table td { color: #333; }
+    .section-title { color: #1a1a1a; }
+    .section-subtitle, .card-title { color: #666; }
+    .chat-fab, .chat-panel { display: none !important; }
+}
