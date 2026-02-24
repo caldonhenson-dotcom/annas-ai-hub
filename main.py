@@ -26,12 +26,13 @@ if __name__ == "__main__":
     import uvicorn
 
     logger.info("=" * 60)
-    logger.info("  ANNAS AI HUB — HubSpot CRM Integration")
+    logger.info("  ANNAS AI HUB — Sales & M&A Intelligence")
     logger.info("=" * 60)
     logger.info(f"  Environment : {os.getenv('ENVIRONMENT', 'development')}")
     logger.info(f"  Server      : http://0.0.0.0:{PORT}")
     logger.info(f"  Dashboard   : http://localhost:{PORT}")
     logger.info(f"  API Docs    : http://localhost:{PORT}/docs")
+    logger.info(f"  WebSocket   : ws://localhost:{PORT}/ws/dashboard")
     logger.info(f"  Debug       : {os.getenv('DEBUG', 'false')}")
     logger.info("=" * 60)
 

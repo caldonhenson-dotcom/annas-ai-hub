@@ -76,20 +76,17 @@ CHART_PALETTE = [
 # Each module: id, label (sidebar), group, group_icon, builder function name (resolved later)
 
 MODULES = [
+    {"id": "anna",              "label": "eComplete AI",          "group": "Assistant",     "icon": "&#9889;"},
     {"id": "executive",         "label": "Executive Summary",    "group": "Overview",      "icon": "&#9679;"},
-    {"id": "leads",             "label": "Leads & Sources",      "group": "Sales",         "icon": "&#9733;"},
-    {"id": "funnel",            "label": "Qualified Leads",      "group": "Sales",         "icon": "&#9733;"},
+    {"id": "leads",             "label": "Leads & Conversion",   "group": "Sales",         "icon": "&#9733;"},
     {"id": "pipeline",          "label": "Pipeline View",        "group": "Sales",         "icon": "&#9733;"},
-    {"id": "targets",           "label": "Targets & Rev Eng",    "group": "Planning",      "icon": "&#9881;"},
-    {"id": "activities",        "label": "Activity Tracking",    "group": "Activity",      "icon": "&#9993;"},
-    {"id": "contacts",          "label": "Contacts & Co.",       "group": "Activity",      "icon": "&#9993;"},
-    {"id": "insights",          "label": "Insights & Forecast",  "group": "Intelligence",  "icon": "&#10024;"},
+    {"id": "targets",           "label": "Targets & Rev Eng",    "group": "Sales",         "icon": "&#9733;"},
+    {"id": "activities",        "label": "Activity & Contacts",  "group": "Performance",   "icon": "&#9993;"},
+    {"id": "insights",          "label": "Insights & Forecast",  "group": "Performance",   "icon": "&#10024;"},
     {"id": "monday-pipeline",   "label": "M&A Pipeline",         "group": "M&A",           "icon": "&#128188;"},
     {"id": "monday-ic",         "label": "IC Scorecards",        "group": "M&A",           "icon": "&#128188;"},
-    {"id": "monday-workspaces", "label": "Workspaces",           "group": "M&A",           "icon": "&#128188;"},
-    {"id": "ai-roadmap",        "label": "AI Roadmap",           "group": "AI",            "icon": "&#129302;"},
-    {"id": "inbound-queue",     "label": "Inbound Queue",        "group": "Actions",       "icon": "&#9889;"},
-    {"id": "quick-actions",     "label": "Quick Actions",        "group": "Actions",       "icon": "&#9889;"},
+    {"id": "ai-roadmap",        "label": "AI Roadmap",           "group": "Operations",    "icon": "&#129302;"},
+    {"id": "inbound-queue",     "label": "Inbound Queue",        "group": "Operations",    "icon": "&#9889;"},
 ]
 
 # Builder function map — populated after function definitions (see bottom of section builders)
@@ -99,20 +96,17 @@ _MODULE_BUILDERS: Dict[str, Any] = {}
 def _register_builders() -> None:
     """Map module IDs to their builder functions. Called once at generation time."""
     _MODULE_BUILDERS.update({
+        "anna":              _build_anna_page,
         "executive":         _build_executive_summary,
-        "leads":             _build_leads_section,
-        "funnel":            _build_funnel_section,
+        "leads":             _build_leads_and_funnel,
         "targets":           _build_target_section,
         "pipeline":          _build_pipeline_section,
-        "activities":        _build_activity_section,
-        "contacts":          _build_contacts_section,
+        "activities":        _build_activities_and_contacts,
         "insights":          _build_insights_section,
-        "monday-pipeline":   _build_monday_pipeline,
+        "monday-pipeline":   _build_monday_pipeline_and_workspaces,
         "monday-ic":         _build_monday_ic,
-        "monday-workspaces": _build_monday_workspaces,
         "ai-roadmap":        _build_ai_section,
-        "inbound-queue":     _build_inbound_queue,
-        "quick-actions":     _build_quick_actions,
+        "inbound-queue":     _build_inbound_and_actions,
     })
 
 
@@ -261,15 +255,15 @@ def _color_at(idx: int) -> str:
 def _svg_bar_chart(
     data: List[Tuple[str, float]],
     width: int = 500,
-    height: int = 300,
+    height: int = 180,
     color: str = "#3CB4AD",
     show_values: bool = True,
 ) -> str:
     """Horizontal bar chart.  data = [(label, value), ...]."""
     if not data:
         return _no_data_svg(width, height)
-    bar_height = 32
-    gap = 8
+    bar_height = 22
+    gap = 4
     label_width = 140
     value_width = 80
     chart_width = width - label_width - value_width - 20
@@ -311,7 +305,7 @@ def _svg_bar_chart(
 
 def _svg_donut(
     segments: List[Tuple[str, float]],
-    size: int = 220,
+    size: int = 150,
     inner_ratio: float = 0.6,
 ) -> str:
     """Donut / pie chart with animated segments and legend."""
@@ -436,8 +430,8 @@ def _svg_sparkline(
 
 def _svg_funnel(
     stages: List[Tuple[str, float, str]],
-    width: int = 600,
-    height: int = 400,
+    width: int = 500,
+    height: int = 220,
 ) -> str:
     """Conversion funnel.  stages = [(label, value, conversion_text), ...]."""
     if not stages:
@@ -520,8 +514,8 @@ def _svg_horizontal_bar(
 
 def _svg_line_chart(
     data_points: List[Tuple[str, float]],
-    width: int = 600,
-    height: int = 250,
+    width: int = 500,
+    height: int = 150,
     color: str = "#38bdf8",
     show_dots: bool = True,
     show_labels: bool = True,
@@ -564,7 +558,19 @@ def _svg_line_chart(
         step = max(1, len(labels) // 8)
         for i in range(0, len(labels), step):
             x = pad_x + (i / (len(labels) - 1)) * chart_w
-            short = str(labels[i])[-5:]  # last 5 chars e.g. "01-25"
+            raw = str(labels[i])
+            # Format YYYY-MM dates as "Mon YY"
+            try:
+                from datetime import datetime as _dt
+                dt = _dt.strptime(raw[:7], "%Y-%m")
+                short = dt.strftime("%b %y")
+            except Exception:
+                # Format YYYY-MM-DD dates as "DD Mon"
+                try:
+                    dt = _dt.strptime(raw[:10], "%Y-%m-%d")
+                    short = dt.strftime("%d %b")
+                except Exception:
+                    short = raw[-5:]
             x_labels += f'''<text x="{x:.1f}" y="{pad_y + chart_h + 18}"
                 text-anchor="middle" fill="{COLORS['text_muted']}" font-size="10"
                 font-family="system-ui, sans-serif">{_esc(short)}</text>\n'''
@@ -598,7 +604,7 @@ def _svg_line_chart(
     </svg>'''
 
 
-def _no_data_svg(width: int = 400, height: int = 200) -> str:
+def _no_data_svg(width: int = 400, height: int = 100) -> str:
     """Placeholder SVG when no data is available."""
     return f'''<svg width="100%" viewBox="0 0 {width} {height}"
          xmlns="http://www.w3.org/2000/svg">
@@ -622,6 +628,7 @@ def _stat_card(
     color: str = "#3CB4AD",
     sparkline_values: Optional[List[float]] = None,
     nav_page: str = "",
+    metric_key: str = "",
 ) -> str:
     """Metric KPI card with optional sparkline and clickable navigation (#40)."""
     spark_html = ""
@@ -632,22 +639,23 @@ def _stat_card(
 
     icon_html = ""
     if icon:
-        icon_html = f'''<div style="width:26px;height:26px;border-radius:6px;
+        icon_html = f'''<div style="width:22px;height:22px;border-radius:5px;
             background:linear-gradient(135deg,{color}22,{color}11);
             display:flex;align-items:center;justify-content:center;
-            font-size:13px;flex-shrink:0;margin-bottom:3px;
+            font-size:11px;flex-shrink:0;margin-bottom:2px;
             border:1px solid {color}33">{icon}</div>'''
 
     nav_attr = f' data-nav-page="{nav_page}"' if nav_page else ""
     nav_hint = f' title="Click to view {title}"' if nav_page else ""
+    metric_attr = f' data-metric="{metric_key}"' if metric_key else ""
 
-    return f'''<div class="stat-card" style="--accent:{color}"{nav_attr}{nav_hint}>
+    return f'''<div class="stat-card" style="--accent:{color}"{nav_attr}{nav_hint}{metric_attr}>
         {icon_html}
         <div style="font-size:10px;color:{COLORS['text_muted']};text-transform:uppercase;
                     letter-spacing:0.05em;margin-bottom:1px">{_esc(title)}</div>
-        <div data-role="stat-value" style="font-size:20px;font-weight:800;color:{COLORS['text']};
+        <div data-role="stat-value" style="font-size:17px;font-weight:800;color:{COLORS['text']};
                     line-height:1.1;margin-bottom:1px">{_esc(value)}</div>
-        <div style="font-size:11px;color:{COLORS['text_muted']}">{_esc(subtitle)}</div>
+        <div data-role="stat-subtitle" style="font-size:11px;color:{COLORS['text_muted']}">{_esc(subtitle)}</div>
         {spark_html}
     </div>'''
 
@@ -733,8 +741,75 @@ def _section_header(section_id: str, title: str, subtitle: str = "", icon: str =
 # Dashboard sections
 # ---------------------------------------------------------------------------
 
+def _build_anna_page(data: dict) -> str:
+    """Full-page Anna AI assistant — conversation sidebar, embedded chat, inline reports."""
+    # No section header — the Anna page uses its own layout
+    return f'''<section class="dashboard-section anna-section">
+    <div class="anna-layout">
+        <!-- Conversation sidebar -->
+        <div class="anna-sidebar" id="anna-sidebar">
+            <button class="anna-new-chat" onclick="window.AnnaPage.newChat()">
+                &#43; New Chat
+            </button>
+            <div class="anna-conv-list" id="anna-conv-list"></div>
+            <div class="anna-sidebar-divider"></div>
+            <div class="anna-sidebar-label">&#128196; Reports</div>
+            <button class="anna-report-btn" onclick="window.AnnaPage.runReport('monthly-deal-flow')">
+                <span>&#9733;</span> Monthly Deal Flow</button>
+            <button class="anna-report-btn" onclick="window.AnnaPage.runReport('pipeline-health')">
+                <span>&#9881;</span> Pipeline Health</button>
+            <button class="anna-report-btn" onclick="window.AnnaPage.runReport('lead-source')">
+                <span>&#10024;</span> Lead Source Analysis</button>
+            <button class="anna-report-btn" onclick="window.AnnaPage.runReport('weekly-activity')">
+                <span>&#9993;</span> Weekly Activity</button>
+            <button class="anna-report-btn" onclick="window.AnnaPage.runReport('ma-pipeline')">
+                <span>&#128188;</span> M&amp;A Pipeline</button>
+            <button class="anna-report-btn" onclick="window.AnnaPage.runReport('rep-scorecard')">
+                <span>&#9879;</span> Rep Scorecard</button>
+        </div>
+
+        <!-- Main chat area -->
+        <div class="anna-chat-area">
+            <div class="anna-chat-header">
+                <div class="anna-avatar">e</div>
+                <div class="anna-header-info">
+                    <div class="anna-header-name">eComplete AI</div>
+                    <div class="anna-header-status">Sales &amp; M&amp;A Intelligence Assistant</div>
+                </div>
+                <div class="anna-header-actions">
+                    <button class="anna-header-btn" onclick="window.AnnaPage.clearChat()" title="Clear chat">&#128465;</button>
+                </div>
+            </div>
+            <div class="anna-messages" id="anna-page-msgs">
+                <div class="anna-welcome" id="anna-welcome">
+                    <div class="anna-welcome-avatar">e</div>
+                    <div class="anna-welcome-title">eComplete AI</div>
+                    <div class="anna-welcome-sub">Your sales &amp; M&amp;A intelligence assistant. Ask me anything about your dashboard data.</div>
+                    <div class="anna-suggestions" id="anna-suggestions">
+                        <button class="anna-suggest-btn" onclick="window.AnnaPage.ask(this.textContent)">Summarise deal flow this month</button>
+                        <button class="anna-suggest-btn" onclick="window.AnnaPage.ask(this.textContent)">Which deals are stale or at risk?</button>
+                        <button class="anna-suggest-btn" onclick="window.AnnaPage.ask(this.textContent)">Pipeline health &amp; coverage</button>
+                        <button class="anna-suggest-btn" onclick="window.AnnaPage.ask(this.textContent)">Lead source effectiveness</button>
+                        <button class="anna-suggest-btn" onclick="window.AnnaPage.ask(this.textContent)">Top performing rep this month</button>
+                        <button class="anna-suggest-btn" onclick="window.AnnaPage.ask(this.textContent)">M&amp;A pipeline status</button>
+                        <button class="anna-suggest-btn" onclick="window.AnnaPage.ask(this.textContent)">Revenue forecast next 90 days</button>
+                        <button class="anna-suggest-btn" onclick="window.AnnaPage.ask(this.textContent)">Weekly summary</button>
+                    </div>
+                </div>
+            </div>
+            <div class="anna-input-area">
+                <input class="anna-input" id="anna-page-input" type="text"
+                    placeholder="Ask eComplete AI about your data..."
+                    onkeydown="if(event.key==='Enter'&&!event.shiftKey){{event.preventDefault();window.AnnaPage.send()}}" />
+                <button class="anna-send-btn" onclick="window.AnnaPage.send()">&#10148;</button>
+            </div>
+        </div>
+    </div>
+    </section>'''
+
+
 def _build_executive_summary(data: dict) -> str:
-    """Section 1: Executive Summary KPI cards and highlights."""
+    """Dashboard Overview — compact KPI strip + 4-pillar AI-driven snapshots."""
     pipeline = _safe_get(data, "pipeline_metrics", default={})
     activity = _safe_get(data, "activity_metrics", default={})
     leads = _safe_get(data, "lead_metrics", default={})
@@ -742,145 +817,165 @@ def _build_executive_summary(data: dict) -> str:
     counts = _safe_get(data, "record_counts", default={})
     rev_eng = _safe_get(data, "reverse_engineering", default={})
     insights = _safe_get(data, "insights", default={})
-
-    # Sparkline data - handle both dict {key: value} and list [{key: val}] formats
-    leads_over_time = _safe_get(leads, "leads_over_time", default={})
-    if isinstance(leads_over_time, dict):
-        lead_sparkline = list(leads_over_time.values())
-    elif isinstance(leads_over_time, list):
-        lead_sparkline = [item.get("count", 0) if isinstance(item, dict) else item for item in leads_over_time]
-    else:
-        lead_sparkline = []
-
-    daily_trend = _safe_get(activity, "daily_trend", default={})
-    if isinstance(daily_trend, dict):
-        activity_sparkline = list(daily_trend.values())
-    elif isinstance(daily_trend, list):
-        activity_sparkline = [item.get("count", 0) if isinstance(item, dict) else item for item in daily_trend]
-    else:
-        activity_sparkline = []
-
-    sales_cycle_trend = _safe_get(insights, "sales_cycle_trend", default={})
-    if isinstance(sales_cycle_trend, dict):
-        cycle_sparkline = list(sales_cycle_trend.values())
-    elif isinstance(sales_cycle_trend, list):
-        cycle_sparkline = [item.get("avg_days", 0) if isinstance(item, dict) else item for item in sales_cycle_trend]
-    else:
-        cycle_sparkline = []
-
     forecast = _safe_get(insights, "revenue_forecast", default={})
-
-    html = _section_header("executive", "Executive Summary",
-                           "Key performance indicators at a glance",
-                           "\U0001F4CA")
-
-    # Row 1 - Primary KPIs (clickable — navigate to relevant pages)
-    html += '<div class="kpi-grid">'
-    html += _stat_card("Pipeline Value", _fmt_currency(pipeline.get("total_pipeline_value", 0)),
-                       f"Weighted: {_fmt_currency(pipeline.get('weighted_pipeline_value', 0))}",
-                       "\U0001F4B0", COLORS['accent'], nav_page="pipeline")
-    html += _stat_card("Win Rate", _fmt_pct(pipeline.get("win_rate", 0)),
-                       f"Won: {pipeline.get('won_deals_count', 0)} | Lost: {pipeline.get('lost_deals_count', 0)}",
-                       "\U0001F3AF", COLORS['accent4'], nav_page="insights")
-    html += _stat_card("Open Deals", _fmt_number(pipeline.get("open_deals_count", 0)),
-                       f"Avg size: {_fmt_currency(pipeline.get('avg_deal_size', 0))}",
-                       "\U0001F4C1", COLORS['accent2'], nav_page="pipeline")
-    html += _stat_card("Total Activities", _fmt_number(activity.get("total_activities", 0)),
-                       f"Touches/won deal: {_fmt_number(activity.get('touches_per_won_deal', 0))}",
-                       "\u26A1", COLORS['accent3'],
-                       activity_sparkline, nav_page="activities")
-    html += '</div>'
-
-    # Row 2 - Secondary KPIs (clickable)
-    html += '<div class="kpi-grid">'
-    html += _stat_card("Total Contacts", _fmt_number(counts.get("contacts", 0)),
-                       f"New 30d: {_fmt_number(_safe_get(contacts, 'new_contacts_30d', default=0))}",
-                       "\U0001F465", COLORS['accent5'], nav_page="contacts")
-    html += _stat_card("Total Leads", _fmt_number(leads.get("total_leads", 0)),
-                       f"New 30d: {_fmt_number(leads.get('new_leads_30d', 0))}",
-                       "\U0001F4E5", COLORS['info'],
-                       lead_sparkline, nav_page="leads")
-    html += _stat_card("Avg Deal Size", _fmt_currency(pipeline.get("avg_deal_size", 0)),
-                       f"Cycle: {_fmt_number(pipeline.get('avg_sales_cycle_days', 0))} days",
-                       "\U0001F4B7", COLORS['accent6'], nav_page="targets")
-    html += _stat_card("30-Day Forecast", _fmt_currency(forecast.get("days_30", 0)),
-                       f"90d: {_fmt_currency(forecast.get('days_90', 0))}",
-                       "\U0001F52E", COLORS['warning'], nav_page="insights")
-    html += '</div>'
-
-    # Actionable Priorities Panel — surfaces what needs attention right now
     monday = data.get("monday", {})
     ma_data = monday.get("ma_metrics", {}) if monday else {}
+
+    html = _section_header("executive", "Dashboard",
+                           "Live business intelligence overview",
+                           "\U0001F4CA")
+
+    # ── Compact KPI strip (all 8 in one row) ──
+    kpis = [
+        ("Pipeline", _fmt_currency(pipeline.get("total_pipeline_value", 0)), COLORS['accent']),
+        ("Weighted", _fmt_currency(pipeline.get("weighted_pipeline_value", 0)), COLORS['accent2']),
+        ("Win Rate", _fmt_pct(pipeline.get("win_rate", 0)), COLORS['accent4']),
+        ("Open Deals", _fmt_number(pipeline.get("open_deals_count", 0)), COLORS['accent3']),
+        ("Avg Size", _fmt_currency(pipeline.get("avg_deal_size", 0)), COLORS['accent6']),
+        ("Leads", _fmt_number(leads.get("total_leads", 0)), COLORS['info']),
+        ("Activities", _fmt_number(activity.get("total_activities", 0)), COLORS['accent5']),
+        ("30d Forecast", _fmt_currency(forecast.get("days_30", 0)), COLORS['warning']),
+    ]
+    kpi_html = ""
+    for label, val, color in kpis:
+        kpi_html += f'''<div class="exec-kpi">
+            <div class="exec-kpi-val" style="color:{color}">{val}</div>
+            <div class="exec-kpi-label">{label}</div>
+        </div>'''
+    html += f'<div class="exec-kpi-strip">{kpi_html}</div>'
+
+    # ── 4-Pillar Snapshots ──
+    # Each pillar: icon, title, 3-4 bullet-point insights
+    won = pipeline.get("won_deals_count", 0)
+    lost = pipeline.get("lost_deals_count", 0)
+    stale_deals = pipeline.get("stale_deals", [])
+    cycle_days = pipeline.get("avg_sales_cycle_days", 0)
+    top_rep = ""
+    by_rep = pipeline.get("pipeline_by_rep", [])
+    if by_rep and isinstance(by_rep, list) and len(by_rep) > 0:
+        top_rep = by_rep[0].get("owner", by_rep[0].get("rep", ""))
+
+    # Build sales pillar points
+    sales_points = []
+    sales_points.append(f'<strong>{_fmt_currency(pipeline.get("total_pipeline_value", 0))}</strong> total pipeline ({_fmt_number(pipeline.get("open_deals_count", 0))} open deals)')
+    if won or lost:
+        sales_points.append(f'<strong>{won}</strong> deals won vs <strong>{lost}</strong> lost &mdash; {_fmt_pct(pipeline.get("win_rate", 0))} win rate')
+    if cycle_days:
+        sales_points.append(f'Average sales cycle: <strong>{_fmt_number(cycle_days)} days</strong>')
+    if stale_deals:
+        sales_points.append(f'<span style="color:{COLORS["warning"]}">&#9888; {len(stale_deals)} stale deals</span> sitting in stage &gt;30 days')
+    if top_rep:
+        sales_points.append(f'Top pipeline holder: <strong>{_esc(top_rep)}</strong>')
+
+    # Build leads pillar points
+    leads_points = []
+    new_30 = leads.get("new_leads_30d", 0)
+    mql = leads.get("mql_count", 0)
+    sql = leads.get("sql_count", 0)
+    leads_points.append(f'<strong>{_fmt_number(leads.get("total_leads", 0))}</strong> total leads ({_fmt_number(new_30)} new in last 30d)')
+    if mql:
+        leads_points.append(f'<strong>{_fmt_number(mql)}</strong> MQLs &mdash; {_fmt_pct(leads.get("lead_to_mql_rate", 0))} conversion rate')
+    top_source = ""
+    sources = leads.get("leads_by_source", {})
+    if sources and isinstance(sources, dict):
+        top_source = max(sources, key=sources.get, default="")
+        if top_source:
+            leads_points.append(f'Top source: <strong>{_esc(top_source)}</strong> ({_fmt_number(sources[top_source])} leads)')
+    leads_points.append(f'<strong>{_fmt_number(counts.get("contacts", 0))}</strong> contacts, <strong>{_fmt_number(counts.get("companies", 0))}</strong> companies in CRM')
+
+    # Build M&A pillar points
+    ma_points = []
+    active_ma = ma_data.get("active_projects", 0)
+    total_ma = ma_data.get("total_projects", 0)
+    stale_ma = ma_data.get("stale_projects", [])
+    stage_dist = ma_data.get("stage_distribution", {})
+    ma_points.append(f'<strong>{active_ma}</strong> active projects out of {total_ma} total')
+    if stage_dist:
+        top_stages = sorted(stage_dist.items(), key=lambda x: x[1], reverse=True)[:3]
+        stage_str = ", ".join(f'{s}: {c}' for s, c in top_stages)
+        ma_points.append(f'Top stages: {stage_str}')
+    if stale_ma:
+        ma_points.append(f'<span style="color:{COLORS["warning"]}">&#9888; {len(stale_ma)} stale projects</span> need follow-up')
     ic_data = monday.get("ic_metrics", {}) if monday else {}
-    stale_projects = ma_data.get("stale_projects", [])
-    ic_items_no_decision = [i for i in ic_data.get("items", []) if not i.get("decisions")]
+    ic_pending = len([i for i in ic_data.get("items", []) if not i.get("decisions")])
+    if ic_pending:
+        ma_points.append(f'<strong>{ic_pending}</strong> IC items awaiting decision')
+
+    # Build ops pillar points
+    ops_points = []
+    ai_data = monday.get("ai_metrics", {}) if monday else {}
+    ai_total = ai_data.get("total_items", 0)
+    by_type = activity.get("by_type", {})
+    calls = by_type.get("calls", by_type.get("CALL", 0))
+    emails = by_type.get("emails", by_type.get("EMAIL", 0))
+    meetings = by_type.get("meetings", by_type.get("MEETING", 0))
+    if calls or emails or meetings:
+        ops_points.append(f'Activity mix: <strong>{_fmt_number(calls)}</strong> calls, <strong>{_fmt_number(emails)}</strong> emails, <strong>{_fmt_number(meetings)}</strong> meetings')
+    tpw = activity.get("touches_per_won_deal", 0)
+    if tpw:
+        ops_points.append(f'<strong>{_fmt_number(tpw)}</strong> touches per won deal')
+    if ai_total:
+        ops_points.append(f'<strong>{ai_total}</strong> items on AI roadmap')
+    # Queue
     queue_file_path = BASE_DIR / "data" / "processed" / "inbound_queue.json"
     critical_count = 0
     if queue_file_path.exists():
         try:
             with open(queue_file_path, "r", encoding="utf-8") as qf:
                 q_data = json.load(qf)
-            critical_count = q_data.get("priority_breakdown", {}).get("critical", 0)
+            critical_count = q_data.get("priority_breakdown", q_data.get("summary", {})).get("critical", 0)
         except Exception:
             pass
+    if critical_count:
+        ops_points.append(f'<span style="color:{COLORS["danger"]}">&#9888; {critical_count} critical</span> items in inbound queue')
 
-    priorities = []
-    if critical_count > 0:
-        priorities.append(f'<span style="color:{COLORS["danger"]};font-weight:700">{critical_count}</span> critical items in inbound queue')
-    if len(stale_projects) > 0:
-        priorities.append(f'<span style="color:{COLORS["warning"]};font-weight:700">{len(stale_projects)}</span> stale M&A projects need follow-up')
-    if len(ic_items_no_decision) > 0:
-        priorities.append(f'<span style="color:{COLORS["accent2"]};font-weight:700">{len(ic_items_no_decision)}</span> IC items awaiting decision')
+    pillars = [
+        ("Sales & Pipeline", COLORS['accent'], "&#9733;", sales_points, "pipeline"),
+        ("Leads & Conversion", COLORS['accent2'], "&#10024;", leads_points, "leads"),
+        ("M&A", COLORS['accent3'], "&#128188;", ma_points, "monday-pipeline"),
+        ("Activity & Operations", COLORS['accent5'], "&#9889;", ops_points, "activities"),
+    ]
 
-    stale_deals = pipeline.get("stale_deals", [])
-    if stale_deals:
-        priorities.append(f'<span style="color:{COLORS["warning"]};font-weight:700">{len(stale_deals)}</span> stale deals in pipeline (>30d in stage)')
-
-    if priorities:
-        priority_items = "".join(
-            f'<div style="display:flex;align-items:center;gap:6px;padding:4px 0;font-size:12px">'
-            f'<span style="color:{COLORS["danger"]}">&#9679;</span> {p}</div>'
-            for p in priorities[:6]
-        )
-        html += f'''<div class="glass-card alert-card" style="margin-top:8px;border-left-color:{COLORS["danger"]}">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
-                <div class="card-title" style="margin-bottom:0">&#9888; Action Required</div>
-                <a href="javascript:void(0)" onclick="showPage('inbound-queue')"
-                   style="font-size:11px;color:{COLORS['accent']};text-decoration:none;font-weight:600">
-                   View Inbound Queue &#8594;</a>
+    html += '<div class="exec-pillars">'
+    for title, color, icon, points, nav in pillars:
+        pts = "".join(f'<li>{p}</li>' for p in points[:5])
+        html += f'''<div class="exec-pillar" onclick="showPage('{nav}')" style="cursor:pointer">
+            <div class="exec-pillar-header">
+                <span class="exec-pillar-icon" style="background:{color}15;color:{color}">{icon}</span>
+                <span class="exec-pillar-title">{title}</span>
+                <span class="exec-pillar-arrow" style="color:{color}">&#8594;</span>
             </div>
-            {priority_items}
+            <ul class="exec-pillar-points">{pts}</ul>
         </div>'''
+    html += '</div>'
 
-    # Compact 2x2 trend charts (tighter layout)
-    html += f'''<div class="grid-2" style="margin-top:8px">
-        <div class="glass-card">
-            <div class="card-title">Leads Trend <span style="font-size:10px;font-weight:400;color:{COLORS['text_muted']}">(filtered)</span></div>
-            <div id="dynamic-leads-sparkline"></div>
+    # ── Compact trend charts ──
+    html += f'''<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px">
+        <div class="glass-card" style="padding:10px 12px">
+            <div class="card-title" style="font-size:10px;margin-bottom:4px">Leads (6mo)</div>
+            <div id="dynamic-leads-barchart"></div>
         </div>
-        <div class="glass-card">
-            <div class="card-title">Revenue Trend <span style="font-size:10px;font-weight:400;color:{COLORS['text_muted']}">(filtered)</span></div>
-            <div id="dynamic-revenue-sparkline"></div>
+        <div class="glass-card" style="padding:10px 12px">
+            <div class="card-title" style="font-size:10px;margin-bottom:4px">Revenue (6mo)</div>
+            <div id="dynamic-revenue-barchart"></div>
+        </div>
+        <div class="glass-card" style="padding:10px 12px">
+            <div class="card-title" style="font-size:10px;margin-bottom:4px">Deals Created (6mo)</div>
+            <div id="dynamic-deals-barchart"></div>
+        </div>
+        <div class="glass-card" style="padding:10px 12px">
+            <div class="card-title" style="font-size:10px;margin-bottom:4px">Activity (6mo)</div>
+            <div id="dynamic-activity-barchart"></div>
         </div>
     </div>'''
-    html += f'''<div class="grid-2" style="margin-top:8px">
-        <div class="glass-card">
-            <div class="card-title">Deals Created <span style="font-size:10px;font-weight:400;color:{COLORS['text_muted']}">(filtered)</span></div>
-            <div id="dynamic-deals-sparkline"></div>
-        </div>
-        <div class="glass-card">
-            <div class="card-title">Activity Trend <span style="font-size:10px;font-weight:400;color:{COLORS['text_muted']}">(filtered)</span></div>
-            <div id="dynamic-activity-sparkline"></div>
-        </div>
-    </div>'''
 
-    # Revenue target progress (compact)
+    # ── Revenue target (compact) ──
     rev_target = _safe_get(rev_eng, "revenue_target", default={})
     monthly_target = rev_target.get("monthly", 100000)
     weighted = pipeline.get("weighted_pipeline_value", 0)
-    html += f'''<div class="glass-card" style="margin-top:8px">
-        <h3 style="font-size:11px;color:{COLORS['text_muted']};margin-bottom:8px;
-            text-transform:uppercase;letter-spacing:0.05em">Revenue Target Progress</h3>
+    html += f'''<div class="glass-card" style="margin-top:8px;padding:10px 14px">
+        <div style="font-size:10px;color:{COLORS['text_muted']};text-transform:uppercase;
+            letter-spacing:0.04em;margin-bottom:4px">Revenue Target Progress</div>
         {_progress_bar(weighted, monthly_target, COLORS['accent4'],
                        f"Weighted Pipeline vs Monthly Target ({_fmt_currency(monthly_target)})")}
     </div>'''
@@ -890,148 +985,232 @@ def _build_executive_summary(data: dict) -> str:
 
 
 def _build_leads_section(data: dict) -> str:
-    """Section 2: Leads & Sources."""
+    """Section 2: Leads & Conversion — department grouping, source analysis, marketing funnel."""
     leads = _safe_get(data, "lead_metrics", default={})
-    html = _section_header("leads", "Leads & Sources",
-                           "Lead volume, source breakdown, and effectiveness",
+    pipeline = _safe_get(data, "pipeline_metrics", default={})
+    html = _section_header("leads", "Leads & Conversion",
+                           "Lead sources, department breakdown, and marketing funnel",
                            "\U0001F4E5")
 
-    # KPI row
-    html += '<div class="kpi-grid kpi-grid-3">'
-    html += _stat_card("Total Leads", _fmt_number(leads.get("total_leads", 0)),
-                       f"New 30d: {_fmt_number(leads.get('new_leads_30d', 0))}",
-                       "\U0001F4CA", COLORS['accent'])
-    html += _stat_card("MQL Count", _fmt_number(leads.get("mql_count", 0)),
-                       f"Lead-to-MQL: {_fmt_pct(leads.get('lead_to_mql_rate', 0))}",
+    DEPT_MAP = {
+        "james carberry": "Supply Chain", "rose galbally": "Supply Chain",
+        "jake heath": "Delivery",
+        "josh elliott": "CDD", "carell": "CDD",
+        "caldon henson": "Management", "anna younger": "Operations",
+        "kirill kopica": "Operations", "skye whitton": "Operations",
+    }
+
+    # ── KPI strip (5 in one row) ──
+    total_leads = leads.get("total_leads", 0)
+    new_30 = leads.get("new_leads_30d", 0)
+    mql = leads.get("mql_count", 0)
+    sql = leads.get("sql_count", 0)
+    response_h = leads.get("avg_lead_response_hours", 0)
+    html += '<div class="kpi-grid" style="grid-template-columns:repeat(5,1fr)">'
+    html += _stat_card("Total Leads", _fmt_number(total_leads),
+                       f"New 30d: {_fmt_number(new_30)}", "\U0001F4CA", COLORS['accent'])
+    html += _stat_card("MQLs", _fmt_number(mql),
+                       f"{_fmt_pct(leads.get('lead_to_mql_rate', 0))} conv.",
                        "\U0001F31F", COLORS['accent2'])
-    html += _stat_card("SQL Count", _fmt_number(leads.get("sql_count", 0)),
-                       f"Avg response: {_fmt_number(leads.get('avg_lead_response_hours', 0))}h",
-                       "\U0001F525", COLORS['accent4'])
+    html += _stat_card("SQLs", _fmt_number(sql), "", "\U0001F525", COLORS['accent4'])
+    html += _stat_card("Open Deals", _fmt_number(pipeline.get("open_deals_count", 0)),
+                       "", "\U0001F4BC", COLORS['accent3'])
+    html += _stat_card("Avg Response", f"{int(round(response_h))}h" if response_h else "N/A",
+                       "", "\u23F1\uFE0F", COLORS['accent5'])
     html += '</div>'
 
-    # Dynamic leads by source (JS-filtered)
-    html += f'''<div class="glass-card" style="margin-top:8px">
-        <h3 class="card-title">Leads by Source <span style="font-size:11px;font-weight:400;color:{COLORS['text_muted']}">(filtered by period)</span></h3>
-        <div id="dynamic-leads-by-source"></div>
-    </div>'''
-
-    # Static source breakdown (all-time reference)
+    # ── Source breakdown + leads trend (2-col) ──
     sources = leads.get("leads_by_source", {})
+    leads_over_time = leads.get("leads_over_time", {})
+    html += '<div class="grid-2" style="margin-top:8px">'
     if sources:
-        source_data = sorted(sources.items(), key=lambda x: x[1], reverse=True)[:12]
-        html += f'''<div class="grid-2" style="margin-top:8px">
-            <div class="glass-card">
-                <h3 class="card-title">Leads by Source (All Time)</h3>
-                {_svg_bar_chart(source_data, 500, max(200, len(source_data) * 40))}
-            </div>
-            <div class="glass-card">
-                <h3 class="card-title">Source Distribution</h3>
-                {_svg_donut(source_data[:8], 240)}
-            </div>
+        source_data = sorted(sources.items(), key=lambda x: x[1], reverse=True)[:8]
+        html += f'''<div class="glass-card">
+            <h3 class="card-title">Leads by Source</h3>
+            {_svg_bar_chart(source_data, 450, max(120, len(source_data) * 26))}
         </div>'''
-
-    # New leads trend
-    leads_over_time = leads.get("leads_over_time", [])
+    else:
+        html += '<div></div>'
     if leads_over_time:
-        trend_data = [(item.get("month", ""), item.get("count", 0)) for item in leads_over_time]
-        html += f'''<div class="glass-card" style="margin-top:8px">
-            <h3 class="card-title">New Leads Over Time</h3>
-            {_svg_line_chart(trend_data, 700, 250, COLORS['accent'])}
-        </div>'''
+        if isinstance(leads_over_time, dict):
+            trend_data = [(m, c) for m, c in sorted(leads_over_time.items())]
+        elif isinstance(leads_over_time, list):
+            trend_data = [(item.get("month", ""), item.get("count", 0)) for item in leads_over_time]
+        else:
+            trend_data = []
+        if trend_data:
+            html += f'''<div class="glass-card">
+                <h3 class="card-title">Lead Trend (Monthly)</h3>
+                {_svg_line_chart(trend_data[-18:], 450, 140, COLORS['accent'])}
+            </div>'''
+        else:
+            html += '<div></div>'
+    else:
+        html += '<div></div>'
+    html += '</div>'
 
-    # Lead status distribution
+    # ── Lead status + source effectiveness (2-col) ──
     status_dist = leads.get("lead_status_distribution", {})
-    if status_dist:
-        html += f'''<div class="glass-card" style="margin-top:8px">
-            <h3 class="card-title">Lead Status Distribution</h3>'''
-        max_status = max(status_dist.values()) if status_dist else 1
-        for status, count in sorted(status_dist.items(), key=lambda x: x[1], reverse=True):
-            html += _svg_horizontal_bar(status, count, max_status, COLORS['accent2'])
+    effectiveness = leads.get("source_effectiveness", {})
+    has_status = bool(status_dist)
+    has_eff = bool(effectiveness)
+    if has_status or has_eff:
+        html += '<div class="grid-2" style="margin-top:8px">'
+        if has_status:
+            named_status = {k: v for k, v in status_dist.items() if not k.strip().isdigit()}
+            if named_status:
+                html += f'''<div class="glass-card">
+                    <h3 class="card-title">Lead Status</h3>'''
+                max_s = max(named_status.values()) if named_status else 1
+                for status, count in sorted(named_status.items(), key=lambda x: x[1], reverse=True)[:6]:
+                    html += _svg_horizontal_bar(status, count, max_s, COLORS['accent2'])
+                html += '</div>'
+            else:
+                html += '<div></div>'
+        else:
+            html += '<div></div>'
+        if has_eff:
+            eff_rows = []
+            if isinstance(effectiveness, dict):
+                for src, info in sorted(effectiveness.items(), key=lambda x: x[1].get("total", 0) if isinstance(x[1], dict) else 0, reverse=True):
+                    if isinstance(info, dict):
+                        eff_rows.append([_esc(src), _fmt_number(info.get("total", 0)),
+                                         _fmt_number(info.get("mqls", 0)), _fmt_pct(info.get("conversion_rate", 0))])
+            elif isinstance(effectiveness, list):
+                for item in effectiveness:
+                    eff_rows.append([_esc(item.get("source", "")), _fmt_number(item.get("lead_count", item.get("total", 0))),
+                                     _fmt_number(item.get("mql_count", item.get("mqls", 0))), _fmt_pct(item.get("conversion_rate", 0))])
+            if eff_rows:
+                html += f'''<div class="glass-card">
+                    <h3 class="card-title">Source Effectiveness</h3>
+                    {_data_table(["Source", "Leads", "MQLs", "Conv."], eff_rows, "source_eff")}
+                </div>'''
+            else:
+                html += '<div></div>'
+        else:
+            html += '<div></div>'
         html += '</div>'
 
-    # Source effectiveness table
-    effectiveness = leads.get("source_effectiveness", [])
-    if effectiveness:
-        rows = []
-        for item in effectiveness:
-            rows.append([
-                _esc(item.get("source", "")),
-                _fmt_number(item.get("lead_count", 0)),
-                _fmt_number(item.get("mql_count", 0)),
-                _fmt_pct(item.get("conversion_rate", 0)),
-            ])
-        html += f'''<div class="glass-card" style="margin-top:8px">
-            <h3 class="card-title">Source Effectiveness</h3>
-            {_data_table(["Source", "Leads", "MQLs", "Conversion Rate"], rows, "source_eff")}
-        </div>'''
+    # ── Department Pipeline Summary ──
+    by_owner = pipeline.get("pipeline_by_owner", {})
+    if isinstance(by_owner, dict) and by_owner:
+        dept_data = {}
+        for oid, info in by_owner.items():
+            if not isinstance(info, dict):
+                continue
+            name = info.get("name", "")
+            if not name or name.strip().isdigit():
+                continue
+            dept = DEPT_MAP.get(name.lower().strip(), "Other")
+            if dept not in dept_data:
+                dept_data[dept] = {"deals": 0, "value": 0, "reps": []}
+            dept_data[dept]["deals"] += info.get("deal_count", 0)
+            dept_data[dept]["value"] += info.get("total_value", 0)
+            dept_data[dept]["reps"].append(name.split()[0])
+        if dept_data:
+            dept_colors = {"Supply Chain": COLORS['accent'], "Delivery": COLORS['accent2'],
+                           "CDD": COLORS['accent3'], "Management": COLORS['accent5'],
+                           "Operations": COLORS['accent4'], "Other": COLORS['info']}
+            html += f'''<div class="glass-card" style="margin-top:8px">
+                <h3 class="card-title">Pipeline by Department</h3>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px">'''
+            for dept, dinfo in sorted(dept_data.items(), key=lambda x: x[1]["value"], reverse=True):
+                dc = dept_colors.get(dept, COLORS['info'])
+                reps_str = ", ".join(dinfo["reps"])
+                html += f'''<div style="background:{dc}11;border:1px solid {dc}33;border-radius:8px;padding:10px 12px">
+                    <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.04em;color:{dc};font-weight:700;margin-bottom:4px">{_esc(dept)}</div>
+                    <div style="font-size:18px;font-weight:800;color:{COLORS['text']}">{_fmt_currency(dinfo["value"])}</div>
+                    <div style="font-size:11px;color:{COLORS['text_muted']}">{dinfo["deals"]} deals &middot; {_esc(reps_str)}</div>
+                </div>'''
+            html += '</div></div>'
 
     html += '</section>'
     return html
 
 
 def _build_funnel_section(data: dict) -> str:
-    """Section 3: Qualified Leads & Funnel."""
+    """Section 3: Deal Stage Flow — funnel based on actual deal stages."""
     leads = _safe_get(data, "lead_metrics", default={})
-    rev_eng = _safe_get(data, "reverse_engineering", default={})
-
-    html = _section_header("funnel", "Qualified Leads & Funnel",
-                           "Conversion funnel from lead to customer",
-                           "\U0001F3AF")
-
-    # Build funnel stages
-    total_leads = leads.get("total_leads", 0)
-    mql = leads.get("mql_count", 0)
-    sql = leads.get("sql_count", 0)
-    opps = rev_eng.get("required_opps", 0) if rev_eng else 0
     pipeline = _safe_get(data, "pipeline_metrics", default={})
-    won = pipeline.get("won_deals_count", 0)
 
-    # Try to get actual values from conversion_rates
-    conversion_rates = leads.get("conversion_rates", {})
+    # No separate section header — merged into leads page
+    html = ''
 
-    funnel_stages = [
-        ("Leads", total_leads, f"{_fmt_number(total_leads)} total leads"),
-        ("MQLs", mql, f"{_fmt_pct(leads.get('lead_to_mql_rate', 0))} conversion"),
-        ("SQLs", sql, f"{_fmt_pct(conversion_rates.get('mql_to_sql', 0))} from MQL"),
-        ("Opportunities", pipeline.get("open_deals_count", 0) + won + pipeline.get("lost_deals_count", 0),
-         f"{_fmt_number(pipeline.get('open_deals_count', 0) + won + pipeline.get('lost_deals_count', 0))} total"),
-        ("Customers (Won)", won, f"{_fmt_pct(pipeline.get('win_rate', 0))} win rate"),
+    # ── Deal stage funnel (from real data) ──
+    deals_by_stage = pipeline.get("deals_by_stage", {})
+    funnel_flow = [
+        ("Inbound Leads", ["Inbound Lead"], COLORS['accent']),
+        ("First Meetings", ["First Meeting Booked"], COLORS['accent2']),
+        ("Second Meetings", ["Second Meeting Booked"], COLORS['accent3']),
+        ("Engaged", ["Engaged"], COLORS['info']),
+        ("Proposals", ["Proposal Shared"], COLORS['accent5']),
+        ("Decision Maker", ["Decision Maker Bought-In"], COLORS['warning']),
+        ("Contracts", ["Contract Sent"], COLORS['accent4']),
+        ("Won", ["Closed Won"], COLORS['success']),
     ]
 
-    html += f'''<div class="glass-card">
-        <h3 class="card-title">Conversion Funnel</h3>
-        <div style="max-width:650px;margin:0 auto">
-            {_svg_funnel(funnel_stages, 650, 420)}
-        </div>
-    </div>'''
+    if isinstance(deals_by_stage, dict) and deals_by_stage:
+        active_stages = []
+        for label, stage_keys, color in funnel_flow:
+            count = sum(deals_by_stage.get(s, {}).get("count", 0) if isinstance(deals_by_stage.get(s), dict) else 0 for s in stage_keys)
+            value = sum(deals_by_stage.get(s, {}).get("total_value", 0) if isinstance(deals_by_stage.get(s), dict) else 0 for s in stage_keys)
+            if count > 0:
+                active_stages.append((label, count, value, color))
+        if active_stages:
+            max_count = max(s[1] for s in active_stages) or 1
+            html += f'''<div class="glass-card" style="margin-top:8px">
+                <h3 class="card-title">Deal Stage Flow</h3>
+                <div style="max-width:700px;margin:0 auto">'''
+            for label, count, value, color in active_stages:
+                pct_w = max(15, (count / max_count) * 100)
+                html += f'''<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+                    <div style="width:120px;text-align:right;font-size:12px;color:{COLORS['text_muted']};flex-shrink:0">{_esc(label)}</div>
+                    <div style="flex:1;height:28px;background:{COLORS['card_border']};border-radius:6px;overflow:hidden;position:relative">
+                        <div style="height:100%;width:{pct_w:.0f}%;background:linear-gradient(90deg,{color},{color}88);border-radius:6px"></div>
+                        <span style="position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:11px;font-weight:600;color:{COLORS['text']}">{count} deals &middot; {_fmt_currency(value)}</span>
+                    </div>
+                </div>'''
+            html += '</div></div>'
 
-    # Conversion rates detail
-    if conversion_rates:
-        html += f'''<div class="glass-card" style="margin-top:8px">
-            <h3 class="card-title">Stage Conversion Rates</h3>
-            <div class="kpi-grid kpi-grid-3">'''
-        rate_labels = {
-            "lead_to_mql": ("Lead \u2192 MQL", COLORS['accent']),
-            "mql_to_sql": ("MQL \u2192 SQL", COLORS['accent2']),
-            "sql_to_opp": ("SQL \u2192 Opp", COLORS['accent3']),
-            "opp_to_won": ("Opp \u2192 Won", COLORS['accent4']),
-            "lead_to_customer": ("Lead \u2192 Customer", COLORS['accent5']),
-        }
-        for key, (label, color) in rate_labels.items():
-            val = conversion_rates.get(key, 0)
-            if val or key in conversion_rates:
-                html += _stat_card(label, _fmt_pct(val), "", "", color)
-        html += '</div></div>'
-
-    # Time in stage
+    # ── Conversion rates + time in stage (2-col) ──
+    conversion_rates = leads.get("conversion_rates", {})
     time_in_stage = leads.get("time_in_stage", {})
-    if time_in_stage:
-        html += f'''<div class="glass-card" style="margin-top:8px">
-            <h3 class="card-title">Average Time in Stage (days)</h3>'''
-        safe_vals = [v for v in time_in_stage.values() if v is not None and v > 0]
-        max_days = max(safe_vals) if safe_vals else 1
-        for stage, days in sorted(time_in_stage.items(), key=lambda x: (x[1] or 0), reverse=True):
-            html += _svg_horizontal_bar(stage, days, max_days, COLORS['accent3'], show_pct=False)
+    if conversion_rates or time_in_stage:
+        html += '<div class="grid-2" style="margin-top:8px">'
+        if conversion_rates:
+            html += f'''<div class="glass-card">
+                <h3 class="card-title">Stage Conversion Rates</h3>'''
+            rate_items = [
+                ("lead_to_mql", "Lead \u2192 MQL", COLORS['accent']),
+                ("mql_to_sql", "MQL \u2192 SQL", COLORS['accent2']),
+                ("sql_to_opp", "SQL \u2192 Opp", COLORS['accent3']),
+                ("opp_to_won", "Opp \u2192 Won", COLORS['accent4']),
+                ("lead_to_customer", "Lead \u2192 Customer", COLORS['accent5']),
+            ]
+            for key, label, color in rate_items:
+                val = conversion_rates.get(key)
+                if val is not None:
+                    html += f'''<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid {COLORS['card_border']}22;font-size:13px">
+                        <span style="color:{COLORS['text_muted']}">{label}</span>
+                        <span style="color:{color};font-weight:700">{_fmt_pct(val)}</span>
+                    </div>'''
+            html += '</div>'
+        else:
+            html += '<div></div>'
+        if time_in_stage:
+            safe_vals = [v for v in time_in_stage.values() if v is not None and v > 0]
+            if safe_vals:
+                max_days = max(safe_vals)
+                html += f'''<div class="glass-card">
+                    <h3 class="card-title">Avg Time in Stage (days)</h3>'''
+                for stage, days in sorted(time_in_stage.items(), key=lambda x: (x[1] or 0), reverse=True):
+                    if days is not None and days > 0:
+                        html += _svg_horizontal_bar(stage, int(round(days)), int(round(max_days)), COLORS['accent3'], show_pct=False)
+                html += '</div>'
+            else:
+                html += '<div></div>'
+        else:
+            html += '<div></div>'
         html += '</div>'
 
     html += '</section>'
@@ -1039,115 +1218,137 @@ def _build_funnel_section(data: dict) -> str:
 
 
 def _build_target_section(data: dict) -> str:
-    """Section 4: Target Setting & Reverse Engineering."""
+    """Section 4: Targets & Reverse Engineering — volume funnel, gap analysis, requirements."""
     rev_eng = _safe_get(data, "reverse_engineering", default={})
+    pipeline = _safe_get(data, "pipeline_metrics", default={})
+    leads = _safe_get(data, "lead_metrics", default={})
+
     if not rev_eng:
-        html = _section_header("targets", "Target Setting & Reverse Engineering",
+        html = _section_header("targets", "Targets & Reverse Engineering",
                                "Revenue targets and required volumes", "\U0001F4C8")
         html += f'''<div class="glass-card"><p style="color:{COLORS['text_muted']};
             text-align:center;padding:32px">No reverse engineering data available</p></div>'''
         html += '</section>'
         return html
 
-    html = _section_header("targets", "Target Setting & Reverse Engineering",
-                           "Revenue targets and required volumes",
+    html = _section_header("targets", "Targets & Reverse Engineering",
+                           "Revenue targets, required volumes, and gap analysis",
                            "\U0001F4C8")
 
-    # Revenue targets
+    # ── Revenue targets + current actuals (5 in one row) ──
     rev_target = rev_eng.get("revenue_target", {})
-    html += '<div class="kpi-grid kpi-grid-3">'
+    won_value = 0
+    deals_by_stage = pipeline.get("deals_by_stage", {})
+    if isinstance(deals_by_stage, dict):
+        cw = deals_by_stage.get("Closed Won", {})
+        won_value = cw.get("total_value", 0) if isinstance(cw, dict) else 0
+    html += '<div class="kpi-grid" style="grid-template-columns:repeat(5,1fr)">'
     html += _stat_card("Monthly Target", _fmt_currency(rev_target.get("monthly", 0)),
                        "", "\U0001F4B7", COLORS['accent'])
     html += _stat_card("Quarterly Target", _fmt_currency(rev_target.get("quarterly", 0)),
                        "", "\U0001F4C5", COLORS['accent2'])
     html += _stat_card("Annual Target", _fmt_currency(rev_target.get("annual", 0)),
                        "", "\U0001F3C6", COLORS['accent4'])
+    html += _stat_card("Won to Date", _fmt_currency(won_value),
+                       f"{pipeline.get('won_deals_count', 0)} deals", "\u2705", COLORS['success'])
+    html += _stat_card("Pipeline", _fmt_currency(pipeline.get("total_pipeline_value", 0)),
+                       f"{pipeline.get('open_deals_count', 0)} open", "\U0001F4CA", COLORS['accent3'])
     html += '</div>'
 
-    # Required volume chain
+    # ── Required Volume Funnel (visual flow) ──
     chain_items = [
-        ("Required Leads", rev_eng.get("required_leads", 0), COLORS['accent']),
-        ("Required MQLs", rev_eng.get("required_mqls", 0), COLORS['accent2']),
-        ("Required SQLs", rev_eng.get("required_sqls", 0), COLORS['accent3']),
-        ("Required Opps", rev_eng.get("required_opps", 0), COLORS['accent5']),
-        ("Required Deals", rev_eng.get("required_deals", 0), COLORS['accent4']),
+        ("Leads", rev_eng.get("required_leads", 0), leads.get("total_leads", 0), COLORS['accent']),
+        ("MQLs", rev_eng.get("required_mqls", 0), leads.get("mql_count", 0), COLORS['accent2']),
+        ("SQLs", rev_eng.get("required_sqls", 0), leads.get("sql_count", 0), COLORS['accent3']),
+        ("Opps", rev_eng.get("required_opps", 0), pipeline.get("open_deals_count", 0) + pipeline.get("won_deals_count", 0) + pipeline.get("lost_deals_count", 0), COLORS['accent5']),
+        ("Deals", rev_eng.get("required_deals", 0), pipeline.get("won_deals_count", 0), COLORS['accent4']),
     ]
-    html += '''<div class="glass-card" style="margin-top:8px">
-        <h3 class="card-title">Required Volume Chain (Monthly)</h3>
-        <div class="volume-chain">'''
-    for i, (label, val, color) in enumerate(chain_items):
-        arrow = '<div class="chain-arrow">\u27A1</div>' if i > 0 else ''
-        html += f'''{arrow}
-            <div class="chain-item" style="border-color:{color}">
-                <div class="chain-value" style="color:{color}">{_fmt_number(val)}</div>
-                <div class="chain-label">{_esc(label)}</div>
-            </div>'''
+    html += f'''<div class="glass-card" style="margin-top:8px">
+        <h3 class="card-title">Required vs Actual (Monthly)</h3>
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px">'''
+    for label, required, actual, color in chain_items:
+        req_int = int(round(required)) if required else 0
+        act_int = int(round(actual)) if actual else 0
+        gap_val = act_int - req_int
+        gap_color = COLORS['success'] if gap_val >= 0 else COLORS['danger']
+        gap_prefix = "+" if gap_val > 0 else ""
+        html += f'''<div style="text-align:center;padding:8px">
+            <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.04em;color:{COLORS['text_muted']};margin-bottom:4px">{_esc(label)}</div>
+            <div style="font-size:20px;font-weight:800;color:{color}">{_fmt_number(req_int)}</div>
+            <div style="font-size:11px;color:{COLORS['text_muted']}">required</div>
+            <div style="font-size:14px;font-weight:700;color:{COLORS['text']};margin-top:4px">{_fmt_number(act_int)}</div>
+            <div style="font-size:11px;color:{gap_color};font-weight:600">{gap_prefix}{_fmt_number(gap_val)} gap</div>
+        </div>'''
     html += '</div></div>'
 
-    # Gap analysis
+    # ── Gap analysis + Requirements + What-if (3-col) ──
     gap = rev_eng.get("gap_analysis", {})
-    if gap:
-        html += f'''<div class="glass-card" style="margin-top:8px">
-            <h3 class="card-title">Gap Analysis</h3>'''
-        for key, val in gap.items():
-            label = key.replace("_", " ").title()
-            if isinstance(val, (int, float)):
-                color = COLORS['success'] if val >= 0 else COLORS['danger']
-                display = _fmt_number(val) if abs(val) < 1000 else _fmt_currency(val)
-                prefix = "+" if val > 0 else ""
-                html += f'''<div style="display:flex;justify-content:space-between;
-                    padding:8px 0;border-bottom:1px solid {COLORS['card_border']}22;font-size:13px">
-                    <span style="color:{COLORS['text_muted']}">{_esc(label)}</span>
-                    <span style="color:{color};font-weight:600">{prefix}{display}</span>
-                </div>'''
-        html += '</div>'
-
-    # Daily/Weekly requirements
     daily = rev_eng.get("daily_requirements", {})
     weekly = rev_eng.get("weekly_requirements", {})
-    if daily or weekly:
-        html += '''<div class="grid-2" style="margin-top:8px">'''
-        if daily:
-            html += f'''<div class="glass-card">
-                <h3 class="card-title">Daily Requirements</h3>'''
-            for key, val in daily.items():
-                label = key.replace("_", " ").title()
-                html += f'''<div style="display:flex;justify-content:space-between;
-                    padding:6px 0;font-size:13px;border-bottom:1px solid {COLORS['card_border']}22">
-                    <span style="color:{COLORS['text_muted']}">{_esc(label)}</span>
-                    <span style="color:{COLORS['text']};font-weight:600">{_fmt_number(val)}</span>
-                </div>'''
-            html += '</div>'
-        if weekly:
-            html += f'''<div class="glass-card">
-                <h3 class="card-title">Weekly Requirements</h3>'''
-            for key, val in weekly.items():
-                label = key.replace("_", " ").title()
-                html += f'''<div style="display:flex;justify-content:space-between;
-                    padding:6px 0;font-size:13px;border-bottom:1px solid {COLORS['card_border']}22">
-                    <span style="color:{COLORS['text_muted']}">{_esc(label)}</span>
-                    <span style="color:{COLORS['text']};font-weight:600">{_fmt_number(val)}</span>
-                </div>'''
-            html += '</div>'
-        html += '</div>'
-
-    # What-if scenarios
     scenarios = rev_eng.get("what_if_scenarios", [])
-    if scenarios:
-        rows = []
-        for s in scenarios:
-            rows.append([
-                f"+{_fmt_number(s.get('improvement_pct', 0))}%",
-                _fmt_pct(s.get("new_lead_to_mql", 0)),
-                _fmt_number(s.get("required_leads", 0)),
-                _fmt_number(s.get("leads_saved", 0)),
-            ])
-        html += f'''<div class="glass-card" style="margin-top:8px">
-            <h3 class="card-title">What-If Scenarios</h3>
-            <p style="font-size:12px;color:{COLORS['text_muted']};margin-bottom:8px">
-                Impact of improving lead-to-MQL conversion rate</p>
-            {_data_table(["Improvement", "New Rate", "Leads Needed", "Leads Saved"], rows, "whatif")}
-        </div>'''
+
+    if gap or daily or weekly or scenarios:
+        html += '<div class="grid-3" style="margin-top:8px">'
+        if gap:
+            html += f'''<div class="glass-card">
+                <h3 class="card-title">Gap Analysis</h3>'''
+            for key, val in gap.items():
+                label = key.replace("_", " ").title()
+                if isinstance(val, (int, float)):
+                    gcolor = COLORS['success'] if val >= 0 else COLORS['danger']
+                    display = _fmt_number(int(round(val))) if abs(val) < 1000 else _fmt_currency(val)
+                    prefix = "+" if val > 0 else ""
+                    html += f'''<div style="display:flex;justify-content:space-between;
+                        padding:4px 0;border-bottom:1px solid {COLORS['card_border']}22;font-size:12px">
+                        <span style="color:{COLORS['text_muted']}">{_esc(label)}</span>
+                        <span style="color:{gcolor};font-weight:600">{prefix}{display}</span>
+                    </div>'''
+            html += '</div>'
+        else:
+            html += '<div></div>'
+        if daily or weekly:
+            html += f'''<div class="glass-card">
+                <h3 class="card-title">Daily / Weekly Requirements</h3>'''
+            if daily:
+                for key, val in list(daily.items())[:4]:
+                    label = key.replace("_", " ").title()
+                    html += f'''<div style="display:flex;justify-content:space-between;padding:3px 0;font-size:12px;border-bottom:1px solid {COLORS['card_border']}22">
+                        <span style="color:{COLORS['text_muted']}">Daily {_esc(label)}</span>
+                        <span style="color:{COLORS['text']};font-weight:600">{_fmt_number(val)}</span>
+                    </div>'''
+            if weekly:
+                for key, val in list(weekly.items())[:4]:
+                    label = key.replace("_", " ").title()
+                    html += f'''<div style="display:flex;justify-content:space-between;padding:3px 0;font-size:12px;border-bottom:1px solid {COLORS['card_border']}22">
+                        <span style="color:{COLORS['text_muted']}">Weekly {_esc(label)}</span>
+                        <span style="color:{COLORS['text']};font-weight:600">{_fmt_number(val)}</span>
+                    </div>'''
+            html += '</div>'
+        else:
+            html += '<div></div>'
+        if scenarios:
+            rows = []
+            for s in scenarios:
+                imp = s.get("improvement_pct", 0)
+                improved_rates = s.get("improved_rates", {})
+                new_rate = improved_rates.get("lead_to_mql", s.get("new_lead_to_mql", 0))
+                req_leads = s.get("required_leads_monthly", s.get("required_leads", 0))
+                saved = s.get("lead_reduction_vs_baseline", s.get("leads_saved", 0))
+                rows.append([
+                    f"+{_fmt_number(imp)}%",
+                    _fmt_pct(new_rate),
+                    _fmt_number(int(round(req_leads))) if req_leads else "0",
+                    _fmt_number(int(round(saved))) if saved else "0",
+                ])
+            html += f'''<div class="glass-card">
+                <h3 class="card-title">What-If Scenarios</h3>
+                <p style="font-size:11px;color:{COLORS['text_muted']};margin-bottom:6px">
+                    Lead-to-MQL improvements</p>
+                {_data_table(["Imp.", "New Rate", "Leads", "Saved"], rows, "whatif")}
+            </div>'''
+        else:
+            html += '<div></div>'
+        html += '</div>'
 
     html += '</section>'
     return html
@@ -1160,121 +1361,197 @@ def _build_pipeline_section(data: dict) -> str:
                            "Deal stages, rep performance, and velocity",
                            "\U0001F4B0")
 
-    # KPIs
-    html += '<div class="kpi-grid">'
+    # --- KPIs (5 cards: Total Pipeline, Coverage, Avg Sales Cycle, Win Rate, Velocity) ---
+    velocity_raw = pipeline.get("pipeline_velocity", 0)
+    velocity_val = float(velocity_raw) if isinstance(velocity_raw, (int, float)) else 0
+
+    avg_cycle_raw = pipeline.get("avg_sales_cycle_days", 0)
+    try:
+        avg_cycle_int = int(float(avg_cycle_raw))
+    except (ValueError, TypeError):
+        avg_cycle_int = 0
+
+    html += f'<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:16px;margin-bottom:16px">'
     html += _stat_card("Total Pipeline", _fmt_currency(pipeline.get("total_pipeline_value", 0)),
                        f"Weighted: {_fmt_currency(pipeline.get('weighted_pipeline_value', 0))}",
                        "\U0001F4B0", COLORS['accent'])
     html += _stat_card("Pipeline Coverage", f"{_fmt_number(pipeline.get('pipeline_coverage', 0))}x",
                        "vs revenue target", "\U0001F6E1", COLORS['accent2'])
-    html += _stat_card("Avg Sales Cycle", f"{_fmt_number(pipeline.get('avg_sales_cycle_days', 0))}d",
+    html += _stat_card("Avg Sales Cycle", f"{avg_cycle_int}d",
                        f"Avg deal: {_fmt_currency(pipeline.get('avg_deal_size', 0))}",
                        "\u23F1", COLORS['accent3'])
     html += _stat_card("Win Rate", _fmt_pct(pipeline.get("win_rate", 0)),
                        f"Won {pipeline.get('won_deals_count', 0)} | Lost {pipeline.get('lost_deals_count', 0)}",
                        "\U0001F3AF", COLORS['accent4'])
+    html += _stat_card("Pipeline Velocity", _fmt_currency(velocity_val),
+                       "value per day", "\U0001F680", COLORS['accent5'])
     html += '</div>'
 
-    # Pipeline velocity
-    velocity = pipeline.get("pipeline_velocity", {})
-    if velocity and isinstance(velocity, dict):
-        html += f'''<div class="glass-card" style="margin-top:8px">
-            <h3 class="card-title">Pipeline Velocity</h3>
-            <div class="kpi-grid kpi-grid-3">'''
-        for key, val in velocity.items():
-            if not isinstance(val, (int, float)):
-                continue
-            label = key.replace("_", " ").title()
-            display = _fmt_currency(val) if "value" in key.lower() or "revenue" in key.lower() else _fmt_number(val)
-            html += f'''<div style="text-align:center;padding:12px">
-                <div style="font-size:11px;color:{COLORS['text_muted']};text-transform:uppercase;
-                    letter-spacing:0.05em;margin-bottom:4px">{_esc(label)}</div>
-                <div style="font-size:22px;font-weight:700;color:{COLORS['text']}">{display}</div>
+    # --- Deals by Stage (2-col: table left, bars right) ---
+    deals_by_stage = pipeline.get("deals_by_stage", {})
+    if isinstance(deals_by_stage, dict) and deals_by_stage:
+        stage_rows = []
+        for stage_name, info in sorted(deals_by_stage.items(),
+                                        key=lambda x: x[1].get("total_value", 0) if isinstance(x[1], dict) else 0,
+                                        reverse=True):
+            if isinstance(info, dict):
+                count = info.get("count", 0)
+                value = info.get("total_value", 0)
+                prob = info.get("probability", 0)
+                weighted = value * prob
+                stage_rows.append([stage_name, count, value, weighted, prob])
+        # Only show stages with count > 0
+        stage_rows = [r for r in stage_rows if r[1] > 0]
+
+        if stage_rows:
+            # Table rows formatted for display
+            table_rows = []
+            for r in stage_rows:
+                table_rows.append([
+                    _esc(r[0]),
+                    _fmt_number(r[1]),
+                    _fmt_currency(r[2]),
+                    _fmt_currency(r[3]),
+                    _fmt_pct(r[4]),
+                ])
+
+            # Bar data
+            max_stage_val = max((r[2] for r in stage_rows), default=1) or 1
+            bars_html = ""
+            for i, r in enumerate(stage_rows):
+                bars_html += _svg_horizontal_bar(
+                    r[0], r[2], max_stage_val, _color_at(i), show_pct=False,
+                )
+
+            html += f'''<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+                <div class="glass-card">
+                    <h3 class="card-title">Deals by Stage</h3>
+                    {_data_table(["Stage", "Deals", "Value", "Weighted", "Probability"],
+                                 table_rows, "pipeline_stages")}
+                </div>
+                <div class="glass-card">
+                    <h3 class="card-title">Stage Value Distribution</h3>
+                    {bars_html}
+                </div>
             </div>'''
-        html += '</div></div>'
 
-    # Stage breakdown
-    stages = pipeline.get("deals_by_stage", [])
-    if stages:
-        rows = []
-        for s in stages:
-            rows.append([
-                _esc(s.get("label", s.get("stage", ""))),
-                _fmt_number(s.get("count", 0)),
-                _fmt_currency(s.get("value", 0)),
-                _fmt_currency(s.get("weighted_value", 0)),
-                _fmt_pct(s.get("probability", 0)),
-                _fmt_number(s.get("avg_days_in_stage", 0)),
-            ])
-        html += f'''<div class="glass-card" style="margin-top:8px">
-            <h3 class="card-title">Deals by Stage</h3>
-            {_data_table(["Stage", "Deals", "Value", "Weighted", "Probability", "Avg Days"],
-                         rows, "pipeline_stages")}
-        </div>'''
+    # --- Pipeline by Rep (grouped by department) ---
+    _dept_map = {
+        "james carberry": "Supply Chain",
+        "rose galbally": "Supply Chain",
+        "jake heath": "Delivery",
+        "josh elliott": "CDD",
+        "carell": "CDD",
+        "caldon henson": "Management",
+        "anna younger": "Operations",
+        "kirill kopica": "Operations",
+    }
 
-        # Visual stage bars
-        max_stage_val = max((s.get("value", 0) for s in stages), default=1) or 1
-        html += f'''<div class="glass-card" style="margin-top:8px">
-            <h3 class="card-title">Stage Value Distribution</h3>'''
-        for i, s in enumerate(stages):
-            html += _svg_horizontal_bar(
-                s.get("label", s.get("stage", "")),
-                s.get("value", 0),
-                max_stage_val,
-                _color_at(i),
-                show_pct=False,
-            )
-        html += '</div>'
+    by_owner = pipeline.get("pipeline_by_owner", {})
+    if isinstance(by_owner, dict) and by_owner:
+        owner_rows = []
+        for oid, info in by_owner.items():
+            if isinstance(info, dict):
+                name = info.get("name", "")
+                if not name or name.strip().isdigit():
+                    continue
+                dept = _dept_map.get(name.lower().strip(), "Other")
+                owner_rows.append({
+                    "name": name,
+                    "deals": info.get("deal_count", 0),
+                    "value": info.get("total_value", 0),
+                    "weighted": info.get("weighted_value", 0),
+                    "dept": dept,
+                })
+        owner_rows.sort(key=lambda x: x["value"], reverse=True)
 
-    # Pipeline by rep
-    by_owner = pipeline.get("pipeline_by_owner", [])
-    if by_owner:
-        rows = []
-        for rep in by_owner:
-            rows.append([
-                _esc(rep.get("owner_name", "Unknown")),
-                _fmt_number(rep.get("deal_count", 0)),
-                _fmt_currency(rep.get("total_value", 0)),
-                _fmt_currency(rep.get("weighted_value", 0)),
-                _fmt_currency(rep.get("avg_deal_size", 0)),
-                _fmt_pct(rep.get("win_rate", 0)),
-            ])
-        html += f'''<div class="glass-card" style="margin-top:8px">
-            <h3 class="card-title">Pipeline by Rep</h3>
-            {_data_table(["Rep", "Deals", "Total Value", "Weighted", "Avg Deal", "Win Rate"],
-                         rows, "pipeline_reps")}
-        </div>'''
+        if owner_rows:
+            # Group by department
+            dept_groups = {}
+            for row in owner_rows:
+                dept = row["dept"]
+                if dept not in dept_groups:
+                    dept_groups[dept] = []
+                dept_groups[dept].append(row)
 
-    # Stale deals
+            html += '<div class="glass-card" style="margin-bottom:16px">'
+            html += '<h3 class="card-title">Pipeline by Rep</h3>'
+
+            for dept_name, members in sorted(dept_groups.items()):
+                html += f'''<div style="margin-bottom:12px">
+                    <div style="font-size:12px;font-weight:700;color:{COLORS['accent2']};
+                        text-transform:uppercase;letter-spacing:0.05em;
+                        margin-bottom:6px;padding-bottom:4px;
+                        border-bottom:1px solid {COLORS['card_border']}">{_esc(dept_name)}</div>'''
+
+                dept_table_rows = []
+                for m in members:
+                    dept_table_rows.append([
+                        _esc(m["name"]),
+                        _fmt_number(m["deals"]),
+                        _fmt_currency(m["value"]),
+                        _fmt_currency(m["weighted"]),
+                    ])
+                html += _data_table(["Name", "Deals", "Total Value", "Weighted"],
+                                    dept_table_rows, f"rep_{dept_name.lower().replace(' ', '_')}")
+                html += '</div>'
+            html += '</div>'
+
+    # --- Bottom row: Stale Deals + Close Date Distribution (2-col) ---
     stale = pipeline.get("stale_deals", [])
-    if stale:
-        html += f'''<div class="glass-card alert-card" style="margin-top:8px;
-            border-color:{COLORS['warning']}44">
-            <h3 class="card-title" style="color:{COLORS['warning']}">
-                \u26A0 Stale Deals ({len(stale)})</h3>
-            <p style="font-size:12px;color:{COLORS['text_muted']};margin-bottom:8px">
-                Deals with no activity beyond threshold</p>'''
-        stale_rows = []
-        for d in stale[:20]:
-            stale_rows.append([
-                _esc(d.get("name", d.get("deal_name", "Unknown"))),
-                _fmt_currency(d.get("amount", d.get("value", 0))),
-                _esc(d.get("stage", "")),
-                _fmt_number(d.get("days_stale", d.get("days_inactive", 0))),
-                _esc(d.get("owner", d.get("owner_name", ""))),
-            ])
-        html += _data_table(["Deal", "Value", "Stage", "Days Stale", "Owner"],
-                            stale_rows, "stale_deals")
-        html += '</div>'
-
-    # Close date distribution
     close_dist = pipeline.get("close_date_distribution", {})
-    if close_dist:
-        chart_data = [(k, v) for k, v in sorted(close_dist.items())]
-        html += f'''<div class="glass-card" style="margin-top:8px">
-            <h3 class="card-title">Expected Close Date Distribution</h3>
-            {_svg_line_chart(chart_data, 700, 220, COLORS['accent2'])}
-        </div>'''
+    has_stale = isinstance(stale, list) and len(stale) > 0
+    has_close = isinstance(close_dist, dict) and len(close_dist) > 0
+
+    if has_stale or has_close:
+        html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">'
+
+        # Stale deals
+        if has_stale:
+            html += f'''<div class="glass-card alert-card" style="border-color:{COLORS['warning']}44">
+                <h3 class="card-title" style="color:{COLORS['warning']}">
+                    \u26A0 Stale Deals ({len(stale)})</h3>
+                <p style="font-size:12px;color:{COLORS['text_muted']};margin-bottom:8px">
+                    Deals with no activity beyond threshold</p>'''
+            stale_rows = []
+            for d in stale[:20]:
+                days_val = d.get("days_since_update", 0)
+                try:
+                    days_display = str(int(float(days_val)))
+                except (ValueError, TypeError):
+                    days_display = "0"
+                stale_rows.append([
+                    _esc(d.get("dealname", "Unknown")),
+                    _fmt_currency(d.get("amount", 0)),
+                    _esc(d.get("stage", "")),
+                    days_display,
+                    _esc(d.get("owner", "")),
+                ])
+            html += _data_table(["Deal", "Value", "Stage", "Days Stale", "Owner"],
+                                stale_rows, "stale_deals")
+            html += '</div>'
+        else:
+            html += '<div></div>'
+
+        # Close date distribution
+        if has_close:
+            dist_data = []
+            for month_str, count in sorted(close_dist.items()):
+                try:
+                    dt = datetime.strptime(month_str, "%Y-%m")
+                    label = dt.strftime("%b %y")
+                except (ValueError, TypeError):
+                    label = month_str
+                dist_data.append((label, count))
+
+            html += f'''<div class="glass-card">
+                <h3 class="card-title">Expected Close Date Distribution</h3>
+                {_svg_bar_chart(dist_data, 500, 180)}
+            </div>'''
+        else:
+            html += '<div></div>'
+
+        html += '</div>'
 
     html += '</section>'
     return html
@@ -1287,7 +1564,7 @@ def _build_activity_section(data: dict) -> str:
                            "Sales activities, rep engagement, and trends",
                            "\u26A1")
 
-    # Activity type KPIs
+    # Activity type KPIs -- all on ONE row (6 columns: Total + up to 5 types)
     by_type = activity.get("by_type", {})
     icon_map = {
         "calls": "\U0001F4DE",
@@ -1304,62 +1581,98 @@ def _build_activity_section(data: dict) -> str:
         "notes": COLORS['accent5'],
     }
 
-    html += '<div class="kpi-grid">'
+    sorted_types = sorted(by_type.items(), key=lambda x: x[1], reverse=True)[:5]
+    num_cols = 1 + len(sorted_types)  # Total card + one per type
+    html += f'<div class="kpi-grid" style="grid-template-columns:repeat({num_cols}, 1fr)">'
     html += _stat_card("Total Activities", _fmt_number(activity.get("total_activities", 0)),
-                       f"{len(by_type)} activity types", "\u26A1", COLORS['accent6'])
-    for act_type, count in sorted(by_type.items(), key=lambda x: x[1], reverse=True)[:4]:
+                       f"{len(by_type)} types", "\u26A1", COLORS['accent6'])
+    for act_type, count in sorted_types:
         icon = icon_map.get(act_type.lower(), "\U0001F4CB")
         color = color_map.get(act_type.lower(), COLORS['info'])
         html += _stat_card(act_type.title(), _fmt_number(count), "", icon, color)
     html += '</div>'
 
-    # Dynamic activity breakdown (JS-filtered)
-    html += f'''<div class="glass-card" style="margin-top:8px">
+    # Activity Breakdown + Distribution donut + Trend -- 3-column row
+    daily_trend = activity.get("daily_trend", [])
+    by_rep = activity.get("by_rep", [])
+
+    html += '<div style="display:grid;grid-template-columns:1fr auto 1fr;gap:16px;margin-top:8px">'
+    html += f'''<div class="glass-card">
         <h3 class="card-title">Activity Breakdown <span style="font-size:11px;font-weight:400;color:{COLORS['text_muted']}">(filtered by period)</span></h3>
         <div id="dynamic-activity-breakdown"></div>
     </div>'''
-
-    # Activity by type donut
     if by_type:
         type_segments = [(k.title(), v) for k, v in sorted(by_type.items(), key=lambda x: x[1], reverse=True)]
-        html += f'''<div class="grid-2" style="margin-top:8px">
-            <div class="glass-card">
-                <h3 class="card-title">Activity Distribution</h3>
-                {_svg_donut(type_segments, 260)}
-            </div>'''
-    else:
-        html += '<div class="grid-2" style="margin-top:8px"><div></div>'
-
-    # Activity trend
-    daily_trend = activity.get("daily_trend", [])
-    if daily_trend:
-        trend_data = [(item.get("date", ""), item.get("count", 0)) for item in daily_trend]
-        html += f'''<div class="glass-card">
-            <h3 class="card-title">Daily Activity Trend</h3>
-            {_svg_line_chart(trend_data[-60:], 500, 250, COLORS['accent2'])}
+        html += f'''<div class="glass-card" style="min-width:180px">
+            <h3 class="card-title">Distribution</h3>
+            {_svg_donut(type_segments, 130)}
         </div>'''
     else:
         html += '<div></div>'
+    if daily_trend:
+        trend_data = [(item.get("date", ""), item.get("count", 0)) for item in daily_trend]
+        html += f'''<div class="glass-card">
+            <h3 class="card-title">Daily Trend <span style="font-size:11px;font-weight:400;color:{COLORS['text_muted']}">(30d)</span></h3>
+            {_svg_line_chart(trend_data[-30:], 400, 140, COLORS['accent2'])}
+        </div>'''
+    else:
+        html += f'''<div class="glass-card">
+            <h3 class="card-title">Daily Trend</h3>
+            <div style="text-align:center;padding:32px;color:{COLORS['text_muted']};font-size:14px">No trend data</div>
+        </div>'''
     html += '</div>'
 
-    # Activity by rep
-    by_rep = activity.get("by_rep", [])
-    if by_rep:
-        rows = []
-        for rep in by_rep:
-            rows.append([
-                _esc(rep.get("owner_name", "Unknown")),
-                _fmt_number(rep.get("calls", 0)),
-                _fmt_number(rep.get("emails", 0)),
-                _fmt_number(rep.get("meetings", 0)),
-                _fmt_number(rep.get("tasks", 0)),
-                _fmt_number(rep.get("notes", 0)),
-                f'<strong>{_fmt_number(rep.get("total", 0))}</strong>',
-            ])
+    # Activity by Rep -- full-width
+    # Filter: only keep reps with actual names (not numeric IDs), exclude unassigned
+    named_reps = [r for r in by_rep if r.get("owner_name", "").strip()
+                  and not r.get("owner_name", "").strip().replace("-", "").isdigit()
+                  and r.get("owner_name", "").strip().lower() != "unassigned"]
+    REP_LIMIT = 10
+    if named_reps:
+        rep_rows_html = ""
+        for i, rep in enumerate(named_reps):
+            hidden_style = ' style="display:none"' if i >= REP_LIMIT else ''
+            extra_cls = ' activity-rep-extra' if i >= REP_LIMIT else ''
+            rep_rows_html += (
+                f'<tr class="{extra_cls.strip()}"{hidden_style}>'
+                f'<td>{_esc(rep.get("owner_name", "Unknown"))}</td>'
+                f'<td>{_fmt_number(rep.get("calls", 0))}</td>'
+                f'<td>{_fmt_number(rep.get("emails", 0))}</td>'
+                f'<td>{_fmt_number(rep.get("meetings", 0))}</td>'
+                f'<td>{_fmt_number(rep.get("tasks", 0))}</td>'
+                f'<td>{_fmt_number(rep.get("notes", 0))}</td>'
+                f'<td><strong>{_fmt_number(rep.get("total", 0))}</strong></td>'
+                f'</tr>\n'
+            )
+        rep_show_more = ""
+        if len(named_reps) > REP_LIMIT:
+            remaining = len(named_reps) - REP_LIMIT
+            rep_show_more = (
+                f'<div style="text-align:center;padding:10px;border-top:1px solid {COLORS["card_border"]}">'
+                f'<button id="act-rep-show-more" onclick="toggleExpandList(\'activity-rep-extra\',\'act-rep-show-more\',{len(named_reps)},{REP_LIMIT})"'
+                f' style="background:none;border:1px solid {COLORS["card_border"]};border-radius:8px;'
+                f'padding:6px 20px;color:{COLORS["accent2"]};font-size:12px;font-weight:600;'
+                f'cursor:pointer">Show all {len(named_reps)} ({remaining} more)</button>'
+                f'</div>'
+            )
+        header_cells = ''.join(
+            f'<th style="cursor:pointer;user-select:none">{h}</th>'
+            for h in ["Rep", "Calls", "Emails", "Meetings", "Tasks", "Notes", "Total"]
+        )
+        html += f'''<div class="glass-card" style="padding-bottom:0;margin-top:8px">
+            <h3 class="card-title">Activity by Rep</h3>
+            <div class="table-wrapper">
+                <table id="activity_reps" class="data-table">
+                    <thead><tr>{header_cells}</tr></thead>
+                    <tbody>{rep_rows_html}</tbody>
+                </table>
+            </div>
+            {rep_show_more}
+        </div>'''
+    else:
         html += f'''<div class="glass-card" style="margin-top:8px">
             <h3 class="card-title">Activity by Rep</h3>
-            {_data_table(["Rep", "Calls", "Emails", "Meetings", "Tasks", "Notes", "Total"],
-                         rows, "activity_reps")}
+            <div style="text-align:center;padding:32px;color:{COLORS['text_muted']};font-size:14px">No named reps found</div>
         </div>'''
 
     html += '</section>'
@@ -1374,7 +1687,7 @@ def _build_contacts_section(data: dict) -> str:
                            "Lifecycle stages, engagement, and company overview",
                            "\U0001F465")
 
-    # KPIs
+    # KPIs (3-column row -- kept as-is)
     html += '<div class="kpi-grid kpi-grid-3">'
     html += _stat_card("Total Contacts", _fmt_number(counts.get("contacts", 0)),
                        f"New 30d: {_fmt_number(contacts.get('new_contacts_30d', 0))}",
@@ -1385,48 +1698,80 @@ def _build_contacts_section(data: dict) -> str:
                        "", "\U0001F464", COLORS['accent3'])
     html += '</div>'
 
-    # Lifecycle distribution
+    # Lifecycle distribution -- filter out numeric-only keys, merged donut + bars
     lifecycle = contacts.get("by_lifecycle", {})
-    if lifecycle:
-        lc_segments = sorted(lifecycle.items(), key=lambda x: x[1], reverse=True)
-        html += f'''<div class="grid-2" style="margin-top:8px">
-            <div class="glass-card">
-                <h3 class="card-title">Lifecycle Distribution</h3>
-                {_svg_donut(lc_segments, 260)}
-            </div>
-            <div class="glass-card">
-                <h3 class="card-title">Lifecycle Breakdown</h3>'''
-        max_lc = max(lifecycle.values()) if lifecycle else 1
+    named_lifecycle = {k: v for k, v in lifecycle.items() if not k.strip().isdigit()}
+    if named_lifecycle:
+        lc_segments = sorted(named_lifecycle.items(), key=lambda x: x[1], reverse=True)
+        max_lc = max(named_lifecycle.values()) if named_lifecycle else 1
+        bars_html = ""
         for stage, count in lc_segments:
-            html += _svg_horizontal_bar(stage, count, max_lc, COLORS['accent2'], show_pct=False)
-        html += '</div></div>'
-
-    # Top engaged contacts
-    engaged = contacts.get("top_engaged", [])
-    if engaged:
-        rows = []
-        for c in engaged[:15]:
-            rows.append([
-                _esc(c.get("name", "")),
-                _esc(c.get("email", "")),
-                _fmt_number(c.get("page_views", 0)),
-                _fmt_number(c.get("visits", 0)),
-                _fmt_number(c.get("events", 0)),
-            ])
+            bars_html += _svg_horizontal_bar(stage, count, max_lc, COLORS['accent2'], show_pct=False)
         html += f'''<div class="glass-card" style="margin-top:8px">
-            <h3 class="card-title">Top Engaged Contacts</h3>
-            {_data_table(["Name", "Email", "Page Views", "Visits", "Events"],
-                         rows, "top_engaged")}
+            <h3 class="card-title">Lifecycle Distribution</h3>
+            <div style="display:flex;gap:24px;align-items:flex-start">
+                <div style="flex-shrink:0">{_svg_donut(lc_segments, 120)}</div>
+                <div style="flex:1;min-width:0">{bars_html}</div>
+            </div>
+        </div>'''
+    else:
+        html += f'''<div class="glass-card" style="margin-top:8px">
+            <h3 class="card-title">Lifecycle Distribution</h3>
+            <div style="text-align:center;padding:32px;color:{COLORS['text_muted']};font-size:14px">
+                No lifecycle data with named stages</div>
         </div>'''
 
-    # Companies summary
+    # Top engaged contacts -- first 5 visible, rest collapsible
+    engaged = contacts.get("top_engaged", [])
+    if engaged:
+        CONTACT_LIMIT = 5
+        contact_rows_html = ""
+        for i, c in enumerate(engaged):
+            hidden_style = ' style="display:none"' if i >= CONTACT_LIMIT else ''
+            extra_cls = ' contacts-extra-row' if i >= CONTACT_LIMIT else ''
+            contact_rows_html += (
+                f'<tr class="{extra_cls.strip()}"{hidden_style}>'
+                f'<td>{_esc(c.get("name", ""))}</td>'
+                f'<td>{_esc(c.get("email", ""))}</td>'
+                f'<td>{_fmt_number(c.get("page_views", 0))}</td>'
+                f'<td>{_fmt_number(c.get("visits", 0))}</td>'
+                f'<td>{_fmt_number(c.get("events", 0))}</td>'
+                f'</tr>\n'
+            )
+        contact_show_more = ""
+        if len(engaged) > CONTACT_LIMIT:
+            remaining = len(engaged) - CONTACT_LIMIT
+            contact_show_more = (
+                f'<div style="text-align:center;padding:10px;border-top:1px solid {COLORS["card_border"]}">'
+                f'<button id="engaged-show-more" onclick="toggleExpandList(\'contacts-extra-row\',\'engaged-show-more\',{len(engaged)},{CONTACT_LIMIT})"'
+                f' style="background:none;border:1px solid {COLORS["card_border"]};border-radius:8px;'
+                f'padding:6px 20px;color:{COLORS["accent2"]};font-size:12px;font-weight:600;'
+                f'cursor:pointer">Show all {len(engaged)} ({remaining} more)</button>'
+                f'</div>'
+            )
+        header_cells = ''.join(
+            f'<th style="cursor:pointer;user-select:none">{h}</th>'
+            for h in ["Name", "Email", "Page Views", "Visits", "Events"]
+        )
+        html += f'''<div class="glass-card" style="margin-top:8px;padding-bottom:0">
+            <h3 class="card-title">Top Engaged Contacts</h3>
+            <div class="table-wrapper">
+                <table id="top_engaged" class="data-table">
+                    <thead><tr>{header_cells}</tr></thead>
+                    <tbody>{contact_rows_html}</tbody>
+                </table>
+            </div>
+            {contact_show_more}
+        </div>'''
+
+    # Companies summary (compact)
     companies = contacts.get("companies_summary", {})
     if companies:
         if isinstance(companies, dict):
             # Summary object format: {total, with_deals, by_industry, by_size}
-            html += f'''<div class="glass-card" style="margin-top:8px">
-                <h3 class="card-title">Companies Overview</h3>
-                <div class="kpi-grid kpi-grid-3">'''
+            html += f'''<div class="glass-card" style="margin-top:8px;padding:10px 14px">
+                <h3 class="card-title" style="margin-bottom:6px">Companies Overview</h3>
+                <div class="kpi-grid kpi-grid-3" style="gap:8px">'''
             html += _stat_card("Total", _fmt_number(companies.get("total", 0)), "", "", COLORS['accent2'])
             html += _stat_card("With Deals", _fmt_number(companies.get("with_deals", 0)), "", "", COLORS['accent3'])
             by_industry = companies.get("by_industry", {})
@@ -1436,7 +1781,7 @@ def _build_contacts_section(data: dict) -> str:
             html += '</div></div>'
         elif isinstance(companies, list):
             rows = []
-            for co in companies[:20]:
+            for co in companies[:15]:
                 rows.append([
                     _esc(co.get("name", "")),
                     _esc(co.get("domain", "")),
@@ -1444,8 +1789,8 @@ def _build_contacts_section(data: dict) -> str:
                     _fmt_number(co.get("deals", 0)),
                     _fmt_currency(co.get("revenue", 0)),
                 ])
-            html += f'''<div class="glass-card" style="margin-top:8px">
-                <h3 class="card-title">Companies Summary</h3>
+            html += f'''<div class="glass-card" style="margin-top:8px;padding:10px 14px">
+                <h3 class="card-title" style="margin-bottom:6px">Companies Summary</h3>
                 {_data_table(["Company", "Domain", "Contacts", "Deals", "Revenue"],
                              rows, "companies")}
             </div>'''
@@ -1473,85 +1818,109 @@ def _build_insights_section(data: dict) -> str:
                            "", "\U0001F4C8", COLORS['accent4'])
         html += '</div>'
 
-    # Win/Loss analysis
+    # Win/Loss + Cycle Trend + Deal Size — 3-column row
     wl = insights.get("win_loss_analysis", {})
-    if wl:
-        html += f'''<div class="grid-2" style="margin-top:8px">
-            <div class="glass-card">
+    cycle_trend = insights.get("sales_cycle_trend", {})
+    if isinstance(cycle_trend, dict):
+        trend_data = [(month, int(round(days))) for month, days in sorted(cycle_trend.items())]
+    elif isinstance(cycle_trend, list):
+        trend_data = [(item.get("month", ""), int(round(item.get("avg_days", 0)))) for item in cycle_trend]
+    else:
+        trend_data = []
+    deal_sizes = insights.get("deal_size_distribution", {})
+    if isinstance(deal_sizes, dict):
+        size_data = [(range_str, count) for range_str, count in deal_sizes.items()]
+    elif isinstance(deal_sizes, list):
+        size_data = [(item.get("range", ""), item.get("count", 0)) for item in deal_sizes]
+    else:
+        size_data = []
+
+    if wl or trend_data or size_data:
+        html += '<div class="grid-3" style="margin-top:8px">'
+        # Win/Loss (donut + reasons merged)
+        if wl:
+            reasons_html = ""
+            won_reasons = wl.get("won_reasons", {})
+            lost_reasons = wl.get("lost_reasons", {})
+            if won_reasons:
+                reasons_html += f'<h4 style="font-size:11px;color:{COLORS["accent4"]};margin:6px 0 2px;text-transform:uppercase">Won</h4>'
+                if isinstance(won_reasons, dict):
+                    for reason, count in sorted(won_reasons.items(), key=lambda x: x[1], reverse=True)[:3]:
+                        reasons_html += f'<div style="font-size:12px;padding:2px 0;color:{COLORS["text_muted"]}">{_esc(reason)}: <strong style="color:{COLORS["text"]}">{_fmt_number(count)}</strong></div>'
+                elif isinstance(won_reasons, list):
+                    for item in won_reasons[:3]:
+                        reasons_html += f'<div style="font-size:12px;padding:2px 0;color:{COLORS["text_muted"]}">{_esc(str(item))}</div>'
+            if lost_reasons:
+                reasons_html += f'<h4 style="font-size:11px;color:{COLORS["danger"]};margin:6px 0 2px;text-transform:uppercase">Lost</h4>'
+                if isinstance(lost_reasons, dict):
+                    for reason, count in sorted(lost_reasons.items(), key=lambda x: x[1], reverse=True)[:3]:
+                        reasons_html += f'<div style="font-size:12px;padding:2px 0;color:{COLORS["text_muted"]}">{_esc(reason)}: <strong style="color:{COLORS["text"]}">{_fmt_number(count)}</strong></div>'
+                elif isinstance(lost_reasons, list):
+                    for item in lost_reasons[:3]:
+                        reasons_html += f'<div style="font-size:12px;padding:2px 0;color:{COLORS["text_muted"]}">{_esc(str(item))}</div>'
+            html += f'''<div class="glass-card">
                 <h3 class="card-title">Win/Loss Analysis</h3>
-                {_svg_donut([
-                    ("Won", wl.get("won_count", 0)),
-                    ("Lost", wl.get("lost_count", 0)),
-                ], 200)}
-                <div style="text-align:center;margin-top:8px;font-size:14px;
-                    color:{COLORS['text']}">
-                    Win Rate: <strong style="color:{COLORS['accent4']}">{_fmt_pct(wl.get("win_rate", 0))}</strong>
+                <div style="display:flex;gap:16px;align-items:flex-start">
+                    <div style="flex-shrink:0">
+                        {_svg_donut([("Won", wl.get("won_count", 0)), ("Lost", wl.get("lost_count", 0))], 100)}
+                        <div style="text-align:center;margin-top:4px;font-size:13px;color:{COLORS['text']}">
+                            Win Rate: <strong style="color:{COLORS['accent4']}">{_fmt_pct(wl.get("win_rate", 0))}</strong>
+                        </div>
+                    </div>
+                    <div style="flex:1;min-width:0">{reasons_html}</div>
                 </div>
             </div>'''
-
-        # Lost reasons + Won reasons
-        html += f'''<div class="glass-card">
-                <h3 class="card-title">Win/Loss Reasons</h3>'''
-        won_reasons = wl.get("won_reasons", {})
-        lost_reasons = wl.get("lost_reasons", {})
-        if won_reasons:
-            html += f'<h4 style="font-size:12px;color:{COLORS["accent4"]};margin:8px 0 4px;text-transform:uppercase">Won Reasons</h4>'
-            if isinstance(won_reasons, dict):
-                for reason, count in sorted(won_reasons.items(), key=lambda x: x[1], reverse=True)[:5]:
-                    html += f'''<div style="font-size:13px;padding:4px 0;color:{COLORS['text_muted']}">
-                        {_esc(reason)}: <strong style="color:{COLORS['text']}">{_fmt_number(count)}</strong></div>'''
-            elif isinstance(won_reasons, list):
-                for item in won_reasons[:5]:
-                    html += f'<div style="font-size:13px;padding:4px 0;color:{COLORS["text_muted"]}">{_esc(str(item))}</div>'
-        if lost_reasons:
-            html += f'<h4 style="font-size:12px;color:{COLORS["danger"]};margin:12px 0 4px;text-transform:uppercase">Lost Reasons</h4>'
-            if isinstance(lost_reasons, dict):
-                for reason, count in sorted(lost_reasons.items(), key=lambda x: x[1], reverse=True)[:5]:
-                    html += f'''<div style="font-size:13px;padding:4px 0;color:{COLORS['text_muted']}">
-                        {_esc(reason)}: <strong style="color:{COLORS['text']}">{_fmt_number(count)}</strong></div>'''
-            elif isinstance(lost_reasons, list):
-                for item in lost_reasons[:5]:
-                    html += f'<div style="font-size:13px;padding:4px 0;color:{COLORS["text_muted"]}">{_esc(str(item))}</div>'
-        html += '</div></div>'
-
-    # Sales cycle trend
-    cycle_trend = insights.get("sales_cycle_trend", [])
-    if cycle_trend:
-        trend_data = [(item.get("month", ""), item.get("avg_days", 0)) for item in cycle_trend]
-        html += f'''<div class="glass-card" style="margin-top:8px">
-            <h3 class="card-title">Sales Cycle Trend (Avg Days)</h3>
-            {_svg_line_chart(trend_data, 700, 220, COLORS['accent3'])}
-        </div>'''
-
-    # Deal size distribution
-    deal_sizes = insights.get("deal_size_distribution", [])
-    if deal_sizes:
-        size_data = [(item.get("range", ""), item.get("count", 0)) for item in deal_sizes]
-        html += f'''<div class="glass-card" style="margin-top:8px">
-            <h3 class="card-title">Deal Size Distribution</h3>
-            {_svg_bar_chart(size_data, 600, max(200, len(size_data) * 45))}
-        </div>'''
+        else:
+            html += '<div></div>'
+        # Sales Cycle Trend
+        if trend_data:
+            html += f'''<div class="glass-card">
+                <h3 class="card-title">Sales Cycle Trend (Days)</h3>
+                {_svg_line_chart(trend_data, 400, 140, COLORS['accent3'])}
+            </div>'''
+        else:
+            html += '<div></div>'
+        # Deal Size Distribution
+        if size_data:
+            html += f'''<div class="glass-card">
+                <h3 class="card-title">Deal Size Distribution</h3>
+                {_svg_bar_chart(size_data, 400, max(130, len(size_data) * 26))}
+            </div>'''
+        else:
+            html += '<div></div>'
+        html += '</div>'
 
     # Rep performance leaderboard
     rep_perf = insights.get("rep_performance", [])
     if rep_perf:
-        rows = []
-        for i, rep in enumerate(sorted(rep_perf, key=lambda x: x.get("revenue", 0), reverse=True)):
-            medal = ["\U0001F947", "\U0001F948", "\U0001F949"][i] if i < 3 else f"#{i+1}"
-            rows.append([
-                f"{medal} {_esc(rep.get('name', 'Unknown'))}",
-                _fmt_number(rep.get("deals_won", 0)),
-                _fmt_number(rep.get("deals_lost", 0)),
-                _fmt_currency(rep.get("revenue", 0)),
-                _fmt_pct(rep.get("win_rate", 0)),
-                _fmt_currency(rep.get("avg_deal_size", 0)),
-                _fmt_number(rep.get("avg_cycle_days", 0)),
-            ])
-        html += f'''<div class="glass-card" style="margin-top:8px">
-            <h3 class="card-title">Rep Performance Leaderboard</h3>
-            {_data_table(["Rep", "Won", "Lost", "Revenue", "Win Rate", "Avg Deal", "Avg Cycle"],
-                         rows, "rep_perf")}
-        </div>'''
+        # Filter out reps whose name is numeric (e.g. owner IDs without names)
+        named_reps = [r for r in rep_perf if r.get("name", "").strip() and not r.get("name", "").strip().replace("-", "").isdigit()]
+        if named_reps:
+            rows = []
+            for i, rep in enumerate(sorted(named_reps, key=lambda x: x.get("total_won_value", 0), reverse=True)):
+                medal = ["\U0001F947", "\U0001F948", "\U0001F949"][i] if i < 3 else f"#{i+1}"
+                raw_cycle = rep.get("avg_cycle_days")
+                if raw_cycle is not None and raw_cycle != "":
+                    try:
+                        cycle_str = str(int(round(float(raw_cycle))))
+                    except (ValueError, TypeError):
+                        cycle_str = "N/A"
+                else:
+                    cycle_str = "N/A"
+                rows.append([
+                    f"{medal} {_esc(rep.get('name', 'Unknown'))}",
+                    _fmt_number(rep.get("deals_won", 0)),
+                    _fmt_number(rep.get("deals_lost", 0)),
+                    _fmt_currency(rep.get("total_won_value", 0)),
+                    _fmt_currency(rep.get("total_pipeline_value", 0)),
+                    _fmt_pct(rep.get("win_rate", 0)),
+                    cycle_str,
+                ])
+            html += f'''<div class="glass-card" style="margin-top:8px">
+                <h3 class="card-title">Rep Performance Leaderboard</h3>
+                {_data_table(["Rep", "Won", "Lost", "Revenue", "Pipeline", "Win Rate", "Avg Cycle (Days)"],
+                             rows, "rep_perf")}
+            </div>'''
 
     # Cohort analysis
     cohorts = insights.get("cohort_analysis", [])
@@ -1684,7 +2053,7 @@ def _build_monday_pipeline(data: dict) -> str:
         ("Closing", "#34d399"),
         ("Completed", "#22c55e"),
     ]
-    flow_html = '<div class="glass-card" style="margin-bottom:16px;padding:16px 20px">'
+    flow_html = '<div class="glass-card" style="margin-bottom:10px;padding:10px 14px">'
     flow_html += f'<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:{COLORS["text_muted"]};margin-bottom:10px">Deal Flow — Order of Events</div>'
     flow_html += '<div class="deal-flow-nav">'
     for i, (stage_name, stage_color) in enumerate(deal_flow_stages):
@@ -1698,12 +2067,15 @@ def _build_monday_pipeline(data: dict) -> str:
     html += flow_html
 
     # ── Filter out dormant projects and sort by recency ──
+    MA_OWNERS = {"josh elliott", "josie greenwood"}
     projects = ma.get("projects", [])
     # Remove dormant (5+ months no update)
     fresh_projects = [p for p in projects if not _is_dormant(p.get("updated_at", ""))]
     # Sort by most recently updated
     fresh_projects.sort(key=lambda p: p.get("updated_at") or "", reverse=True)
-    active_list = [p for p in fresh_projects if p.get("is_active")]
+    # Filter active list to relevant M&A owners only
+    active_list = [p for p in fresh_projects if p.get("is_active")
+                   and p.get("owner", "").lower().strip() in MA_OWNERS]
     dormant_count = len(projects) - len(fresh_projects)
 
     # ── KPI row ──
@@ -1871,7 +2243,7 @@ def _build_monday_pipeline(data: dict) -> str:
             </div>'''
 
         html += f'''<div class="glass-card" style="margin-top:8px;padding:0;overflow:hidden">
-            <div style="padding:16px 20px;border-bottom:1px solid {COLORS['card_border']}">
+            <div style="padding:10px 14px;border-bottom:1px solid {COLORS['card_border']}">
                 <h3 class="card-title" style="margin-bottom:0">\U0001F3AF Active M&A Projects
                     <span id="monday-count" style="font-size:13px;font-weight:400;color:{COLORS['text_muted']}">
                         ({len(active_list)} — showing {min(SHOW_LIMIT, len(active_list))})
@@ -1883,14 +2255,12 @@ def _build_monday_pipeline(data: dict) -> str:
             {show_more_btn}
         </div>'''
 
-    # ── Stale Projects Warning (show 10 with expand) ──
+    # ── Previous Projects (closed/completed/unsuccessful) ──
     stale = ma.get("stale_projects", [])
-    # Sort stale by days_stale desc
     stale.sort(key=lambda sp: sp.get("days_stale", 0), reverse=True)
-    # Filter out stale items that are also dormant (5+ months)
     stale = [sp for sp in stale if sp.get("days_stale", 0) < DORMANCY_MONTHS * 30]
     if stale:
-        STALE_LIMIT = 10
+        STALE_LIMIT = 5
         stale_html = ""
         for i, sp in enumerate(stale):
             days = sp.get("days_stale", 0)
@@ -1899,61 +2269,28 @@ def _build_monday_pipeline(data: dict) -> str:
             extra_cls = ' stale-extra-row' if i >= STALE_LIMIT else ''
             stale_html += f'''<div class="stale-item{extra_cls}" {hidden if i >= STALE_LIMIT else ''}>
                 <div style="display:flex;justify-content:space-between;align-items:center;
-                    padding:10px 12px;border-bottom:1px solid {COLORS['card_border']}">
+                    padding:8px 12px;border-bottom:1px solid {COLORS['card_border']}">
                     <div>
-                        <span style="font-size:13px;color:{COLORS['text']};font-weight:500">{_esc(sp.get("name", ""))}</span>
-                        <span style="font-size:11px;color:{COLORS['text_muted']};margin-left:8px">{_esc(sp.get("stage", "").title())}</span>
+                        <span style="font-size:12px;color:{COLORS['text']};font-weight:500">{_esc(sp.get("name", ""))}</span>
+                        <span style="font-size:10px;color:{COLORS['text_muted']};margin-left:8px">{_esc(sp.get("stage", "").title())}</span>
                     </div>
-                    <span style="font-size:12px;font-weight:600;color:{urgency_color}">{days}d stale</span>
+                    <span style="font-size:11px;font-weight:600;color:{urgency_color}">{days}d</span>
                 </div>
             </div>'''
-
         stale_more = ""
         if len(stale) > STALE_LIMIT:
             remaining = len(stale) - STALE_LIMIT
-            stale_more = f'''<div style="text-align:center;padding:10px">
+            stale_more = f'''<div style="text-align:center;padding:8px">
                 <button id="stale-show-more" onclick="toggleExpandList('stale-extra-row','stale-show-more',{len(stale)},{STALE_LIMIT})"
                     style="background:none;border:1px solid {COLORS['card_border']};border-radius:8px;
-                    padding:6px 20px;color:{COLORS['text_muted']};font-size:12px;font-weight:600;
+                    padding:5px 16px;color:{COLORS['text_muted']};font-size:11px;font-weight:600;
                     cursor:pointer">Show all {len(stale)} ({remaining} more)</button>
             </div>'''
-
-        html += f'''<div class="glass-card" style="margin-top:8px;border:1px solid {MONDAY_RED}44">
-            <h3 class="card-title" style="color:{MONDAY_RED}">\u26A0\uFE0F Stale Projects ({len(stale)})</h3>
-            <p style="font-size:12px;color:{COLORS['text_muted']};margin-bottom:8px">No updates in 14+ days (dormant 5mo+ hidden)</p>
+        html += f'''<div class="glass-card" style="margin-top:8px">
+            <h3 class="card-title">Previous Projects ({len(stale)})</h3>
+            <p style="font-size:11px;color:{COLORS['text_muted']};margin-bottom:6px">Closed, completed, or inactive — no updates in 14+ days</p>
             {stale_html}
             {stale_more}
-        </div>'''
-
-    # ── Owner Summary (show 10 with expand) ──
-    owner_summary = ma.get("owner_summary", [])
-    if owner_summary:
-        OWNER_LIMIT = 10
-        rows = []
-        for o in owner_summary[:OWNER_LIMIT]:
-            rows.append([
-                _esc(o.get("owner", "Unknown")),
-                _fmt_number(o.get("total_deals", 0)),
-                _fmt_number(o.get("active_deals", 0)),
-                _fmt_currency(o.get("total_value", 0)),
-            ])
-        html += f'''<div class="glass-card" style="margin-top:8px">
-            <h3 class="card-title">\U0001F465 M&A by Owner
-                <span style="font-size:12px;font-weight:400;color:{COLORS['text_muted']}">
-                    (showing {min(OWNER_LIMIT, len(owner_summary))} of {len(owner_summary)})
-                </span>
-            </h3>
-            {_data_table(["Owner", "Total Deals", "Active", "Total Value"], rows, "ma_owners")}
-        </div>'''
-
-    # ── Stage Distribution chart ──
-    stage_dist = ma.get("stage_distribution", {})
-    if stage_dist:
-        stage_data = [(k.replace("_", " ").title(), v) for k, v in
-                      sorted(stage_dist.items(), key=lambda x: x[1], reverse=True)]
-        html += f'''<div class="glass-card" style="margin-top:8px">
-            <h3 class="card-title">\U0001F4CA Stage Distribution</h3>
-            {_svg_bar_chart(stage_data, 650, max(200, len(stage_data) * 44))}
         </div>'''
 
     # ── Filter and board toggle JavaScript ──
@@ -2072,7 +2409,7 @@ def _build_monday_ic(data: dict) -> str:
         ("on hold", "On Hold", "#f59e0b"),
         ("passed", "Passed", "#ef4444"),
     ]
-    ic_flow_html = f'<div class="glass-card" style="margin-bottom:16px;padding:16px 20px">'
+    ic_flow_html = f'<div class="glass-card" style="margin-bottom:10px;padding:10px 14px">'
     ic_flow_html += f'<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px">'
     ic_flow_html += '<div style="flex:1;min-width:300px">'
     ic_flow_html += f'<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:{COLORS["text_muted"]};margin-bottom:10px">IC Gate Progression — Click to Filter</div>'
@@ -2404,7 +2741,7 @@ def _build_monday_ic(data: dict) -> str:
         if cat_data:
             html += f'''<div class="glass-card" style="margin-top:8px">
                 <h3 class="card-title">\U0001F4CA IC Score by Category (Averages)</h3>
-                {_svg_bar_chart(cat_data, 650, max(200, len(cat_data) * 44), MONDAY_PURPLE)}
+                {_svg_bar_chart(cat_data, 650, max(140, len(cat_data) * 28), MONDAY_PURPLE)}
             </div>'''
 
     # ── Charts row: Trend + Decision Distribution ──
@@ -2417,14 +2754,14 @@ def _build_monday_ic(data: dict) -> str:
             if trend_data:
                 html += f'''<div class="glass-card">
                     <h3 class="card-title">\U0001F4C8 IC Score Trend (Monthly Avg)</h3>
-                    {_svg_line_chart(trend_data, 700, 220, MONDAY_PURPLE)}
+                    {_svg_line_chart(trend_data, 500, 150, MONDAY_PURPLE)}
                 </div>'''
         if decisions:
             decision_data = [(k, v) for k, v in sorted(decisions.items(),
                                                         key=lambda x: x[1], reverse=True)]
             html += f'''<div class="glass-card">
                 <h3 class="card-title">\U0001F3DB\uFE0F IC Decision Distribution</h3>
-                {_svg_donut(decision_data, 240)}
+                {_svg_donut(decision_data, 150)}
             </div>'''
         html += '</div>'
 
@@ -2670,7 +3007,7 @@ def _build_monday_workspaces(data: dict) -> str:
             </div>'''
 
         html += f'''<div class="glass-card" style="margin-top:8px;padding:0;overflow:hidden">
-            <div style="padding:16px 20px;border-bottom:1px solid {COLORS['card_border']}">
+            <div style="padding:10px 14px;border-bottom:1px solid {COLORS['card_border']}">
                 <h3 class="card-title" style="margin-bottom:0">\U0001F3E2 Active Workspaces
                     <span style="font-size:13px;font-weight:400;color:{COLORS['text_muted']}">
                         ({len(active_workspaces)} active, {dormant_ws} dormant hidden)
@@ -3063,6 +3400,77 @@ def _build_css() -> str:
             font-weight: 600;
         }}
 
+        /* Sidebar favourite star */
+        .sidebar-link {{ position: relative; }}
+        .sidebar-fav {{
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 12px;
+            color: rgba(255,255,255,0.15);
+            padding: 2px;
+            line-height: 1;
+            opacity: 0;
+            transition: opacity 0.2s, color 0.2s;
+        }}
+        .sidebar-link:hover .sidebar-fav {{ opacity: 1; }}
+        .sidebar-fav:hover {{ color: {COLORS['accent6']}; }}
+        .sidebar-fav.is-fav {{
+            opacity: 1;
+            color: {COLORS['accent6']};
+        }}
+
+        /* Favourites group */
+        .sidebar-favs-group {{
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            display: none;
+        }}
+        .sidebar-favs-group.has-favs {{
+            display: block;
+        }}
+        .sidebar-favs-group .sidebar-group-label {{
+            color: {COLORS['accent6']};
+            opacity: 0.7;
+        }}
+
+        /* AI assistant link */
+        .sidebar-ai-link {{
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 18px;
+            margin: 4px 10px;
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            font-weight: 600;
+            color: #fff;
+            text-decoration: none;
+            cursor: pointer;
+            background: linear-gradient(135deg, {COLORS['accent']}, {COLORS['accent2']});
+            border: none;
+            transition: opacity 0.2s, transform 0.2s;
+        }}
+        .sidebar-ai-link:hover {{
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }}
+        .sidebar-ai-link-dot {{
+            font-size: 14px;
+        }}
+        .sidebar-ai-badge {{
+            margin-left: auto;
+            background: rgba(255,255,255,0.2);
+            padding: 1px 6px;
+            border-radius: 8px;
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+        }}
+
         .sidebar-footer {{
             padding: 14px 18px;
             font-size: 10px;
@@ -3138,7 +3546,7 @@ def _build_css() -> str:
            Sections
            ============================================================ */
         .dashboard-section {{
-            margin-bottom: 14px;
+            margin-bottom: 10px;
         }}
 
         @keyframes fade-in-up {{
@@ -3151,7 +3559,7 @@ def _build_css() -> str:
             border-bottom: 1px solid var(--card-border);
         }}
         .section-title {{
-            font-size: 16px;
+            font-size: 14px;
             font-weight: 800;
             color: var(--text);
             letter-spacing: -0.02em;
@@ -3169,7 +3577,7 @@ def _build_css() -> str:
             background: var(--card);
             border: 1px solid var(--card-border);
             border-radius: var(--radius);
-            padding: 10px 14px;
+            padding: 8px 12px;
             box-shadow: var(--shadow);
             transition: var(--transition);
         }}
@@ -3205,7 +3613,7 @@ def _build_css() -> str:
             background: var(--card);
             border: 1px solid var(--card-border);
             border-radius: var(--radius-sm);
-            padding: 10px 12px;
+            padding: 8px 10px;
             transition: var(--transition);
             position: relative;
             overflow: hidden;
@@ -3235,7 +3643,12 @@ def _build_css() -> str:
         .grid-2 {{
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 10px;
+            gap: 8px;
+        }}
+        .grid-3 {{
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
         }}
 
         /* ============================================================
@@ -3247,15 +3660,15 @@ def _build_css() -> str:
             justify-content: center;
             gap: 0;
             flex-wrap: wrap;
-            padding: 16px 0;
+            padding: 8px 0;
         }}
         .chain-item {{
             text-align: center;
-            padding: 16px 20px;
+            padding: 10px 14px;
             border: 2px solid var(--card-border);
             border-radius: var(--radius);
             background: var(--surface2);
-            min-width: 100px;
+            min-width: 80px;
             transition: var(--transition);
         }}
         .chain-item:hover {{
@@ -3263,7 +3676,7 @@ def _build_css() -> str:
             box-shadow: 0 4px 16px rgba(60, 180, 173, 0.12);
         }}
         .chain-value {{
-            font-size: 24px;
+            font-size: 18px;
             font-weight: 800;
             line-height: 1.2;
         }}
@@ -3332,11 +3745,11 @@ def _build_css() -> str:
            ============================================================ */
         .dashboard-footer {{
             text-align: center;
-            padding: 16px 20px;
+            padding: 10px 16px;
             color: var(--text-muted);
             font-size: 11px;
             border-top: 1px solid var(--card-border);
-            margin-top: 20px;
+            margin-top: 12px;
         }}
         .dashboard-footer .brand {{
             color: var(--accent);
@@ -3354,6 +3767,7 @@ def _build_css() -> str:
             .kpi-grid {{ grid-template-columns: repeat(2, 1fr); }}
             .kpi-grid-3 {{ grid-template-columns: repeat(2, 1fr); }}
             .grid-2 {{ grid-template-columns: 1fr; }}
+            .grid-3 {{ grid-template-columns: 1fr; }}
             .volume-chain {{ gap: 8px; }}
             .chain-item {{ min-width: 80px; padding: 12px; }}
             .chain-value {{ font-size: 18px; }}
@@ -3451,6 +3865,46 @@ def _build_css() -> str:
             font-weight: 500;
             white-space: nowrap;
         }}
+        .live-dot {{
+            width: 6px; height: 6px; border-radius: 50%;
+            background: #22c55e;
+            animation: livePulse 2s infinite;
+            display: inline-block;
+        }}
+        @keyframes livePulse {{
+            0%, 100% {{ opacity: 1; }}
+            50% {{ opacity: 0.3; }}
+        }}
+        .supabase-status {{
+            margin-left: auto;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: 600;
+            white-space: nowrap;
+        }}
+        .supabase-status.live {{
+            background: rgba(34, 197, 94, 0.1);
+            color: #16a34a;
+        }}
+        .supabase-status.offline {{
+            background: rgba(107, 114, 128, 0.1);
+            color: var(--text-muted);
+        }}
+        .supabase-status.error {{
+            background: rgba(239, 68, 68, 0.1);
+            color: #dc2626;
+        }}
+        .kpi-updated {{
+            animation: kpiFlash 0.6s ease;
+        }}
+        @keyframes kpiFlash {{
+            0% {{ background: rgba(60, 180, 173, 0.15); }}
+            100% {{ background: transparent; }}
+        }}
 
         /* Clickable KPI cards (#40) */
         .stat-card[data-nav-page] {{
@@ -3491,6 +3945,116 @@ def _build_css() -> str:
             .filter-bar {{ padding: 8px 16px; top: 0; }}
             .filter-btn {{ padding: 5px 12px; font-size: 11px; }}
             .filter-period-label {{ display: none; }}
+        }}
+
+        /* ============================================================
+           Login Overlay
+           ============================================================ */
+        .login-overlay {{
+            position: fixed;
+            inset: 0;
+            z-index: 99999;
+            background: #242833;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }}
+        .login-overlay.hidden {{
+            display: none;
+        }}
+        .login-card {{
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 48px 40px;
+            max-width: 380px;
+            width: 90%;
+            text-align: center;
+        }}
+        .login-brand {{
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 24px;
+        }}
+        .login-brand .brand-dot {{
+            width: 32px;
+            height: 32px;
+            background: {COLORS["accent"]};
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: 800;
+            font-size: 18px;
+        }}
+        .login-brand span:last-child {{
+            font-size: 22px;
+            font-weight: 700;
+            color: {COLORS["text"]};
+        }}
+        .login-title {{
+            font-size: 28px;
+            font-weight: 800;
+            color: {COLORS["text"]};
+            margin-bottom: 6px;
+        }}
+        .login-subtitle {{
+            color: {COLORS["text_muted"]};
+            font-size: 14px;
+            margin: 0 0 24px 0;
+        }}
+        .login-input {{
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid {COLORS["card_border"]};
+            border-radius: 10px;
+            font-size: 16px;
+            font-family: 'Assistant', sans-serif;
+            outline: none;
+            transition: border-color 0.2s;
+            box-sizing: border-box;
+        }}
+        .login-input:focus {{
+            border-color: {COLORS["accent"]};
+        }}
+        .login-btn {{
+            width: 100%;
+            margin-top: 16px;
+            padding: 12px;
+            background: linear-gradient(135deg, {COLORS["accent"]}, {COLORS["accent2"]});
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 700;
+            font-family: 'Assistant', sans-serif;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }}
+        .login-btn:hover {{
+            opacity: 0.9;
+        }}
+
+        /* Sidebar user display */
+        .sidebar-user {{
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border-top: 1px solid rgba(255,255,255,0.08);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            color: rgba(255,255,255,0.65);
+            font-size: 13px;
+        }}
+        .sidebar-user-icon {{
+            font-size: 16px;
+        }}
+        .sidebar-user-name {{
+            font-weight: 600;
+            color: rgba(255,255,255,0.9);
         }}
 
         /* ============================================================
@@ -3539,8 +4103,8 @@ def _build_css() -> str:
             align-items: center;
             gap: 0;
             overflow-x: auto;
-            padding: 16px 0;
-            margin-bottom: 16px;
+            padding: 8px 0;
+            margin-bottom: 8px;
             scrollbar-width: thin;
         }}
         .deal-flow-step {{
@@ -3550,13 +4114,13 @@ def _build_css() -> str:
             white-space: nowrap;
         }}
         .deal-flow-step .step-dot {{
-            width: 28px;
-            height: 28px;
+            width: 22px;
+            height: 22px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 700;
             color: #fff;
             flex-shrink: 0;
@@ -3592,8 +4156,8 @@ def _build_css() -> str:
         .board-group-header {{
             display: flex;
             align-items: center;
-            gap: 10px;
-            padding: 10px 16px;
+            gap: 8px;
+            padding: 8px 14px;
             cursor: pointer;
             transition: background 0.15s ease;
             user-select: none;
@@ -3603,13 +4167,13 @@ def _build_css() -> str:
             background: #eef0f3;
         }}
         .board-group-header .group-color {{
-            width: 6px;
-            height: 32px;
+            width: 5px;
+            height: 24px;
             border-radius: 3px;
             flex-shrink: 0;
         }}
         .board-group-header .group-title {{
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 700;
             color: var(--text);
             flex: 1;
@@ -3635,9 +4199,9 @@ def _build_css() -> str:
             display: grid;
             grid-template-columns: 2fr 120px 100px 120px 100px 90px 90px;
             align-items: center;
-            padding: 8px 16px 8px 32px;
+            padding: 6px 14px 6px 28px;
             border-bottom: 1px solid var(--card-border);
-            font-size: 13px;
+            font-size: 12px;
             transition: background 0.12s ease;
         }}
         .board-row:hover {{
@@ -3649,7 +4213,7 @@ def _build_css() -> str:
         .board-header-row {{
             display: grid;
             grid-template-columns: 2fr 120px 100px 120px 100px 90px 90px;
-            padding: 6px 16px 6px 32px;
+            padding: 5px 14px 5px 28px;
             font-size: 11px;
             font-weight: 600;
             color: var(--text-muted);
@@ -3892,6 +4456,804 @@ def _build_css() -> str:
             .ai-item-row {{ grid-template-columns: 1fr 100px; }}
             .ai-item-row > :nth-child(n+3) {{ display: none; }}
         }}
+
+        /* ============================================================
+           AI Chat Assistant (eComplete AI)
+           ============================================================ */
+        .chat-fab {{
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, {COLORS['accent']}, {COLORS['accent2']});
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 16px rgba(60,180,173,0.35);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }}
+        .chat-fab:hover {{
+            transform: scale(1.08);
+            box-shadow: 0 6px 24px rgba(60,180,173,0.45);
+        }}
+        .chat-fab.has-panel {{ display: none; }}
+
+        .chat-panel {{
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 400px;
+            max-width: calc(100vw - 48px);
+            height: 540px;
+            max-height: calc(100vh - 48px);
+            background: var(--card);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            box-shadow: 0 12px 48px rgba(0,0,0,0.15);
+            z-index: 10000;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+        }}
+        .chat-panel.open {{
+            display: flex;
+            animation: chatSlideIn 0.25s ease;
+        }}
+        @keyframes chatSlideIn {{
+            from {{ opacity: 0; transform: translateY(20px) scale(0.96); }}
+            to {{ opacity: 1; transform: translateY(0) scale(1); }}
+        }}
+
+        .chat-header {{
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 16px;
+            background: linear-gradient(135deg, {COLORS['accent']}, {COLORS['accent2']});
+            color: #fff;
+            flex-shrink: 0;
+        }}
+        .chat-header-avatar {{
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px; font-weight: 700;
+        }}
+        .chat-header-info {{
+            flex: 1;
+        }}
+        .chat-header-name {{
+            font-weight: 700; font-size: 14px;
+        }}
+        .chat-header-status {{
+            font-size: 10px; opacity: 0.85;
+        }}
+        .chat-close {{
+            background: rgba(255,255,255,0.15);
+            border: none; cursor: pointer;
+            color: #fff; font-size: 18px;
+            width: 28px; height: 28px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+        }}
+        .chat-close:hover {{
+            background: rgba(255,255,255,0.25);
+        }}
+
+        .chat-messages {{
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }}
+        .chat-msg {{
+            max-width: 88%;
+            padding: 10px 14px;
+            border-radius: 14px;
+            font-size: 13px;
+            line-height: 1.5;
+            word-wrap: break-word;
+        }}
+        .chat-msg.user {{
+            align-self: flex-end;
+            background: {COLORS['accent']};
+            color: #fff;
+            border-bottom-right-radius: 4px;
+        }}
+        .chat-msg.assistant {{
+            align-self: flex-start;
+            background: var(--bg);
+            color: var(--text);
+            border: 1px solid var(--card-border);
+            border-bottom-left-radius: 4px;
+        }}
+        .chat-msg.assistant strong {{ font-weight: 700; }}
+        .chat-msg.assistant ul, .chat-msg.assistant ol {{
+            margin: 4px 0; padding-left: 18px;
+        }}
+        .chat-msg.assistant li {{ margin-bottom: 2px; }}
+        .chat-msg.assistant code {{
+            background: rgba(0,0,0,0.06);
+            padding: 1px 4px;
+            border-radius: 3px;
+            font-size: 12px;
+        }}
+        .chat-msg.system {{
+            align-self: center;
+            background: transparent;
+            color: var(--text-muted);
+            font-size: 11px;
+            text-align: center;
+            padding: 4px 8px;
+        }}
+        .chat-typing {{
+            align-self: flex-start;
+            display: flex;
+            gap: 4px;
+            padding: 12px 16px;
+        }}
+        .chat-typing span {{
+            width: 7px; height: 7px;
+            border-radius: 50%;
+            background: {COLORS['accent']};
+            animation: typingBounce 1.4s infinite;
+        }}
+        .chat-typing span:nth-child(2) {{ animation-delay: 0.15s; }}
+        .chat-typing span:nth-child(3) {{ animation-delay: 0.3s; }}
+        @keyframes typingBounce {{
+            0%, 60%, 100% {{ transform: translateY(0); opacity: 0.4; }}
+            30% {{ transform: translateY(-6px); opacity: 1; }}
+        }}
+
+        /* Chat tabs */
+        .chat-tabs {{
+            display: flex;
+            border-bottom: 1px solid var(--card-border);
+            flex-shrink: 0;
+        }}
+        .chat-tab {{
+            flex: 1;
+            padding: 8px 0;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            font-family: 'Assistant', sans-serif;
+            color: var(--text-muted);
+            transition: color 0.2s, border-color 0.2s;
+            border-bottom: 2px solid transparent;
+        }}
+        .chat-tab.active {{
+            color: {COLORS['accent']};
+            border-bottom-color: {COLORS['accent']};
+        }}
+        .chat-tab:hover {{ color: {COLORS['accent']}; }}
+
+        /* Categorised suggestions */
+        .chat-suggestions {{
+            display: block;
+            padding: 0;
+            max-height: 220px;
+            overflow-y: auto;
+            border-top: 1px solid var(--card-border);
+            flex-shrink: 0;
+        }}
+        .chat-suggest-group {{
+            border-bottom: 1px solid var(--card-border);
+        }}
+        .chat-suggest-group:last-child {{ border-bottom: none; }}
+        .chat-suggest-header {{
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 16px;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: color 0.2s;
+        }}
+        .chat-suggest-header:hover {{ color: {COLORS['accent']}; }}
+        .chat-suggest-arrow {{
+            font-size: 10px;
+            transition: transform 0.2s;
+        }}
+        .chat-suggest-group.collapsed .chat-suggest-arrow {{
+            transform: rotate(-90deg);
+        }}
+        .chat-suggest-group.collapsed .chat-suggest-items {{
+            display: none;
+        }}
+        .chat-suggest-items {{
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            padding: 0 16px 8px;
+        }}
+        .chat-suggestion {{
+            padding: 5px 10px;
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            background: var(--bg);
+            color: var(--text-muted);
+            font-size: 11px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: 'Assistant', sans-serif;
+        }}
+        .chat-suggestion:hover {{
+            border-color: {COLORS['accent']};
+            color: {COLORS['accent']};
+            background: rgba(60,180,173,0.05);
+        }}
+
+        /* Reports list */
+        .chat-reports {{
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px 0;
+        }}
+        .chat-report-item {{
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 16px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }}
+        .chat-report-item:hover {{
+            background: rgba(60,180,173,0.05);
+        }}
+        .chat-report-icon {{
+            font-size: 18px;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: var(--surface2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }}
+        .chat-report-info {{ flex: 1; min-width: 0; }}
+        .chat-report-title {{
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text);
+        }}
+        .chat-report-desc {{
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 1px;
+        }}
+        .chat-report-arrow {{
+            color: var(--text-muted);
+            font-size: 14px;
+            flex-shrink: 0;
+        }}
+        .chat-report-item:hover .chat-report-arrow {{
+            color: {COLORS['accent']};
+        }}
+        .chat-report-loading {{
+            position: absolute;
+            inset: 0;
+            background: rgba(255,255,255,0.92);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            z-index: 10;
+            font-size: 13px;
+            color: var(--text-muted);
+        }}
+
+        /* Per-message action buttons */
+        .chat-msg-actions {{
+            display: flex;
+            gap: 4px;
+            margin-top: 6px;
+            padding-top: 4px;
+            border-top: 1px solid var(--card-border);
+            opacity: 0;
+            transition: opacity 0.2s;
+        }}
+        .chat-msg.assistant:hover .chat-msg-actions {{ opacity: 1; }}
+        .chat-action-btn {{
+            background: none;
+            border: 1px solid var(--card-border);
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            padding: 2px 6px;
+            color: var(--text-muted);
+            transition: color 0.2s, border-color 0.2s;
+        }}
+        .chat-action-btn:hover {{
+            color: {COLORS['accent']};
+            border-color: {COLORS['accent']};
+        }}
+
+        .chat-input-area {{
+            display: flex;
+            gap: 8px;
+            padding: 12px 16px;
+            border-top: 1px solid var(--card-border);
+            background: var(--card);
+            flex-shrink: 0;
+        }}
+        .chat-input {{
+            flex: 1;
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 8px 14px;
+            font-size: 13px;
+            font-family: 'Assistant', sans-serif;
+            outline: none;
+            transition: border-color 0.2s;
+            background: var(--bg);
+            color: var(--text);
+        }}
+        .chat-input:focus {{
+            border-color: {COLORS['accent']};
+        }}
+        .chat-input::placeholder {{
+            color: var(--text-muted);
+        }}
+        .chat-send {{
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            border: none;
+            background: {COLORS['accent']};
+            color: #fff;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px;
+            transition: background 0.2s, opacity 0.2s;
+            flex-shrink: 0;
+        }}
+        .chat-send:hover {{ background: {COLORS['accent2']}; }}
+        .chat-send:disabled {{
+            opacity: 0.4; cursor: not-allowed;
+        }}
+        .chat-error {{
+            color: {COLORS['danger']};
+            font-size: 11px;
+            padding: 4px 16px;
+            text-align: center;
+        }}
+
+        /* ============================================================
+           eComplete AI — Full Page
+           ============================================================ */
+        .anna-section {{ padding: 0 !important; margin: 0; }}
+        .anna-layout {{
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            height: calc(100vh - 56px);
+            background: {COLORS['card']};
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid {COLORS['card_border']};
+        }}
+        /* Sidebar */
+        .anna-sidebar {{
+            background: {COLORS['surface2']};
+            border-right: 1px solid {COLORS['card_border']};
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            overflow-y: auto;
+        }}
+        .anna-new-chat {{
+            width: 100%;
+            padding: 10px 14px;
+            background: linear-gradient(135deg, #3CB4AD, #334FB4);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            font-family: 'Assistant', sans-serif;
+            cursor: pointer;
+            margin-bottom: 8px;
+            transition: opacity 0.15s;
+        }}
+        .anna-new-chat:hover {{ opacity: 0.9; }}
+        .anna-conv-list {{
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            flex: 1;
+            overflow-y: auto;
+        }}
+        .anna-conv-item {{
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            color: {COLORS['text']};
+            transition: background 0.15s;
+            border: none;
+            background: none;
+            text-align: left;
+            font-family: 'Assistant', sans-serif;
+            width: 100%;
+        }}
+        .anna-conv-item:hover {{ background: {COLORS['card_border']}60; }}
+        .anna-conv-item.active {{
+            background: {COLORS['card']};
+            font-weight: 700;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        }}
+        .anna-conv-item .conv-icon {{ font-size: 14px; flex-shrink: 0; }}
+        .anna-conv-item .conv-label {{ flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }}
+        .anna-conv-item .conv-delete {{
+            opacity: 0; font-size: 11px; color: {COLORS['text_muted']}; cursor: pointer;
+            border: none; background: none; padding: 2px 4px; border-radius: 4px;
+        }}
+        .anna-conv-item:hover .conv-delete {{ opacity: 1; }}
+        .anna-conv-item .conv-delete:hover {{ color: {COLORS['danger']}; background: {COLORS['danger']}15; }}
+        .anna-sidebar-divider {{
+            height: 1px;
+            background: {COLORS['card_border']};
+            margin: 8px 0;
+        }}
+        .anna-sidebar-label {{
+            font-size: 11px;
+            font-weight: 700;
+            color: {COLORS['text_muted']};
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            padding: 4px 10px 6px;
+        }}
+        .anna-report-btn {{
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            padding: 7px 10px;
+            border: none;
+            border-radius: 6px;
+            background: transparent;
+            color: {COLORS['text']};
+            font-size: 12px;
+            font-family: 'Assistant', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.15s;
+        }}
+        .anna-report-btn:hover {{
+            background: {COLORS['accent']}12;
+            color: {COLORS['accent']};
+        }}
+        .anna-report-btn span {{ font-size: 13px; }}
+        /* Chat area */
+        .anna-chat-area {{
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }}
+        .anna-chat-header {{
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 20px;
+            border-bottom: 1px solid {COLORS['card_border']};
+            flex-shrink: 0;
+        }}
+        .anna-avatar {{
+            width: 34px; height: 34px; border-radius: 50%;
+            background: linear-gradient(135deg, #3CB4AD, #334FB4);
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-weight: 800; font-size: 14px; flex-shrink: 0;
+        }}
+        .anna-header-info {{ flex: 1; }}
+        .anna-header-name {{ font-size: 14px; font-weight: 700; color: {COLORS['text']}; }}
+        .anna-header-status {{ font-size: 11px; color: {COLORS['text_muted']}; }}
+        .anna-header-btn {{
+            background: none; border: 1px solid {COLORS['card_border']};
+            border-radius: 6px; padding: 5px 8px; cursor: pointer;
+            font-size: 13px; color: {COLORS['text_muted']}; transition: all 0.15s;
+        }}
+        .anna-header-btn:hover {{ color: {COLORS['text']}; border-color: {COLORS['text_muted']}; }}
+        .anna-messages {{
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }}
+        /* Welcome screen */
+        .anna-welcome {{
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            min-height: 300px;
+            text-align: center;
+            padding: 40px 20px;
+        }}
+        .anna-welcome-avatar {{
+            width: 56px; height: 56px; border-radius: 50%;
+            background: linear-gradient(135deg, #3CB4AD, #334FB4);
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-weight: 800; font-size: 24px; margin-bottom: 16px;
+        }}
+        .anna-welcome-title {{
+            font-size: 22px; font-weight: 800; color: {COLORS['text']}; margin-bottom: 6px;
+        }}
+        .anna-welcome-sub {{
+            font-size: 13px; color: {COLORS['text_muted']}; max-width: 400px; margin-bottom: 24px; line-height: 1.5;
+        }}
+        .anna-suggestions {{
+            display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; max-width: 500px;
+        }}
+        .anna-suggest-btn {{
+            padding: 7px 14px;
+            border: 1px solid {COLORS['card_border']};
+            border-radius: 20px;
+            background: {COLORS['card']};
+            color: {COLORS['text']};
+            font-size: 12px;
+            font-family: 'Assistant', sans-serif;
+            cursor: pointer;
+            transition: all 0.15s;
+        }}
+        .anna-suggest-btn:hover {{
+            border-color: {COLORS['accent']};
+            color: {COLORS['accent']};
+            background: {COLORS['accent']}08;
+        }}
+        /* Message bubbles */
+        .anna-messages .chat-msg {{
+            font-size: 13px;
+            line-height: 1.6;
+            padding: 10px 14px;
+            border-radius: 12px;
+            max-width: 80%;
+            word-wrap: break-word;
+        }}
+        .anna-messages .chat-msg.user {{
+            background: {COLORS['accent']};
+            color: #fff;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }}
+        .anna-messages .chat-msg.assistant {{
+            background: {COLORS['surface2']};
+            color: {COLORS['text']};
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+            max-width: 90%;
+        }}
+        .anna-messages .chat-msg.system {{
+            background: transparent;
+            color: {COLORS['text_muted']};
+            font-size: 12px;
+            text-align: center;
+            align-self: center;
+            max-width: 100%;
+        }}
+        /* Inline report card */
+        .anna-report-card {{
+            align-self: flex-start;
+            max-width: 95%;
+            width: 100%;
+            border: 1px solid {COLORS['card_border']};
+            border-radius: 12px;
+            overflow: hidden;
+            background: {COLORS['card']};
+        }}
+        .anna-report-card-header {{
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 18px;
+            background: linear-gradient(135deg, #3CB4AD08, #334FB408);
+            border-bottom: 2px solid {COLORS['accent']};
+        }}
+        .anna-report-card-dot {{
+            width: 24px; height: 24px; border-radius: 50%; background: {COLORS['accent']};
+            display: flex; align-items: center; justify-content: center;
+            font-size: 11px; font-weight: 800; color: #fff;
+        }}
+        .anna-report-card-title {{
+            font-size: 14px; font-weight: 700; color: {COLORS['text']}; flex: 1;
+        }}
+        .anna-report-card-meta {{
+            font-size: 10px; color: {COLORS['text_muted']};
+        }}
+        .anna-report-card-body {{
+            padding: 18px;
+            font-size: 13px;
+            line-height: 1.65;
+            color: {COLORS['text']};
+        }}
+        .anna-report-card-body strong {{ font-weight: 700; }}
+        .anna-report-card-body ul, .anna-report-card-body ol {{ margin: 6px 0; padding-left: 20px; }}
+        .anna-report-card-body li {{ margin-bottom: 3px; }}
+        .anna-report-card-body code {{ background: {COLORS['surface2']}; padding: 1px 5px; border-radius: 3px; font-size: 12px; }}
+        .anna-report-card-footer {{
+            display: flex;
+            gap: 6px;
+            padding: 10px 18px;
+            border-top: 1px solid {COLORS['card_border']};
+            background: {COLORS['surface2']};
+        }}
+        .anna-report-action {{
+            padding: 5px 12px;
+            border: 1px solid {COLORS['card_border']};
+            border-radius: 6px;
+            background: {COLORS['card']};
+            color: {COLORS['text']};
+            font-size: 11px;
+            font-weight: 600;
+            font-family: 'Assistant', sans-serif;
+            cursor: pointer;
+            transition: all 0.15s;
+        }}
+        .anna-report-action:hover {{
+            border-color: {COLORS['accent']};
+            color: {COLORS['accent']};
+        }}
+        /* Input area */
+        .anna-input-area {{
+            display: flex;
+            gap: 8px;
+            padding: 14px 20px;
+            border-top: 1px solid {COLORS['card_border']};
+            flex-shrink: 0;
+        }}
+        .anna-input {{
+            flex: 1;
+            padding: 10px 16px;
+            border: 1px solid {COLORS['card_border']};
+            border-radius: 10px;
+            font-size: 13px;
+            font-family: 'Assistant', sans-serif;
+            outline: none;
+            background: {COLORS['surface2']};
+            color: {COLORS['text']};
+            transition: border-color 0.2s;
+        }}
+        .anna-input:focus {{ border-color: {COLORS['accent']}; }}
+        .anna-send-btn {{
+            padding: 10px 18px;
+            background: linear-gradient(135deg, #3CB4AD, #334FB4);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: opacity 0.15s;
+        }}
+        .anna-send-btn:hover {{ opacity: 0.9; }}
+        @media (max-width: 900px) {{
+            .anna-layout {{ grid-template-columns: 1fr; height: auto; min-height: calc(100vh - 56px); }}
+            .anna-sidebar {{ display: none; }}
+        }}
+
+        /* ============================================================
+           Executive Summary — compact KPI strip & pillars
+           ============================================================ */
+        .exec-kpi-strip {{
+            display: flex;
+            gap: 6px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }}
+        .exec-kpi {{
+            flex: 1 1 0;
+            min-width: 90px;
+            background: {COLORS['card']};
+            border: 1px solid {COLORS['card_border']};
+            border-radius: 6px;
+            padding: 8px 10px;
+            text-align: center;
+        }}
+        .exec-kpi-val {{
+            font-size: 18px;
+            font-weight: 800;
+            line-height: 1.2;
+        }}
+        .exec-kpi-label {{
+            font-size: 10px;
+            color: {COLORS['text_muted']};
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-top: 2px;
+        }}
+        .exec-pillars {{
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-bottom: 10px;
+        }}
+        .exec-pillar {{
+            background: {COLORS['card']};
+            border: 1px solid {COLORS['card_border']};
+            border-radius: 8px;
+            padding: 14px 16px;
+            transition: var(--transition);
+        }}
+        .exec-pillar:hover {{
+            border-color: rgba(60,180,173,0.35);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+        }}
+        .exec-pillar-header {{
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }}
+        .exec-pillar-icon {{
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            flex-shrink: 0;
+        }}
+        .exec-pillar-title {{
+            font-size: 13px;
+            font-weight: 700;
+            color: {COLORS['text']};
+            flex: 1;
+        }}
+        .exec-pillar-arrow {{
+            font-size: 16px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }}
+        .exec-pillar:hover .exec-pillar-arrow {{ opacity: 1; }}
+        .exec-pillar-points {{
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }}
+        .exec-pillar-points li {{
+            font-size: 11.5px;
+            color: {COLORS['text_muted']};
+            line-height: 1.5;
+            padding: 2px 0;
+            border-bottom: 1px solid {COLORS['card_border']};
+        }}
+        .exec-pillar-points li:last-child {{ border-bottom: none; }}
+        .exec-pillar-points li strong {{ color: {COLORS['text']}; }}
+        @media (max-width: 1100px) {{
+            .exec-pillars {{ grid-template-columns: repeat(2, 1fr); }}
+        }}
+        @media (max-width: 600px) {{
+            .exec-kpi-strip {{ flex-wrap: wrap; }}
+            .exec-kpi {{ min-width: 70px; }}
+            .exec-pillars {{ grid-template-columns: 1fr; }}
+        }}
+
+        @media print {{
+            .chat-fab, .chat-panel {{ display: none !important; }}
+        }}
     </style>'''
 
 
@@ -3905,6 +5267,48 @@ def _build_js() -> str:
     <script>
     (function() {
         'use strict';
+
+        // ------------------------------------------------------------------
+        // Login gate — localStorage name persistence
+        // ------------------------------------------------------------------
+        var LOGIN_KEY = 'ecomplete_user';
+        var loginOverlay = document.getElementById('login-overlay');
+        var loginInput = document.getElementById('login-name');
+        var storedUser = '';
+        try { storedUser = localStorage.getItem(LOGIN_KEY) || ''; } catch(e) {}
+
+        function updateSidebarUser(name) {
+            var el = document.getElementById('sidebar-user-name');
+            if (el) el.textContent = name || '';
+        }
+
+        if (storedUser) {
+            // Already logged in — hide overlay immediately
+            if (loginOverlay) loginOverlay.classList.add('hidden');
+            updateSidebarUser(storedUser);
+        } else {
+            // Show overlay, prevent scroll
+            document.body.style.overflow = 'hidden';
+            if (loginInput) loginInput.focus();
+        }
+
+        window.doLogin = function() {
+            var input = document.getElementById('login-name');
+            var name = (input ? input.value : '').trim();
+            if (!name) { if (input) input.focus(); return; }
+            try { localStorage.setItem(LOGIN_KEY, name); } catch(e) {}
+            var overlay = document.getElementById('login-overlay');
+            if (overlay) overlay.classList.add('hidden');
+            document.body.style.overflow = '';
+            updateSidebarUser(name);
+        };
+
+        // Enter key support
+        if (loginInput) {
+            loginInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') window.doLogin();
+            });
+        }
 
         // ------------------------------------------------------------------
         // Sidebar toggle (mobile)
@@ -3948,6 +5352,69 @@ def _build_js() -> str:
             } catch(e) {}
         }
 
+        // ------------------------------------------------------------------
+        // Favourites (#fav)
+        // ------------------------------------------------------------------
+        var MODULES_MAP = {};
+        document.querySelectorAll('.sidebar-link[data-page]').forEach(function(link) {
+            MODULES_MAP[link.getAttribute('data-page')] = link.textContent.trim();
+        });
+
+        function getFavs() {
+            var prefs = loadPrefs();
+            return Array.isArray(prefs.favs) ? prefs.favs : [];
+        }
+
+        function renderFavs() {
+            var favs = getFavs();
+            var container = document.getElementById('sidebar-favs');
+            var list = document.getElementById('sidebar-favs-list');
+            if (!container || !list) return;
+
+            // Show/hide favourites group
+            if (favs.length === 0) {
+                container.classList.remove('has-favs');
+                list.innerHTML = '';
+                return;
+            }
+            container.classList.add('has-favs');
+
+            // Build fav links
+            var html = '';
+            for (var i = 0; i < favs.length; i++) {
+                var fid = favs[i];
+                var label = MODULES_MAP[fid] || fid;
+                html += '<a href="javascript:void(0)" onclick="showPage(&#39;' + fid + '&#39;)" '
+                    + 'class="sidebar-link" data-page="' + fid + '">' + label
+                    + '<button class="sidebar-fav is-fav" data-fav="' + fid + '" '
+                    + 'onclick="event.preventDefault();event.stopPropagation();toggleFav(&#39;' + fid + '&#39;)" '
+                    + 'title="Remove favourite">&#9733;</button></a>';
+            }
+            list.innerHTML = html;
+
+            // Update star states in main nav
+            document.querySelectorAll('.sidebar-fav[data-fav]').forEach(function(btn) {
+                var pid = btn.getAttribute('data-fav');
+                if (favs.indexOf(pid) !== -1) {
+                    btn.classList.add('is-fav');
+                } else {
+                    btn.classList.remove('is-fav');
+                }
+            });
+        }
+
+        window.toggleFav = function(pageId) {
+            var favs = getFavs();
+            var idx = favs.indexOf(pageId);
+            if (idx === -1) {
+                favs.push(pageId);
+            } else {
+                favs.splice(idx, 1);
+            }
+            savePrefs({favs: favs});
+            renderFavs();
+        };
+
         window.showPage = function(pageId) {
             // Hide all pages
             document.querySelectorAll('.dash-page').forEach(function(page) {
@@ -3978,6 +5445,14 @@ def _build_js() -> str:
                     }, 50);
                 });
             }
+            // Hide chat FAB, freshness bar, and filter bar on Anna page
+            var isAnna = (pageId === 'anna');
+            var fab = document.getElementById('chat-fab');
+            var freshBar = document.getElementById('freshness-bar');
+            var filterBar = document.getElementById('filter-bar');
+            if (fab) fab.style.display = isAnna ? 'none' : '';
+            if (freshBar) freshBar.style.display = isAnna ? 'none' : '';
+            if (filterBar) filterBar.style.display = isAnna ? 'none' : '';
             // Persist last page (#51)
             savePrefs({lastPage: pageId});
         };
@@ -3990,11 +5465,11 @@ def _build_js() -> str:
             }
         });
 
-        // Restore last page or default to executive (#51)
+        // Restore last page or default to executive (#51) + render favourites
         document.addEventListener('DOMContentLoaded', function() {
+            renderFavs();
             var prefs = loadPrefs();
             var startPage = prefs.lastPage || 'executive';
-            // Verify the page exists
             if (!document.getElementById('page-' + startPage)) startPage = 'executive';
             showPage(startPage);
         });
@@ -4030,6 +5505,180 @@ def _build_js() -> str:
         };
 
     })();
+    </script>'''
+
+
+def _build_supabase_js() -> str:
+    """Build the Supabase live-fetch JavaScript module.
+
+    Fetches latest metrics from Supabase Storage public URLs and updates
+    KPIs on the executive summary page in real time.
+    """
+    sb_url = os.getenv("SUPABASE_URL", "").strip()
+
+    if not sb_url:
+        return ""
+
+    storage_base = f"{sb_url}/storage/v1/object/public/dashboard-data"
+
+    return f'''
+    <script>
+    (function() {{
+        'use strict';
+
+        var STORAGE = '{storage_base}';
+
+        // ---- Format helpers (match Python _fmt_currency / _fmt_number / _fmt_pct) ----
+        function fmtCurrency(v) {{
+            if (v == null || isNaN(v)) return '\\u00a30';
+            var abs = Math.abs(v);
+            if (abs >= 1e6) return '\\u00a3' + (v / 1e6).toFixed(1) + 'M';
+            if (abs >= 1e3) return '\\u00a3' + (v / 1e3).toFixed(0) + 'K';
+            return '\\u00a3' + Math.round(v).toLocaleString();
+        }}
+        function fmtNumber(v) {{
+            if (v == null || isNaN(v)) return '0';
+            var abs = Math.abs(v);
+            if (abs >= 1e6) return (v / 1e6).toFixed(1) + 'M';
+            if (abs >= 1e3) return (v / 1e3).toFixed(1) + 'K';
+            return Math.round(v).toLocaleString();
+        }}
+        function fmtPct(v) {{
+            if (v == null || isNaN(v)) return '0%';
+            return (v * 100).toFixed(1) + '%';
+        }}
+
+        var FORMATTERS = {{
+            'pipeline_metrics.total_pipeline_value': fmtCurrency,
+            'pipeline_metrics.weighted_pipeline_value': fmtCurrency,
+            'pipeline_metrics.win_rate': fmtPct,
+            'pipeline_metrics.open_deals_count': fmtNumber,
+            'pipeline_metrics.avg_deal_size': fmtCurrency,
+            'activity_metrics.total_activities': fmtNumber,
+            'record_counts.contacts': fmtNumber,
+            'lead_metrics.total_leads': fmtNumber,
+            'insights.revenue_forecast.days_30': fmtCurrency,
+            'insights.revenue_forecast.days_90': fmtCurrency
+        }};
+
+        function resolve(obj, path) {{
+            var parts = path.split('.');
+            var cur = obj;
+            for (var i = 0; i < parts.length; i++) {{
+                if (cur == null) return undefined;
+                cur = cur[parts[i]];
+            }}
+            return cur;
+        }}
+
+        function setStatus(state, text) {{
+            var bar = document.getElementById('freshness-bar');
+            if (!bar) return;
+            var el = document.getElementById('supabase-status');
+            if (!el) {{
+                el = document.createElement('span');
+                el.id = 'supabase-status';
+                el.className = 'supabase-status';
+                bar.appendChild(el);
+            }}
+            el.className = 'supabase-status ' + state;
+            if (state === 'live') {{
+                el.innerHTML = '<span class="live-dot"></span> ' + text;
+            }} else {{
+                el.textContent = text;
+            }}
+        }}
+
+        // ---- Fetch JSON from Supabase Storage (public URL, no auth needed) ----
+        function fetchFile(filename) {{
+            return fetch(STORAGE + '/' + filename + '?t=' + Date.now())
+                .then(function(r) {{
+                    if (!r.ok) throw new Error('HTTP ' + r.status);
+                    return r.json();
+                }});
+        }}
+
+        function updateKPIs(data) {{
+            var cards = document.querySelectorAll('[data-metric]');
+            var updated = 0;
+            cards.forEach(function(card) {{
+                var key = card.getAttribute('data-metric');
+                var val = resolve(data, key);
+                if (val === undefined || val === null) return;
+
+                var formatter = FORMATTERS[key] || fmtNumber;
+                var valueEl = card.querySelector('[data-role="stat-value"]');
+                if (valueEl) {{
+                    var newText = formatter(val);
+                    if (valueEl.textContent !== newText) {{
+                        valueEl.textContent = newText;
+                        card.classList.add('kpi-updated');
+                        setTimeout(function() {{ card.classList.remove('kpi-updated'); }}, 600);
+                        updated++;
+                    }}
+                }}
+            }});
+            return updated;
+        }}
+
+        function updatePill(name, genAt) {{
+            if (!genAt) return;
+            var timeStr = genAt.substring(5, 16);
+            var pills = document.querySelectorAll('.freshness-pill');
+            pills.forEach(function(pill) {{
+                if (pill.textContent.indexOf(name) === 0 && timeStr) {{
+                    pill.textContent = name + ': ' + timeStr;
+                    pill.title = 'Live from Supabase: ' + genAt;
+                }}
+            }});
+        }}
+
+        function init() {{
+            setStatus('offline', 'Connecting...');
+
+            fetchFile('hubspot_sales_metrics.json')
+                .then(function(data) {{
+                    updateKPIs(data);
+                    var genAt = data.generated_at || '';
+                    var timeStr = genAt.substring(5, 16);
+                    setStatus('live', 'Live' + (timeStr ? ' \\u00b7 ' + timeStr : ''));
+                    updatePill('HubSpot', genAt);
+                    // Store for AI chat context
+                    window.__sbHubspot = data;
+                }})
+                .catch(function(err) {{
+                    console.warn('Supabase fetch failed:', err);
+                    setStatus('error', 'Offline');
+                }});
+
+            fetchFile('monday_metrics.json')
+                .then(function(data) {{
+                    updatePill('Monday', data.generated_at || '');
+                    window.__sbMonday = data;
+                }})
+                .catch(function() {{}});
+
+            fetchFile('inbound_queue.json')
+                .then(function(data) {{
+                    updatePill('Queue', data.generated_at || '');
+                    window.__sbQueue = data;
+                }})
+                .catch(function() {{}});
+
+            // Refresh every 5 minutes
+            setInterval(function() {{
+                fetchFile('hubspot_sales_metrics.json')
+                    .then(function(data) {{ updateKPIs(data); }})
+                    .catch(function() {{}});
+            }}, 300000);
+        }}
+
+        if (document.readyState === 'loading') {{
+            document.addEventListener('DOMContentLoaded', init);
+        }} else {{
+            init();
+        }}
+    }})();
     </script>'''
 
 
@@ -4274,13 +5923,36 @@ def _build_quick_actions(data: dict) -> str:
 
 
 # ---------------------------------------------------------------------------
+# Merged page wrappers — combine related sections into single pages
+# ---------------------------------------------------------------------------
+
+def _build_leads_and_funnel(data: dict) -> str:
+    """Leads & Conversion — merges Leads and Funnel sections into one page."""
+    return _build_leads_section(data) + _build_funnel_section(data)
+
+
+def _build_activities_and_contacts(data: dict) -> str:
+    """Activity & Contacts — merges Activity Tracking and Contacts sections."""
+    return _build_activity_section(data) + _build_contacts_section(data)
+
+
+def _build_monday_pipeline_and_workspaces(data: dict) -> str:
+    """M&A Pipeline — merges Monday Pipeline and Workspaces sections."""
+    return _build_monday_pipeline(data) + _build_monday_workspaces(data)
+
+
+def _build_inbound_and_actions(data: dict) -> str:
+    """Inbound Queue — merges Inbound Queue and Quick Actions sections."""
+    return _build_inbound_queue(data) + _build_quick_actions(data)
+
+
+# ---------------------------------------------------------------------------
 # Main assembly
 # ---------------------------------------------------------------------------
 
 def _build_sidebar() -> str:
-    """Build the fixed left-hand navy sidebar with grouped sections and page switching.
+    """Build the fixed left-hand navy sidebar with grouped sections, favourites, and AI link.
     Uses MODULES registry as single source of truth."""
-    # Build nav groups from MODULES
     from collections import OrderedDict
     nav_groups: Dict[str, dict] = OrderedDict()
     for mod in MODULES:
@@ -4293,7 +5965,9 @@ def _build_sidebar() -> str:
     for g in nav_groups.values():
         items_html = ''.join(
             f'<a href="javascript:void(0)" onclick="showPage(\'{sid}\')" '
-            f'class="sidebar-link" data-page="{sid}">{lbl}</a>'
+            f'class="sidebar-link" data-page="{sid}">{lbl}'
+            f'<button class="sidebar-fav" data-fav="{sid}" onclick="event.preventDefault();event.stopPropagation();toggleFav(\'{sid}\')" '
+            f'title="Toggle favourite">&#9733;</button></a>'
             for sid, lbl in g["items"]
         )
         groups_html += f'''
@@ -4306,7 +5980,15 @@ def _build_sidebar() -> str:
             <span class="brand-dot">e</span>
             <span class="sidebar-brand-text">eComplete</span>
         </div>
+        <div class="sidebar-user" id="sidebar-user">
+            <span class="sidebar-user-icon">&#128100;</span>
+            <span class="sidebar-user-name" id="sidebar-user-name"></span>
+        </div>
         <nav class="sidebar-nav">
+            <div class="sidebar-favs-group" id="sidebar-favs">
+                <div class="sidebar-group-label">&#9733; Favourites</div>
+                <div id="sidebar-favs-list"></div>
+            </div>
             {groups_html}
         </nav>
         <div class="sidebar-footer">
@@ -4316,6 +5998,802 @@ def _build_sidebar() -> str:
     <button class="sidebar-toggle" id="sidebar-toggle" onclick="toggleSidebar()" aria-label="Toggle menu">
         <span></span><span></span><span></span>
     </button>'''
+
+
+# ---------------------------------------------------------------------------
+# AI Chat Assistant (Anna)
+# ---------------------------------------------------------------------------
+
+def _build_chat_html() -> str:
+    """Build the floating chat button and panel HTML with tabs, grouped suggestions, and reports."""
+    return '''
+    <!-- AI Chat Assistant -->
+    <button class="chat-fab" id="chat-fab" onclick="window.AnnaChat.open()" aria-label="Ask eComplete AI" title="eComplete AI (Ctrl+K)">
+        &#9889;
+    </button>
+    <div class="chat-panel" id="chat-panel">
+        <div class="chat-header">
+            <div class="chat-header-avatar">e</div>
+            <div class="chat-header-info">
+                <div class="chat-header-name">eComplete AI</div>
+                <div class="chat-header-status">Sales &amp; M&amp;A Intelligence</div>
+            </div>
+            <button class="chat-close" onclick="window.AnnaChat.close()" aria-label="Close">&times;</button>
+        </div>
+        <div class="chat-tabs">
+            <button class="chat-tab active" data-tab="chat" onclick="window.AnnaChat.switchTab(\'chat\')">&#9889; Chat</button>
+            <button class="chat-tab" data-tab="reports" onclick="window.AnnaChat.switchTab(\'reports\')">&#128196; Reports</button>
+        </div>
+        <div class="chat-messages" id="chat-messages">
+            <div class="chat-msg system">Ask me anything about your sales data, pipeline, M&amp;A projects, or team activity.</div>
+        </div>
+        <div class="chat-suggestions" id="chat-suggestions">
+            <div class="chat-suggest-group">
+                <div class="chat-suggest-header" onclick="window.AnnaChat.toggleGroup(this)">
+                    &#9733; Pipeline &amp; Deals <span class="chat-suggest-arrow">&#9662;</span>
+                </div>
+                <div class="chat-suggest-items">
+                    <button class="chat-suggestion" onclick="window.AnnaChat.ask(this.textContent)">Summarise deal flow this month</button>
+                    <button class="chat-suggestion" onclick="window.AnnaChat.ask(this.textContent)">Which deals are stale or at risk?</button>
+                    <button class="chat-suggestion" onclick="window.AnnaChat.ask(this.textContent)">Pipeline health &amp; coverage ratio</button>
+                    <button class="chat-suggestion" onclick="window.AnnaChat.ask(this.textContent)">What is the current win rate?</button>
+                </div>
+            </div>
+            <div class="chat-suggest-group">
+                <div class="chat-suggest-header" onclick="window.AnnaChat.toggleGroup(this)">
+                    &#10024; Leads &amp; Marketing <span class="chat-suggest-arrow">&#9662;</span>
+                </div>
+                <div class="chat-suggest-items">
+                    <button class="chat-suggestion" onclick="window.AnnaChat.ask(this.textContent)">Summarise leads by source</button>
+                    <button class="chat-suggestion" onclick="window.AnnaChat.ask(this.textContent)">Lead source effectiveness</button>
+                    <button class="chat-suggestion" onclick="window.AnnaChat.ask(this.textContent)">MQL to SQL conversion trends</button>
+                </div>
+            </div>
+            <div class="chat-suggest-group">
+                <div class="chat-suggest-header" onclick="window.AnnaChat.toggleGroup(this)">
+                    &#9993; Team Activity <span class="chat-suggest-arrow">&#9662;</span>
+                </div>
+                <div class="chat-suggest-items">
+                    <button class="chat-suggestion" onclick="window.AnnaChat.ask(this.textContent)">Top performing rep this month</button>
+                    <button class="chat-suggestion" onclick="window.AnnaChat.ask(this.textContent)">Team activity breakdown</button>
+                    <button class="chat-suggestion" onclick="window.AnnaChat.ask(this.textContent)">Touches per won deal average</button>
+                </div>
+            </div>
+            <div class="chat-suggest-group">
+                <div class="chat-suggest-header" onclick="window.AnnaChat.toggleGroup(this)">
+                    &#128188; M&amp;A <span class="chat-suggest-arrow">&#9662;</span>
+                </div>
+                <div class="chat-suggest-items">
+                    <button class="chat-suggestion" onclick="window.AnnaChat.ask(this.textContent)">M&amp;A pipeline status</button>
+                    <button class="chat-suggestion" onclick="window.AnnaChat.ask(this.textContent)">Stale M&amp;A projects</button>
+                    <button class="chat-suggestion" onclick="window.AnnaChat.ask(this.textContent)">IC scorecard summary</button>
+                </div>
+            </div>
+            <div class="chat-suggest-group">
+                <div class="chat-suggest-header" onclick="window.AnnaChat.toggleGroup(this)">
+                    &#9889; Quick Reports <span class="chat-suggest-arrow">&#9662;</span>
+                </div>
+                <div class="chat-suggest-items">
+                    <button class="chat-suggestion" onclick="window.AnnaChat.ask(this.textContent)">Weekly summary</button>
+                    <button class="chat-suggestion" onclick="window.AnnaChat.ask(this.textContent)">Revenue forecast next 90 days</button>
+                    <button class="chat-suggestion" onclick="window.AnnaChat.ask(this.textContent)">Key risks and blockers</button>
+                </div>
+            </div>
+        </div>
+        <div class="chat-reports" id="chat-reports" style="display:none">
+            <div class="chat-report-item" onclick="window.AnnaChat.runReport(\'monthly-deal-flow\')">
+                <span class="chat-report-icon">&#9733;</span>
+                <div class="chat-report-info">
+                    <div class="chat-report-title">Monthly Deal Flow Summary</div>
+                    <div class="chat-report-desc">Deals created, won, lost &amp; pipeline movement</div>
+                </div>
+                <span class="chat-report-arrow">&#8594;</span>
+            </div>
+            <div class="chat-report-item" onclick="window.AnnaChat.runReport(\'pipeline-health\')">
+                <span class="chat-report-icon">&#9881;</span>
+                <div class="chat-report-info">
+                    <div class="chat-report-title">Pipeline Health Report</div>
+                    <div class="chat-report-desc">Coverage ratio, stage distribution &amp; stale deals</div>
+                </div>
+                <span class="chat-report-arrow">&#8594;</span>
+            </div>
+            <div class="chat-report-item" onclick="window.AnnaChat.runReport(\'lead-source\')">
+                <span class="chat-report-icon">&#10024;</span>
+                <div class="chat-report-info">
+                    <div class="chat-report-title">Lead Source Analysis</div>
+                    <div class="chat-report-desc">Source effectiveness, MQL/SQL conversion rates</div>
+                </div>
+                <span class="chat-report-arrow">&#8594;</span>
+            </div>
+            <div class="chat-report-item" onclick="window.AnnaChat.runReport(\'weekly-activity\')">
+                <span class="chat-report-icon">&#9993;</span>
+                <div class="chat-report-info">
+                    <div class="chat-report-title">Weekly Activity Report</div>
+                    <div class="chat-report-desc">Calls, emails, meetings &amp; tasks by rep</div>
+                </div>
+                <span class="chat-report-arrow">&#8594;</span>
+            </div>
+            <div class="chat-report-item" onclick="window.AnnaChat.runReport(\'ma-pipeline\')">
+                <span class="chat-report-icon">&#128188;</span>
+                <div class="chat-report-info">
+                    <div class="chat-report-title">M&amp;A Pipeline Status</div>
+                    <div class="chat-report-desc">Active projects, stages &amp; owner summary</div>
+                </div>
+                <span class="chat-report-arrow">&#8594;</span>
+            </div>
+            <div class="chat-report-item" onclick="window.AnnaChat.runReport(\'rep-scorecard\')">
+                <span class="chat-report-icon">&#9879;</span>
+                <div class="chat-report-info">
+                    <div class="chat-report-title">Rep Performance Scorecard</div>
+                    <div class="chat-report-desc">Individual rep metrics, pipeline &amp; activities</div>
+                </div>
+                <span class="chat-report-arrow">&#8594;</span>
+            </div>
+        </div>
+        <div class="chat-input-area" id="chat-input-area">
+            <input class="chat-input" id="chat-input" type="text"
+                   placeholder="Ask about your data..."
+                   onkeydown="if(event.key===\'Enter\'&&!event.shiftKey){event.preventDefault();window.AnnaChat.send()}" />
+            <button class="chat-send" id="chat-send" onclick="window.AnnaChat.send()" aria-label="Send">&#10148;</button>
+        </div>
+    </div>'''
+
+
+def _build_chat_js() -> str:
+    """Build the AI chat assistant JavaScript.
+
+    Uses the Vercel serverless function `/api/ai-query` as the backend.
+    Includes: categorised suggestions, tab switching, per-message export,
+    report generation with branded PDF print windows.
+    """
+    return f'''
+    <script>
+    (function() {{
+        'use strict';
+
+        var FUNC_URL = '/api/ai-query';
+
+        var history = [];
+        var isOpen = false;
+        var isLoading = false;
+
+        // ---- Report prompts ----
+        var REPORT_PROMPTS = {{
+            'monthly-deal-flow': 'Generate a comprehensive Monthly Deal Flow Summary report. Include: total deals created vs closed this period, won vs lost breakdown with values in GBP, new pipeline added, average deal size, deal velocity, and comparison to prior period. Format with clear sections using headings and tables where appropriate.',
+            'pipeline-health': 'Generate a Pipeline Health Report. Include: total pipeline value and weighted value in GBP, pipeline coverage ratio, stage-by-stage breakdown with deal counts and values, average time in each stage, stale deals requiring attention, and overall pipeline risk assessment. Use headings and bullet points.',
+            'lead-source': 'Generate a Lead Source Analysis report. Include: total leads by source with counts, lead-to-MQL and MQL-to-SQL conversion rates by source, most effective channels, trend analysis, and recommendations for lead generation improvement. Format with clear sections.',
+            'weekly-activity': 'Generate a Weekly Activity Report. Include: total activities (calls, emails, meetings, tasks, notes) by rep, activity-to-deal ratios, most active reps, engagement trends, and touches per won deal analysis. Format as a structured report with tables.',
+            'ma-pipeline': 'Generate an M&A Pipeline Status report. Include: total active projects, stage distribution breakdown, stale projects requiring attention with days stale, owner workload summary, IC scorecard highlights, and upcoming decision points. Use clear headings.',
+            'rep-scorecard': 'Generate a Rep Performance Scorecard. For each sales rep, include: deals owned (count and value in GBP), win rate, activity volume breakdown, average deal size, pipeline contribution, and relative performance. Format as a comparative table or structured list.'
+        }};
+
+        // ---- DOM refs ----
+        function $(id) {{ return document.getElementById(id); }}
+
+        // ---- Markdown-lite renderer ----
+        function md(text) {{
+            if (!text) return '';
+            var s = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+            s = s.replace(/\\*\\*(.+?)\\*\\*/g, '<strong>$1</strong>');
+            s = s.replace(/`([^`]+)`/g, '<code>$1</code>');
+            s = s.replace(/^[\\-\\*] (.+)$/gm, '<li>$1</li>');
+            s = s.replace(/(<li>.*<\\/li>)/gs, '<ul>$1</ul>');
+            s = s.replace(/<\\/ul>\\s*<ul>/g, '');
+            s = s.replace(/^\\d+\\. (.+)$/gm, '<li>$1</li>');
+            s = s.replace(/\\n/g, '<br>');
+            s = s.replace(/(<br>){{3,}}/g, '<br><br>');
+            return s;
+        }}
+
+        // ---- Branded print window ----
+        function openPrintWindow(title, htmlContent) {{
+            var now = new Date();
+            var dateStr = now.toLocaleDateString('en-GB', {{ day: 'numeric', month: 'long', year: 'numeric' }});
+            var timeStr = now.toLocaleTimeString('en-GB', {{ hour: '2-digit', minute: '2-digit' }});
+
+            var w = window.open('', '_blank');
+            if (!w) {{ alert('Please allow pop-ups to export reports.'); return; }}
+
+            var html = '<!DOCTYPE html><html><head>'
+                + '<meta charset="UTF-8">'
+                + '<title>' + title + '</title>'
+                + '<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&display=swap" rel="stylesheet">'
+                + '<style>'
+                + 'body {{ font-family: "Assistant", sans-serif; color: #121212; margin: 0; padding: 40px; line-height: 1.6; }}'
+                + '.rpt-header {{ border-bottom: 3px solid #3CB4AD; padding-bottom: 16px; margin-bottom: 24px; }}'
+                + '.rpt-brand {{ display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }}'
+                + '.rpt-dot {{ width: 28px; height: 28px; border-radius: 50%; background: #3CB4AD; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 800; color: #fff; }}'
+                + '.rpt-name {{ font-size: 18px; font-weight: 800; color: #242833; }}'
+                + '.rpt-title {{ font-size: 22px; font-weight: 700; color: #242833; margin: 8px 0 4px; }}'
+                + '.rpt-meta {{ font-size: 12px; color: #6b7280; }}'
+                + '.rpt-body {{ font-size: 14px; }}'
+                + '.rpt-body strong {{ font-weight: 700; }}'
+                + '.rpt-body ul, .rpt-body ol {{ margin: 8px 0; padding-left: 24px; }}'
+                + '.rpt-body li {{ margin-bottom: 4px; }}'
+                + '.rpt-body code {{ background: #f3f4f6; padding: 2px 5px; border-radius: 3px; font-size: 13px; }}'
+                + '.rpt-footer {{ margin-top: 40px; padding-top: 16px; border-top: 1px solid #e2e5ea; font-size: 11px; color: #6b7280; text-align: center; }}'
+                + '@media print {{ body {{ padding: 20px; }} .rpt-header {{ border-bottom-width: 2px; }} }}'
+                + '</style></head><body>'
+                + '<div class="rpt-header">'
+                + '<div class="rpt-brand"><div class="rpt-dot">e</div><span class="rpt-name">eComplete</span></div>'
+                + '<div class="rpt-title">' + title + '</div>'
+                + '<div class="rpt-meta">Generated by eComplete AI &middot; ' + dateStr + ' at ' + timeStr + '</div>'
+                + '</div>'
+                + '<div class="rpt-body">' + htmlContent + '</div>'
+                + '<div class="rpt-footer">eComplete &mdash; Sales &amp; M&amp;A Intelligence Dashboard &middot; Confidential</div>'
+                + '<scr' + 'ipt>window.onload=function(){{ window.print(); }}</scr' + 'ipt>'
+                + '</body></html>';
+            w.document.write(html);
+            w.document.close();
+        }}
+
+        // ---- Add message to chat ----
+        function addMessage(role, content) {{
+            var msgs = $('chat-messages');
+            if (!msgs) return;
+            var div = document.createElement('div');
+            div.className = 'chat-msg ' + role;
+            if (role === 'assistant') {{
+                div.innerHTML = md(content);
+                // Action bar: copy + export
+                var actions = document.createElement('div');
+                actions.className = 'chat-msg-actions';
+                actions.innerHTML = '<button class="chat-action-btn" title="Copy to clipboard" onclick="window.AnnaChat.copyMsg(this)">&#128203; Copy</button>'
+                    + '<button class="chat-action-btn" title="Export as PDF" onclick="window.AnnaChat.exportMsg(this)">&#128196; Export</button>';
+                div.appendChild(actions);
+                div.setAttribute('data-raw', content);
+            }} else {{
+                div.textContent = content;
+            }}
+            msgs.appendChild(div);
+            msgs.scrollTop = msgs.scrollHeight;
+        }}
+
+        function showTyping() {{
+            var msgs = $('chat-messages');
+            if (!msgs) return;
+            var div = document.createElement('div');
+            div.className = 'chat-typing';
+            div.id = 'chat-typing';
+            div.innerHTML = '<span></span><span></span><span></span>';
+            msgs.appendChild(div);
+            msgs.scrollTop = msgs.scrollHeight;
+        }}
+
+        function hideTyping() {{
+            var el = $('chat-typing');
+            if (el) el.remove();
+        }}
+
+        function setLoading(loading) {{
+            isLoading = loading;
+            var btn = $('chat-send');
+            var input = $('chat-input');
+            if (btn) btn.disabled = loading;
+            if (input) input.disabled = loading;
+            if (loading) showTyping(); else hideTyping();
+        }}
+
+        // ---- Send message ----
+        function sendMessage(text) {{
+            if (!text || isLoading) return;
+            text = text.trim();
+            if (!text) return;
+
+            // Hide suggestions after first message
+            var suggestions = $('chat-suggestions');
+            if (suggestions) suggestions.style.display = 'none';
+
+            addMessage('user', text);
+            history.push({{ role: 'user', content: text }});
+
+            var input = $('chat-input');
+            if (input) input.value = '';
+
+            setLoading(true);
+
+            fetch(FUNC_URL, {{
+                method: 'POST',
+                headers: {{ 'Content-Type': 'application/json' }},
+                body: JSON.stringify({{
+                    question: text,
+                    history: history.slice(-6)
+                }})
+            }})
+            .then(function(r) {{
+                if (!r.ok) {{
+                    return r.json().then(function(d) {{
+                        throw new Error(d.error || 'Request failed (' + r.status + ')');
+                    }});
+                }}
+                return r.json();
+            }})
+            .then(function(data) {{
+                setLoading(false);
+                var answer = data.answer || 'No response received.';
+                addMessage('assistant', answer);
+                history.push({{ role: 'assistant', content: answer }});
+            }})
+            .catch(function(err) {{
+                setLoading(false);
+                var msg = err.message || String(err);
+                if (msg.indexOf('Failed to fetch') !== -1 || msg.indexOf('NetworkError') !== -1) {{
+                    msg = 'Cannot reach the AI service. Please try again in a moment.';
+                }}
+                addMessage('system', 'Error: ' + msg);
+            }});
+        }}
+
+        // ---- Public API ----
+        window.AnnaChat = {{
+            open: function() {{
+                var panel = $('chat-panel');
+                var fab = $('chat-fab');
+                if (panel) panel.classList.add('open');
+                if (fab) fab.classList.add('has-panel');
+                isOpen = true;
+                var input = $('chat-input');
+                if (input) setTimeout(function() {{ input.focus(); }}, 100);
+            }},
+            close: function() {{
+                var panel = $('chat-panel');
+                var fab = $('chat-fab');
+                if (panel) panel.classList.remove('open');
+                if (fab) fab.classList.remove('has-panel');
+                isOpen = false;
+            }},
+            send: function() {{
+                var input = $('chat-input');
+                if (input) sendMessage(input.value);
+            }},
+            ask: function(text) {{
+                sendMessage(text);
+            }},
+            toggleGroup: function(headerEl) {{
+                var group = headerEl.parentElement;
+                if (group) group.classList.toggle('collapsed');
+            }},
+            switchTab: function(tab) {{
+                var chatMsgs = $('chat-messages');
+                var chatSuggestions = $('chat-suggestions');
+                var reports = $('chat-reports');
+                var inputArea = $('chat-input-area');
+                var tabs = document.querySelectorAll('.chat-tab');
+                for (var i = 0; i < tabs.length; i++) {{
+                    if (tabs[i].getAttribute('data-tab') === tab) {{
+                        tabs[i].classList.add('active');
+                    }} else {{
+                        tabs[i].classList.remove('active');
+                    }}
+                }}
+                if (tab === 'chat') {{
+                    if (chatMsgs) chatMsgs.style.display = '';
+                    if (chatSuggestions && history.length === 0) chatSuggestions.style.display = '';
+                    if (reports) reports.style.display = 'none';
+                    if (inputArea) inputArea.style.display = '';
+                }} else {{
+                    if (chatMsgs) chatMsgs.style.display = 'none';
+                    if (chatSuggestions) chatSuggestions.style.display = 'none';
+                    if (reports) reports.style.display = '';
+                    if (inputArea) inputArea.style.display = 'none';
+                }}
+            }},
+            copyMsg: function(btn) {{
+                var msgDiv = btn.closest('.chat-msg');
+                if (!msgDiv) return;
+                var raw = msgDiv.getAttribute('data-raw') || msgDiv.textContent;
+                navigator.clipboard.writeText(raw).then(function() {{
+                    var orig = btn.innerHTML;
+                    btn.innerHTML = '&#10003; Copied';
+                    setTimeout(function() {{ btn.innerHTML = orig; }}, 1500);
+                }});
+            }},
+            exportMsg: function(btn) {{
+                var msgDiv = btn.closest('.chat-msg');
+                if (!msgDiv) return;
+                var raw = msgDiv.getAttribute('data-raw') || '';
+                openPrintWindow('eComplete AI Response', md(raw));
+            }},
+            runReport: function(reportId) {{
+                var prompt = REPORT_PROMPTS[reportId];
+                if (!prompt) return;
+                // Open window immediately in click context to avoid popup blocker
+                var w = window.open('', '_blank');
+                if (!w) {{ alert('Please allow pop-ups to export reports.'); return; }}
+                w.document.write('<!DOCTYPE html><html><head><title>Generating Report...</title>'
+                    + '<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&display=swap" rel="stylesheet">'
+                    + '<style>body{{font-family:"Assistant",sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;color:#6b7280;margin:0;}}</style>'
+                    + '</head><body><div style="text-align:center"><div style="font-size:24px;margin-bottom:8px">&#9889; Generating report...</div>'
+                    + '<div>This may take a few seconds</div></div></body></html>');
+                w.document.close();
+
+                var title = reportId.replace(/-/g, ' ').replace(/\\b\\w/g, function(c) {{ return c.toUpperCase(); }});
+
+                fetch(FUNC_URL, {{
+                    method: 'POST',
+                    headers: {{ 'Content-Type': 'application/json' }},
+                    body: JSON.stringify({{
+                        question: prompt,
+                        history: [],
+                        report: true
+                    }})
+                }})
+                .then(function(r) {{
+                    if (!r.ok) throw new Error('Request failed (' + r.status + ')');
+                    return r.json();
+                }})
+                .then(function(data) {{
+                    var answer = data.answer || 'No response received.';
+                    var now = new Date();
+                    var dateStr = now.toLocaleDateString('en-GB', {{ day: 'numeric', month: 'long', year: 'numeric' }});
+                    var timeStr = now.toLocaleTimeString('en-GB', {{ hour: '2-digit', minute: '2-digit' }});
+                    w.document.open();
+                    w.document.write('<!DOCTYPE html><html><head>'
+                        + '<meta charset="UTF-8"><title>' + title + '</title>'
+                        + '<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&display=swap" rel="stylesheet">'
+                        + '<style>'
+                        + 'body {{ font-family: "Assistant", sans-serif; color: #121212; margin: 0; padding: 40px; line-height: 1.6; }}'
+                        + '.rpt-header {{ border-bottom: 3px solid #3CB4AD; padding-bottom: 16px; margin-bottom: 24px; }}'
+                        + '.rpt-brand {{ display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }}'
+                        + '.rpt-dot {{ width: 28px; height: 28px; border-radius: 50%; background: #3CB4AD; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 800; color: #fff; }}'
+                        + '.rpt-name {{ font-size: 18px; font-weight: 800; color: #242833; }}'
+                        + '.rpt-title {{ font-size: 22px; font-weight: 700; color: #242833; margin: 8px 0 4px; }}'
+                        + '.rpt-meta {{ font-size: 12px; color: #6b7280; }}'
+                        + '.rpt-body {{ font-size: 14px; }}'
+                        + '.rpt-body strong {{ font-weight: 700; }}'
+                        + '.rpt-body ul, .rpt-body ol {{ margin: 8px 0; padding-left: 24px; }}'
+                        + '.rpt-body li {{ margin-bottom: 4px; }}'
+                        + '.rpt-body code {{ background: #f3f4f6; padding: 2px 5px; border-radius: 3px; font-size: 13px; }}'
+                        + '.rpt-footer {{ margin-top: 40px; padding-top: 16px; border-top: 1px solid #e2e5ea; font-size: 11px; color: #6b7280; text-align: center; }}'
+                        + '@media print {{ body {{ padding: 20px; }} }}'
+                        + '</style></head><body>'
+                        + '<div class="rpt-header">'
+                        + '<div class="rpt-brand"><div class="rpt-dot">e</div><span class="rpt-name">eComplete</span></div>'
+                        + '<div class="rpt-title">' + title + '</div>'
+                        + '<div class="rpt-meta">Generated by eComplete AI &middot; ' + dateStr + ' at ' + timeStr + '</div>'
+                        + '</div>'
+                        + '<div class="rpt-body">' + md(answer) + '</div>'
+                        + '<div class="rpt-footer">eComplete &mdash; Sales &amp; M&amp;A Intelligence Dashboard &middot; Confidential</div>'
+                        + '<scr' + 'ipt>window.onload=function(){{ window.print(); }}</scr' + 'ipt>'
+                        + '</body></html>');
+                    w.document.close();
+                }})
+                .catch(function(err) {{
+                    w.document.open();
+                    w.document.write('<html><body style="font-family:Assistant,sans-serif;padding:40px"><h2>Error generating report</h2><p>' + (err.message || String(err)) + '</p></body></html>');
+                    w.document.close();
+                }});
+            }}
+        }};
+
+        // Keyboard shortcut: Ctrl+K or Cmd+K to toggle chat
+        document.addEventListener('keydown', function(e) {{
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {{
+                e.preventDefault();
+                if (isOpen) window.AnnaChat.close();
+                else window.AnnaChat.open();
+            }}
+        }});
+
+        // Collapse all suggestion groups except the first
+        document.addEventListener('DOMContentLoaded', function() {{
+            var groups = document.querySelectorAll('.chat-suggest-group');
+            for (var i = 1; i < groups.length; i++) {{
+                groups[i].classList.add('collapsed');
+            }}
+        }});
+
+        // ---- AnnaPage: full-page chat with multi-conversation + inline reports ----
+        var AP_STORE_KEY = 'ecomplete_anna_convs';
+        var apConvs = [];  // {{id, title, messages:[]}}
+        var apActiveId = null;
+        var apLoading = false;
+
+        function apLoadConvs() {{
+            try {{ apConvs = JSON.parse(localStorage.getItem(AP_STORE_KEY) || '[]'); }} catch(e) {{ apConvs = []; }}
+        }}
+        function apSaveConvs() {{
+            try {{ localStorage.setItem(AP_STORE_KEY, JSON.stringify(apConvs)); }} catch(e) {{}}
+        }}
+        function apGetActive() {{
+            return apConvs.find(function(c) {{ return c.id === apActiveId; }});
+        }}
+
+        function apRenderConvList() {{
+            var list = document.getElementById('anna-conv-list');
+            if (!list) return;
+            var html = '';
+            for (var i = apConvs.length - 1; i >= 0; i--) {{
+                var c = apConvs[i];
+                var active = c.id === apActiveId ? ' active' : '';
+                html += '<button class="anna-conv-item' + active + '" data-cid="' + c.id + '" onclick="window.AnnaPage.switchConv(this.getAttribute(&#39;data-cid&#39;))">'
+                    + '<span class="conv-icon">&#128172;</span>'
+                    + '<span class="conv-label">' + (c.title || 'New Chat') + '</span>'
+                    + '<span class="conv-delete" onclick="event.stopPropagation();window.AnnaPage.deleteConv(&#39;' + c.id + '&#39;)" title="Delete">&#10005;</span>'
+                    + '</button>';
+            }}
+            list.innerHTML = html;
+        }}
+
+        function apRenderMessages() {{
+            var msgs = document.getElementById('anna-page-msgs');
+            if (!msgs) return;
+            var conv = apGetActive();
+            msgs.innerHTML = '';
+            if (!conv || conv.messages.length === 0) {{
+                // Show welcome
+                var w = document.getElementById('anna-welcome');
+                if (!w) {{
+                    msgs.innerHTML = '<div class="anna-welcome" id="anna-welcome">'
+                        + '<div class="anna-welcome-avatar">e</div>'
+                        + '<div class="anna-welcome-title">eComplete AI</div>'
+                        + '<div class="anna-welcome-sub">Your sales &amp; M&amp;A intelligence assistant. Ask me anything about your dashboard data.</div>'
+                        + '<div class="anna-suggestions" id="anna-suggestions">'
+                        + '<button class="anna-suggest-btn" onclick="window.AnnaPage.ask(this.textContent)">Summarise deal flow this month</button>'
+                        + '<button class="anna-suggest-btn" onclick="window.AnnaPage.ask(this.textContent)">Which deals are stale or at risk?</button>'
+                        + '<button class="anna-suggest-btn" onclick="window.AnnaPage.ask(this.textContent)">Pipeline health &amp; coverage</button>'
+                        + '<button class="anna-suggest-btn" onclick="window.AnnaPage.ask(this.textContent)">Lead source effectiveness</button>'
+                        + '<button class="anna-suggest-btn" onclick="window.AnnaPage.ask(this.textContent)">Top performing rep this month</button>'
+                        + '<button class="anna-suggest-btn" onclick="window.AnnaPage.ask(this.textContent)">M&amp;A pipeline status</button>'
+                        + '<button class="anna-suggest-btn" onclick="window.AnnaPage.ask(this.textContent)">Revenue forecast next 90 days</button>'
+                        + '<button class="anna-suggest-btn" onclick="window.AnnaPage.ask(this.textContent)">Weekly summary</button>'
+                        + '</div></div>';
+                }}
+                return;
+            }}
+            for (var i = 0; i < conv.messages.length; i++) {{
+                var m = conv.messages[i];
+                apAddMsgDOM(m.role, m.content, m.reportTitle || null);
+            }}
+            msgs.scrollTop = msgs.scrollHeight;
+        }}
+
+        function apAddMsgDOM(role, content, reportTitle) {{
+            var msgs = document.getElementById('anna-page-msgs');
+            if (!msgs) return;
+            // Remove welcome
+            var w = msgs.querySelector('.anna-welcome');
+            if (w) w.remove();
+
+            if (reportTitle) {{
+                // Render as branded report card
+                var now = new Date();
+                var dateStr = now.toLocaleDateString('en-GB', {{ day: 'numeric', month: 'long', year: 'numeric' }});
+                var card = document.createElement('div');
+                card.className = 'anna-report-card';
+                card.innerHTML = '<div class="anna-report-card-header">'
+                    + '<div class="anna-report-card-dot">e</div>'
+                    + '<div class="anna-report-card-title">' + reportTitle + '</div>'
+                    + '<div class="anna-report-card-meta">eComplete AI &middot; ' + dateStr + '</div>'
+                    + '</div>'
+                    + '<div class="anna-report-card-body">' + md(content) + '</div>'
+                    + '<div class="anna-report-card-footer">'
+                    + '<button class="anna-report-action" onclick="window.AnnaPage.copyReport(this)">&#128203; Copy</button>'
+                    + '<button class="anna-report-action" onclick="window.AnnaPage.downloadReport(this)">&#128196; Download PDF</button>'
+                    + '</div>';
+                card.setAttribute('data-raw', content);
+                card.setAttribute('data-title', reportTitle);
+                msgs.appendChild(card);
+            }} else {{
+                var div = document.createElement('div');
+                div.className = 'chat-msg ' + role;
+                if (role === 'assistant') {{
+                    div.innerHTML = md(content);
+                    var actions = document.createElement('div');
+                    actions.className = 'chat-msg-actions';
+                    actions.style.opacity = '1';
+                    actions.innerHTML = '<button class="chat-action-btn" title="Copy" onclick="window.AnnaChat.copyMsg(this)">&#128203; Copy</button>';
+                    div.appendChild(actions);
+                    div.setAttribute('data-raw', content);
+                }} else if (role === 'user') {{
+                    div.textContent = content;
+                }} else {{
+                    div.innerHTML = content;
+                }}
+                msgs.appendChild(div);
+            }}
+            msgs.scrollTop = msgs.scrollHeight;
+        }}
+
+        function apShowTyping() {{
+            var msgs = document.getElementById('anna-page-msgs');
+            if (!msgs) return;
+            var div = document.createElement('div');
+            div.className = 'chat-typing';
+            div.id = 'anna-page-typing';
+            div.innerHTML = '<span></span><span></span><span></span>';
+            msgs.appendChild(div);
+            msgs.scrollTop = msgs.scrollHeight;
+        }}
+
+        function apHideTyping() {{
+            var el = document.getElementById('anna-page-typing');
+            if (el) el.remove();
+        }}
+
+        function apEnsureConv() {{
+            if (!apActiveId || !apGetActive()) {{
+                var id = 'conv_' + Date.now();
+                apConvs.push({{ id: id, title: '', messages: [] }});
+                apActiveId = id;
+                apSaveConvs();
+                apRenderConvList();
+            }}
+        }}
+
+        function apSend(text) {{
+            if (!text || apLoading) return;
+            text = text.trim();
+            if (!text) return;
+
+            apEnsureConv();
+            var conv = apGetActive();
+            if (!conv) return;
+
+            // Set title from first message
+            if (!conv.title) {{
+                conv.title = text.length > 40 ? text.substring(0, 40) + '...' : text;
+                apRenderConvList();
+            }}
+
+            conv.messages.push({{ role: 'user', content: text }});
+            apSaveConvs();
+            apAddMsgDOM('user', text, null);
+
+            var input = document.getElementById('anna-page-input');
+            if (input) input.value = '';
+
+            apLoading = true;
+            apShowTyping();
+
+            fetch(FUNC_URL, {{
+                method: 'POST',
+                headers: {{ 'Content-Type': 'application/json' }},
+                body: JSON.stringify({{
+                    question: text,
+                    history: conv.messages.slice(-6)
+                }})
+            }})
+            .then(function(r) {{
+                if (!r.ok) return r.json().then(function(d) {{ throw new Error(d.error || 'Request failed'); }});
+                return r.json();
+            }})
+            .then(function(data) {{
+                apLoading = false;
+                apHideTyping();
+                var answer = data.answer || 'No response received.';
+                conv.messages.push({{ role: 'assistant', content: answer }});
+                apSaveConvs();
+                apAddMsgDOM('assistant', answer, null);
+            }})
+            .catch(function(err) {{
+                apLoading = false;
+                apHideTyping();
+                apAddMsgDOM('system', 'Error: ' + (err.message || String(err)), null);
+            }});
+        }}
+
+        function apRunReport(reportId) {{
+            var prompt = REPORT_PROMPTS[reportId];
+            if (!prompt || apLoading) return;
+            var title = reportId.replace(/-/g, ' ').replace(/\\b\\w/g, function(c) {{ return c.toUpperCase(); }});
+
+            apEnsureConv();
+            var conv = apGetActive();
+            if (!conv) return;
+
+            if (!conv.title) {{
+                conv.title = '📄 ' + title;
+                apRenderConvList();
+            }}
+
+            apLoading = true;
+            apShowTyping();
+
+            fetch(FUNC_URL, {{
+                method: 'POST',
+                headers: {{ 'Content-Type': 'application/json' }},
+                body: JSON.stringify({{
+                    question: prompt,
+                    history: [],
+                    report: true
+                }})
+            }})
+            .then(function(r) {{
+                if (!r.ok) throw new Error('Request failed (' + r.status + ')');
+                return r.json();
+            }})
+            .then(function(data) {{
+                apLoading = false;
+                apHideTyping();
+                var answer = data.answer || 'No response received.';
+                conv.messages.push({{ role: 'assistant', content: answer, reportTitle: title }});
+                apSaveConvs();
+                apAddMsgDOM('assistant', answer, title);
+            }})
+            .catch(function(err) {{
+                apLoading = false;
+                apHideTyping();
+                apAddMsgDOM('system', 'Error generating report: ' + (err.message || String(err)), null);
+            }});
+        }}
+
+        // Init AnnaPage on load
+        document.addEventListener('DOMContentLoaded', function() {{
+            apLoadConvs();
+            if (apConvs.length > 0) {{
+                apActiveId = apConvs[apConvs.length - 1].id;
+            }}
+            apRenderConvList();
+            apRenderMessages();
+        }});
+
+        window.AnnaPage = {{
+            send: function() {{
+                var input = document.getElementById('anna-page-input');
+                if (input) apSend(input.value);
+            }},
+            ask: function(text) {{
+                apSend(text);
+            }},
+            newChat: function() {{
+                var id = 'conv_' + Date.now();
+                apConvs.push({{ id: id, title: '', messages: [] }});
+                apActiveId = id;
+                apSaveConvs();
+                apRenderConvList();
+                apRenderMessages();
+                var input = document.getElementById('anna-page-input');
+                if (input) input.focus();
+            }},
+            switchConv: function(cid) {{
+                apActiveId = cid;
+                apRenderConvList();
+                apRenderMessages();
+            }},
+            deleteConv: function(cid) {{
+                apConvs = apConvs.filter(function(c) {{ return c.id !== cid; }});
+                if (apActiveId === cid) {{
+                    apActiveId = apConvs.length > 0 ? apConvs[apConvs.length - 1].id : null;
+                }}
+                apSaveConvs();
+                apRenderConvList();
+                apRenderMessages();
+            }},
+            clearChat: function() {{
+                var conv = apGetActive();
+                if (conv) {{
+                    conv.messages = [];
+                    conv.title = '';
+                    apSaveConvs();
+                    apRenderConvList();
+                    apRenderMessages();
+                }}
+            }},
+            runReport: function(reportId) {{
+                apRunReport(reportId);
+            }},
+            copyReport: function(btn) {{
+                var card = btn.closest('.anna-report-card');
+                if (!card) return;
+                var raw = card.getAttribute('data-raw') || '';
+                navigator.clipboard.writeText(raw).then(function() {{
+                    var orig = btn.innerHTML;
+                    btn.innerHTML = '&#10003; Copied';
+                    setTimeout(function() {{ btn.innerHTML = orig; }}, 1500);
+                }});
+            }},
+            downloadReport: function(btn) {{
+                var card = btn.closest('.anna-report-card');
+                if (!card) return;
+                var raw = card.getAttribute('data-raw') || '';
+                var title = card.getAttribute('data-title') || 'Report';
+                openPrintWindow(title, md(raw));
+            }}
+        }};
+
+    }})();
+    </script>'''
 
 
 def generate_dashboard(data: dict) -> str:
@@ -4561,7 +7039,7 @@ def generate_dashboard(data: dict) -> str:
                 var val = item[1];
                 var pct = Math.max(2, (val / maxVal) * 100);
                 var color = palette[i % palette.length];
-                html += '<div style="margin-bottom:8px">'
+                html += '<div style="margin-bottom:5px">'
                     + '<div style="display:flex;justify-content:space-between;margin-bottom:3px;font-size:12px">'
                     + '<span style="color:#6b7280">' + label + '</span>'
                     + '<span style="color:#121212;font-weight:600">' + fmtNum(val) + '</span></div>'
@@ -4579,7 +7057,7 @@ def generate_dashboard(data: dict) -> str:
             var entries = Object.entries(data).sort();
             if (entries.length < 2) {{ el.innerHTML = ''; return; }}
             var vals = entries.map(function(e) {{ return e[1]; }});
-            var w = 200, h = 48, pad = 2;
+            var w = 180, h = 36, pad = 2;
             var mn = Math.min.apply(null, vals);
             var mx = Math.max.apply(null, vals);
             var rng = mx - mn || 1;
@@ -4593,6 +7071,51 @@ def generate_dashboard(data: dict) -> str:
                 + '<polyline points="' + polyline + '" fill="none" stroke="' + color + '" stroke-width="2" stroke-linecap="round"/>'
                 + '<circle cx="' + lastPt[0] + '" cy="' + lastPt[1] + '" r="3" fill="' + color + '"/>'
                 + '</svg>';
+        }}
+
+        var MONTH_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        function renderMonthlyBarChart(containerId, data, color, isCurrency) {{
+            var el = document.getElementById(containerId);
+            if (!el) return;
+            color = color || '#3CB4AD';
+            var entries = Object.entries(data).sort();
+            // Take last 6 months only
+            if (entries.length > 6) entries = entries.slice(entries.length - 6);
+            if (entries.length === 0) {{ el.innerHTML = '<span style="color:#64748b;font-size:11px">No data</span>'; return; }}
+            var vals = entries.map(function(e) {{ return e[1]; }});
+            var labels = entries.map(function(e) {{
+                var parts = e[0].split('-');
+                return MONTH_SHORT[parseInt(parts[1], 10) - 1] || e[0];
+            }});
+            var mx = Math.max.apply(null, vals) || 1;
+            var w = 260, barH = 90, padTop = 4, padBot = 18, padL = 4, padR = 4;
+            var chartH = barH - padTop - padBot;
+            var n = entries.length;
+            var gap = 6;
+            var barW = Math.floor((w - padL - padR - gap * (n - 1)) / n);
+            if (barW < 20) barW = 20;
+            var totalW = padL + n * barW + (n - 1) * gap + padR;
+            var svg = '<svg width="100%" height="' + barH + '" viewBox="0 0 ' + totalW + ' ' + barH + '" preserveAspectRatio="xMidYMid meet">';
+            // Axis line
+            svg += '<line x1="' + padL + '" y1="' + (padTop + chartH) + '" x2="' + (totalW - padR) + '" y2="' + (padTop + chartH) + '" stroke="#334155" stroke-width="1" opacity="0.3"/>';
+            for (var i = 0; i < n; i++) {{
+                var x = padL + i * (barW + gap);
+                var v = vals[i];
+                var h = Math.max((v / mx) * chartH, 2);
+                var y = padTop + chartH - h;
+                // Bar with rounded top
+                svg += '<rect x="' + x + '" y="' + y + '" width="' + barW + '" height="' + h + '" rx="3" fill="' + color + '" opacity="0.85"/>';
+                // Value inside bar (or above if bar too short)
+                var valStr = isCurrency ? (v >= 1000 ? '\u00A3' + (v / 1000).toFixed(v >= 10000 ? 0 : 1) + 'k' : '\u00A3' + Math.round(v)) : (v >= 1000 ? (v / 1000).toFixed(v >= 10000 ? 0 : 1) + 'k' : String(Math.round(v)));
+                var fontSize = barW < 30 ? 9 : 10;
+                var textY = h > 18 ? (y + h / 2 + 4) : (y - 3);
+                var textColor = h > 18 ? '#fff' : color;
+                svg += '<text x="' + (x + barW / 2) + '" y="' + textY + '" text-anchor="middle" fill="' + textColor + '" font-size="' + fontSize + '" font-weight="600" font-family="Assistant,sans-serif">' + valStr + '</text>';
+                // Month label below axis
+                svg += '<text x="' + (x + barW / 2) + '" y="' + (padTop + chartH + 14) + '" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="Assistant,sans-serif">' + labels[i] + '</text>';
+            }}
+            svg += '</svg>';
+            el.innerHTML = svg;
         }}
 
         // ----------------------------------------------------------------
@@ -4696,9 +7219,9 @@ def generate_dashboard(data: dict) -> str:
             }}
             renderMiniBar('dynamic-leads-by-source', leadSrcMonthly);
 
-            // Leads over time sparkline
+            // Leads over time bar chart
             var leadsMonthly = filterDailyToMonthly(TS.leads_by_day, range);
-            renderSparkline('dynamic-leads-sparkline', leadsMonthly, '#3CB4AD');
+            renderMonthlyBarChart('dynamic-leads-barchart', leadsMonthly, '#3CB4AD', false);
 
             // Activity trend sparkline
             var actDaily = {{}};
@@ -4713,7 +7236,7 @@ def generate_dashboard(data: dict) -> str:
                     }}
                 }}
             }}
-            renderSparkline('dynamic-activity-sparkline', actDaily, '#a78bfa');
+            renderMonthlyBarChart('dynamic-activity-barchart', actDaily, '#a78bfa', false);
 
             // Activity breakdown bars
             renderMiniBar('dynamic-activity-breakdown', actBreakdown);
@@ -4728,11 +7251,11 @@ def generate_dashboard(data: dict) -> str:
                     }}
                 }}
             }}
-            renderSparkline('dynamic-revenue-sparkline', revMonthly, '#34d399');
+            renderMonthlyBarChart('dynamic-revenue-barchart', revMonthly, '#34d399', true);
 
-            // Deals created sparkline
+            // Deals created bar chart
             var dealsMonthly = filterDailyToMonthly(TS.deals_created_by_day, range);
-            renderSparkline('dynamic-deals-sparkline', dealsMonthly, '#38bdf8');
+            renderMonthlyBarChart('dynamic-deals-barchart', dealsMonthly, '#38bdf8', false);
         }};
 
         // ---- Initialize on page load ----
@@ -4754,6 +7277,19 @@ def generate_dashboard(data: dict) -> str:
     {_build_css()}
 </head>
 <body>
+    <div class="login-overlay" id="login-overlay">
+        <div class="login-card">
+            <div class="login-brand">
+                <span class="brand-dot">e</span>
+                <span>eComplete</span>
+            </div>
+            <div class="login-title">Welcome</div>
+            <p class="login-subtitle">Enter your name to continue</p>
+            <input class="login-input" id="login-name" type="text" placeholder="Your name..." autofocus />
+            <button class="login-btn" id="login-btn" onclick="window.doLogin()">Continue &#10148;</button>
+        </div>
+    </div>
+
     {_build_sidebar()}
     <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
 
@@ -4771,8 +7307,12 @@ def generate_dashboard(data: dict) -> str:
         </footer>
     </div>
 
+    {_build_chat_html()}
+
     {_build_js()}
     {filter_js}
+    {_build_supabase_js()}
+    {_build_chat_js()}
 </body>
 </html>'''
 

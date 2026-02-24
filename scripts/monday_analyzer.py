@@ -919,6 +919,15 @@ def run_monday_analysis() -> dict:
         json.dump(output, fh, indent=2, default=str)
 
     logger.info("Monday.com analysis complete. Output saved to %s", output_path)
+
+    # Sync to normalised Supabase tables
+    try:
+        from scripts.lib.data_sync import sync_monday_to_supabase
+        sync_results = sync_monday_to_supabase()
+        logger.info("Normalised sync: %s", sync_results)
+    except Exception as e:
+        logger.warning("Normalised data sync failed (non-fatal): %s", e)
+
     return output
 
 

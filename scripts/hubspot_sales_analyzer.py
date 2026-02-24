@@ -1553,6 +1553,17 @@ def run_hubspot_analysis(config: Optional[Dict[str, Any]] = None) -> Dict[str, A
         json.dump(output, fh, indent=2, default=str)
 
     logger.info("Analysis complete. Output saved to %s", output_path)
+
+    # ------------------------------------------------------------------
+    # 5. Sync to normalised Supabase tables
+    # ------------------------------------------------------------------
+    try:
+        from scripts.lib.data_sync import sync_hubspot_to_supabase
+        sync_results = sync_hubspot_to_supabase()
+        logger.info("Normalised sync: %s", sync_results)
+    except Exception as e:
+        logger.warning("Normalised data sync failed (non-fatal): %s", e)
+
     return output
 
 

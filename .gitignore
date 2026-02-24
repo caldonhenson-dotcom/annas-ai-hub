@@ -49,3 +49,4 @@ data/cache/
 htmlcov/
 .coverage
 test_*.db
+.vercel
