@@ -193,11 +193,12 @@ module.exports = async function handler(req, res) {
       });
     }
 
-    // Store in Supabase if prospect_id provided
-    if (prospect_id && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    // Store in Supabase if prospect_id provided (validate UUID/integer format)
+    const safeProspectId = prospect_id && /^[a-f0-9-]{1,64}$/i.test(String(prospect_id)) ? String(prospect_id) : null;
+    if (safeProspectId && process.env.SUPABASE_SERVICE_ROLE_KEY) {
       try {
         await fetch(
-          supabaseUrl(`outreach_prospects?id=eq.${prospect_id}`),
+          supabaseUrl(`outreach_prospects?id=eq.${safeProspectId}`),
           {
             method: "PATCH",
             headers: supabaseHeaders(),
@@ -227,7 +228,7 @@ module.exports = async function handler(req, res) {
             input_tokens: groqData.usage?.prompt_tokens || 0,
             output_tokens: groqData.usage?.completion_tokens || 0,
             latency_ms: 0,
-            prospect_id: prospect_id || null,
+            prospect_id: safeProspectId,
             success: true,
           }),
         });
@@ -238,7 +239,7 @@ module.exports = async function handler(req, res) {
 
     return res.status(200).json({
       research,
-      prospect_id: prospect_id || null,
+      prospect_id: safeProspectId,
       model: "groq/llama-3.3-70b-versatile",
       tokens: {
         input: groqData.usage?.prompt_tokens || 0,

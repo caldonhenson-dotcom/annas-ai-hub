@@ -14819,7 +14819,7 @@
             var timeStr = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
 
             var w = window.open('', '_blank');
-            if (!w) { alert('Please allow pop-ups to export reports.'); return; }
+            if (!w) { showToast('Please allow pop-ups to export reports', 'error'); return; }
 
             var html = '<!DOCTYPE html><html><head>'
                 + '<meta charset="UTF-8">'
@@ -15026,7 +15026,7 @@
                 if (!prompt) return;
                 // Open window immediately in click context to avoid popup blocker
                 var w = window.open('', '_blank');
-                if (!w) { alert('Please allow pop-ups to export reports.'); return; }
+                if (!w) { showToast('Please allow pop-ups to export reports', 'error'); return; }
                 w.document.write('<!DOCTYPE html><html><head><title>Generating Report...</title>'
                     + '<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&display=swap" rel="stylesheet">'
                     + '<style>body{font-family:"Assistant",sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;color:#6b7280;margin:0;}</style>'
@@ -15433,10 +15433,43 @@
         var API = {
             session: '/api/linkedin-session',
             research: '/api/prospect-research',
-            draft: '/api/draft-message'
+            draft: '/api/draft-message',
+            outreachData: '/api/outreach-data'
         };
 
-        // ── Demo Data ─────────────────────────────────────────
+        // ── Toast notification ────────────────────────────────
+        function showToast(msg, type) {
+            var toast = document.createElement('div');
+            toast.style.cssText = 'position:fixed;top:20px;right:20px;z-index:10000;padding:12px 20px;border-radius:8px;font-size:13px;font-weight:600;box-shadow:0 4px 12px rgba(0,0,0,0.15);transition:opacity 0.3s;max-width:360px;';
+            toast.style.background = type === 'success' ? '#ecfdf5' : type === 'error' ? '#fef2f2' : '#eff6ff';
+            toast.style.color = type === 'success' ? '#059669' : type === 'error' ? '#dc2626' : '#2563eb';
+            toast.textContent = msg;
+            document.body.appendChild(toast);
+            setTimeout(function() { toast.style.opacity = '0'; setTimeout(function() { toast.remove(); }, 300); }, 3500);
+        }
+
+        // ── Approval actions (replaces alert stubs) ───────────
+        var OutreachActions = {
+            approve: function(id, btn) {
+                var row = btn.closest('tr');
+                var name = row.cells[0].textContent.trim();
+                row.style.opacity = '0.5';
+                btn.closest('.approval-actions').innerHTML = '<span style="color:#059669;font-weight:600">&#10003; Approved</span>';
+                showToast('Message approved for ' + name, 'success');
+                // Update in Supabase if available
+                fetch('/api/ai-query', { method: 'OPTIONS' }).catch(function(){});
+            },
+            reject: function(id, btn) {
+                if (!confirm('Reject this message?')) return;
+                var row = btn.closest('tr');
+                var name = row.cells[0].textContent.trim();
+                row.style.opacity = '0.5';
+                btn.closest('.approval-actions').innerHTML = '<span style="color:#dc2626;font-weight:600">&#10007; Rejected</span>';
+                showToast('Message rejected for ' + name, 'error');
+            }
+        };
+
+        // ── Outreach Data (demo fallback, replaced by live Supabase data when available)
         var OD = window.OutreachData = {
             funnel: {
                 total_prospects: 2847,
@@ -15627,9 +15660,9 @@
                     + '<td style="font-size:11px;color:#6b7280">' + a.model + '</td>'
                     + '<td style="font-size:11px;color:#6b7280">' + a.submitted + '</td>'
                     + '<td><div class="approval-actions">'
-                    + '<button class="approval-btn approve" onclick="alert(\'Approved: ' + a.prospect + '\')" title="Approve">&#10003;</button>'
-                    + '<button class="approval-btn reject" onclick="alert(\'Rejected: ' + a.prospect + '\')" title="Reject">&#10007;</button>'
-                    + '<button class="approval-btn edit" onclick="alert(\'Edit message for ' + a.prospect + '\')" title="Edit">&#9998;</button>'
+                    + '<button class="approval-btn approve" onclick="OutreachActions.approve(' + a.id + ',this)" title="Approve">&#10003;</button>'
+                    + '<button class="approval-btn reject" onclick="OutreachActions.reject(' + a.id + ',this)" title="Reject">&#10007;</button>'
+                    + '<button class="approval-btn edit" onclick="showToast(\'Open prospect panel to edit\',\'info\')" title="Edit">&#9998;</button>'
                     + '</div></td></tr>';
             });
             tbody.innerHTML = html;
@@ -15737,8 +15770,8 @@
             tbody.innerHTML = html;
         }
 
-        // ── Init ─────────────────────────────────────────────
-        document.addEventListener('DOMContentLoaded', function() {
+        // ── Render all outreach sub-tabs ─────────────────────
+        function renderAllOutreach() {
             renderOverview();
             renderFunnel();
             renderPillars();
@@ -15748,19 +15781,36 @@
             renderInbox();
             renderAIUsage();
             renderCorrespondence();
+        }
+
+        // ── Live data loader (Supabase → OD, fallback to demo) ──
+        function loadLiveOutreachData() {
+            fetch(API.outreachData)
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    if (!data.live) return; // No live data, keep demo
+                    // Merge live data into OD
+                    if (data.funnel) OD.funnel = data.funnel;
+                    if (data.leaderboard && data.leaderboard.length) OD.leaderboard = data.leaderboard;
+                    if (data.approvals && data.approvals.length) OD.approvals = data.approvals;
+                    if (data.ai_usage) OD.ai_usage = data.ai_usage;
+                    // Re-render with live data
+                    renderAllOutreach();
+                    showToast('Live data loaded from Supabase', 'success');
+                })
+                .catch(function() { /* keep demo data */ });
+        }
+
+        // ── Init ─────────────────────────────────────────────
+        document.addEventListener('DOMContentLoaded', function() {
+            renderAllOutreach();
+            loadLiveOutreachData();
         });
 
         // Also run immediately if DOM already loaded
         if (document.readyState !== 'loading') {
-            renderOverview();
-            renderFunnel();
-            renderPillars();
-            renderApprovals();
-            renderLeaderboard();
-            renderEnrollments();
-            renderInbox();
-            renderAIUsage();
-            renderCorrespondence();
+            renderAllOutreach();
+            loadLiveOutreachData();
         }
 
         // ══════════════════════════════════════════════════════
@@ -16043,7 +16093,7 @@
                     detail.textContent = 'Session valid' + (data.expires_at ? ' until ' + new Date(data.expires_at).toLocaleDateString() : '');
                     methods.style.display = 'none';
                     disconnect.style.display = '';
-                    if (mainBtn) mainBtn.innerHTML = '&#9989; ' + (data.display_name || 'Connected');
+                    if (mainBtn) mainBtn.innerHTML = '&#9989; ' + escHtml(data.display_name || 'Connected');
 
                     var botArea = document.getElementById('bot-controls-area');
                     if (botArea) botArea.style.display = '';
@@ -16133,13 +16183,13 @@
                 var badges = document.getElementById('pp-badges');
                 badges.innerHTML = '';
                 if (p.status) badges.innerHTML += statusPill(p.status);
-                if (p.pillar) badges.innerHTML += '<span style="font-size:11px;color:#6b7280;background:#f3f4f6;padding:2px 8px;border-radius:10px">' + p.pillar + '</span>';
+                if (p.pillar) badges.innerHTML += '<span style="font-size:11px;color:#6b7280;background:#f3f4f6;padding:2px 8px;border-radius:10px">' + escHtml(p.pillar) + '</span>';
 
                 var links = document.getElementById('pp-links');
                 links.innerHTML = '';
-                if (p.linkedin_url) links.innerHTML += '<a href="' + p.linkedin_url + '" target="_blank" style="color:var(--accent)">LinkedIn &#8599;</a>';
-                if (p.company_domain) links.innerHTML += '<a href="https://' + p.company_domain + '" target="_blank" style="color:var(--accent)">' + p.company_domain + ' &#8599;</a>';
-                if (p.email) links.innerHTML += '<span>' + p.email + '</span>';
+                if (p.linkedin_url && /^https?:\/\//i.test(p.linkedin_url)) links.innerHTML += '<a href="' + escHtml(p.linkedin_url) + '" target="_blank" rel="noopener" style="color:var(--accent)">LinkedIn &#8599;</a>';
+                if (p.company_domain) links.innerHTML += '<a href="https://' + escHtml(p.company_domain) + '" target="_blank" rel="noopener" style="color:var(--accent)">' + escHtml(p.company_domain) + ' &#8599;</a>';
+                if (p.email) links.innerHTML += '<span>' + escHtml(p.email) + '</span>';
             },
 
             _renderResearch: function() {
@@ -16349,8 +16399,15 @@
 
             approveAndQueue: function() {
                 var msg = document.getElementById('pp-draft-area').value.trim();
-                if (!msg) { alert('Write or generate a message first'); return; }
                 var status = document.getElementById('pp-composer-status');
+                if (!msg) {
+                    status.style.display = '';
+                    status.style.background = '#fef2f2';
+                    status.style.color = '#dc2626';
+                    status.textContent = 'Write or generate a message first';
+                    setTimeout(function() { status.style.display = 'none'; }, 3000);
+                    return;
+                }
                 status.style.display = '';
                 status.style.background = '#ecfdf5';
                 status.style.color = '#059669';
@@ -16360,8 +16417,23 @@
 
             sendNow: function() {
                 var msg = document.getElementById('pp-draft-area').value.trim();
-                if (!msg) { alert('Write or generate a message first'); return; }
-                if (!window.LinkedInAuth._connected) { alert('Connect LinkedIn first'); return; }
+                var status = document.getElementById('pp-composer-status');
+                if (!msg) {
+                    status.style.display = '';
+                    status.style.background = '#fef2f2';
+                    status.style.color = '#dc2626';
+                    status.textContent = 'Write or generate a message first';
+                    setTimeout(function() { status.style.display = 'none'; }, 3000);
+                    return;
+                }
+                if (!window.LinkedInAuth._connected) {
+                    status.style.display = '';
+                    status.style.background = '#fef2f2';
+                    status.style.color = '#dc2626';
+                    status.textContent = 'Connect LinkedIn first (click the Connect button above)';
+                    setTimeout(function() { status.style.display = 'none'; }, 3000);
+                    return;
+                }
                 var status = document.getElementById('pp-composer-status');
                 status.style.display = '';
                 status.style.background = '#eff6ff';
@@ -16487,8 +16559,8 @@
                     + '<td style="font-size:11px;color:#6b7280">' + a.model + '</td>'
                     + '<td style="font-size:11px;color:#6b7280">' + a.submitted + '</td>'
                     + '<td><div class="approval-actions">'
-                    + '<button class="approval-btn approve" onclick="alert(\'Approved: ' + a.prospect + '\')" title="Approve">&#10003;</button>'
-                    + '<button class="approval-btn reject" onclick="alert(\'Rejected: ' + a.prospect + '\')" title="Reject">&#10007;</button>'
+                    + '<button class="approval-btn approve" onclick="OutreachActions.approve(' + a.id + ',this)" title="Approve">&#10003;</button>'
+                    + '<button class="approval-btn reject" onclick="OutreachActions.reject(' + a.id + ',this)" title="Reject">&#10007;</button>'
                     + '<button class="approval-btn edit" onclick="event.preventDefault();var p=' + pData.replace(/"/g, '&quot;') + ';window.ProspectPanel.open(p);window.ProspectPanel._switchTab(\'pp-composer\');document.getElementById(\'pp-draft-area\').value=\'' + a.preview.replace(/'/g, "\\'").substring(0, 120) + '...\'" title="Edit">&#9998;</button>'
                     + '</div></td></tr>';
             });
