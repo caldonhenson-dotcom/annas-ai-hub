@@ -4,7 +4,25 @@
 (function () {
     'use strict';
 
-    function uid=4096(AzureAD+CaldonHenson) gid=4096 groups=4096 { return document.getElementById(id); }
+    var FUNC_URL = '/api/ai-query';
+    var history = [];
+    var isOpen = false;
+    var isLoading = false;
+
+    var REPORT_PROMPTS = {
+        'monthly-deal-flow': 'Generate a comprehensive Monthly Deal Flow Summary report. Include: total deals created vs closed this period, won vs lost breakdown with values in GBP, new pipeline added, average deal size, deal velocity, and comparison to prior period. Format with clear sections using headings and tables where appropriate.',
+        'pipeline-health': 'Generate a Pipeline Health Report. Include: total pipeline value and weighted value in GBP, pipeline coverage ratio, stage-by-stage breakdown with deal counts and values, average time in each stage, stale deals requiring attention, and overall pipeline risk assessment. Use headings and bullet points.',
+        'lead-source': 'Generate a Lead Source Analysis report. Include: total leads by source with counts, lead-to-MQL and MQL-to-SQL conversion rates by source, most effective channels, trend analysis, and recommendations for lead generation improvement. Format with clear sections.',
+        'weekly-activity': 'Generate a Weekly Activity Report. Include: total activities (calls, emails, meetings, tasks, notes) by rep, activity-to-deal ratios, most active reps, engagement trends, and touches per won deal analysis. Format as a structured report with tables.',
+        'ma-pipeline': 'Generate an M&A Pipeline Status report. Include: total active projects, stage distribution breakdown, stale projects requiring attention with days stale, owner workload summary, IC scorecard highlights, and upcoming decision points. Use clear headings.',
+        'rep-scorecard': 'Generate a Rep Performance Scorecard. For each sales rep, include: deals owned (count and value in GBP), win rate, activity volume breakdown, average deal size, pipeline contribution, and relative performance. Format as a comparative table or structured list.'
+    };
+
+    // Expose for anna-page.js (separate IIFE needs global access)
+    window.FUNC_URL = FUNC_URL;
+    window.REPORT_PROMPTS = REPORT_PROMPTS;
+
+    function $(id) { return document.getElementById(id); }
 
     function escHtml(s) {
         if (!s) return '';
@@ -20,8 +38,7 @@
         s = s.replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>');
         s = s.replace(/<\/ul>\s*<ul>/g, '');
         s = s.replace(/^\d+\. (.+)$/gm, '<li>$1</li>');
-        s = s.replace(/
-/g, '<br>');
+        s = s.replace(/\n/g, '<br>');
         s = s.replace(/(<br>){3,}/g, '<br><br>');
         return s;
     }

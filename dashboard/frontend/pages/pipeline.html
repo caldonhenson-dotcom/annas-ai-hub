@@ -1,0 +1,266 @@
+<section id="pipeline" class="dashboard-section">
+        <div class="section-header">
+            <div>
+                <h2 class="section-title">💰 Pipeline View</h2>
+                <p class="section-subtitle">Deal stages, rep performance, and velocity</p>
+            </div>
+        </div><div style="display:grid;grid-template-columns:repeat(5,1fr);gap:16px;margin-bottom:16px"><div class="stat-card" style="--accent:#3CB4AD">
+        <div style="width:22px;height:22px;border-radius:5px;
+            background:linear-gradient(135deg,#3CB4AD22,#3CB4AD11);
+            display:flex;align-items:center;justify-content:center;
+            font-size:11px;flex-shrink:0;margin-bottom:2px;
+            border:1px solid #3CB4AD33">💰</div>
+        <div style="font-size:10px;color:#6b7280;text-transform:uppercase;
+                    letter-spacing:0.05em;margin-bottom:1px">Total Pipeline</div>
+        <div data-role="stat-value" style="font-size:17px;font-weight:800;color:#121212;
+                    line-height:1.1;margin-bottom:1px">£699.7K</div>
+        <div data-role="stat-subtitle" style="font-size:11px;color:#6b7280">Weighted: £270.5K</div>
+        
+    </div><div class="stat-card" style="--accent:#334FB4">
+        <div style="width:22px;height:22px;border-radius:5px;
+            background:linear-gradient(135deg,#334FB422,#334FB411);
+            display:flex;align-items:center;justify-content:center;
+            font-size:11px;flex-shrink:0;margin-bottom:2px;
+            border:1px solid #334FB433">🛡</div>
+        <div style="font-size:10px;color:#6b7280;text-transform:uppercase;
+                    letter-spacing:0.05em;margin-bottom:1px">Pipeline Coverage</div>
+        <div data-role="stat-value" style="font-size:17px;font-weight:800;color:#121212;
+                    line-height:1.1;margin-bottom:1px">7x</div>
+        <div data-role="stat-subtitle" style="font-size:11px;color:#6b7280">vs revenue target</div>
+        
+    </div><div class="stat-card" style="--accent:#a78bfa">
+        <div style="width:22px;height:22px;border-radius:5px;
+            background:linear-gradient(135deg,#a78bfa22,#a78bfa11);
+            display:flex;align-items:center;justify-content:center;
+            font-size:11px;flex-shrink:0;margin-bottom:2px;
+            border:1px solid #a78bfa33">⏱</div>
+        <div style="font-size:10px;color:#6b7280;text-transform:uppercase;
+                    letter-spacing:0.05em;margin-bottom:1px">Avg Sales Cycle</div>
+        <div data-role="stat-value" style="font-size:17px;font-weight:800;color:#121212;
+                    line-height:1.1;margin-bottom:1px">104d</div>
+        <div data-role="stat-subtitle" style="font-size:11px;color:#6b7280">Avg deal: £15.7K</div>
+        
+    </div><div class="stat-card" style="--accent:#34d399">
+        <div style="width:22px;height:22px;border-radius:5px;
+            background:linear-gradient(135deg,#34d39922,#34d39911);
+            display:flex;align-items:center;justify-content:center;
+            font-size:11px;flex-shrink:0;margin-bottom:2px;
+            border:1px solid #34d39933">🎯</div>
+        <div style="font-size:10px;color:#6b7280;text-transform:uppercase;
+                    letter-spacing:0.05em;margin-bottom:1px">Win Rate</div>
+        <div data-role="stat-value" style="font-size:17px;font-weight:800;color:#121212;
+                    line-height:1.1;margin-bottom:1px">0.3%</div>
+        <div data-role="stat-subtitle" style="font-size:11px;color:#6b7280">Won 10 | Lost 27</div>
+        
+    </div><div class="stat-card" style="--accent:#f472b6">
+        <div style="width:22px;height:22px;border-radius:5px;
+            background:linear-gradient(135deg,#f472b622,#f472b611);
+            display:flex;align-items:center;justify-content:center;
+            font-size:11px;flex-shrink:0;margin-bottom:2px;
+            border:1px solid #f472b633">🚀</div>
+        <div style="font-size:10px;color:#6b7280;text-transform:uppercase;
+                    letter-spacing:0.05em;margin-bottom:1px">Pipeline Velocity</div>
+        <div data-role="stat-value" style="font-size:17px;font-weight:800;color:#121212;
+                    line-height:1.1;margin-bottom:1px">£1.5K</div>
+        <div data-role="stat-subtitle" style="font-size:11px;color:#6b7280">value per day</div>
+        
+    </div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px"><div class="glass-card alert-card" style="border-color:#f59e0b44">
+                <h3 class="card-title" style="color:#f59e0b">
+                    ⚠ Stale Deals (7)</h3>
+                <p style="font-size:12px;color:#6b7280;margin-bottom:8px">
+                    Deals with no activity beyond threshold</p><div class="table-wrapper">
+        <table id="stale_deals" class="data-table">
+            <thead><tr><th onclick="sortTable('stale_deals', 0)" style="cursor:pointer;user-select:none">Deal <span style="opacity:0.4;font-size:10px">&#x25B2;&#x25BC;</span></th><th onclick="sortTable('stale_deals', 1)" style="cursor:pointer;user-select:none">Value <span style="opacity:0.4;font-size:10px">&#x25B2;&#x25BC;</span></th><th onclick="sortTable('stale_deals', 2)" style="cursor:pointer;user-select:none">Stage <span style="opacity:0.4;font-size:10px">&#x25B2;&#x25BC;</span></th><th onclick="sortTable('stale_deals', 3)" style="cursor:pointer;user-select:none">Days Stale <span style="opacity:0.4;font-size:10px">&#x25B2;&#x25BC;</span></th><th onclick="sortTable('stale_deals', 4)" style="cursor:pointer;user-select:none">Owner <span style="opacity:0.4;font-size:10px">&#x25B2;&#x25BC;</span></th></tr></thead>
+            <tbody><tr><td>GMC - Evri - Rebate</td><td>£25.0K</td><td>Contract Sent</td><td>222</td><td>Caldon Henson</td></tr>
+<tr><td>The Ayurveda Experience - Freight</td><td>£60.0K</td><td>Engaged</td><td>67</td><td>James Carberry</td></tr>
+<tr><td>Glow Hub - M&amp;A</td><td>£10.0K</td><td>Engaged</td><td>180</td><td>Josh Elliott</td></tr>
+<tr><td>MAYAH - Investment</td><td>£1</td><td>Contract Sent</td><td>42</td><td>Anna Younger</td></tr>
+<tr><td>Cascadia Capital - CDD</td><td>£200.0K</td><td>Proposal Shared</td><td>76</td><td>Josh Elliott</td></tr>
+<tr><td>Nuovaluce Beauty</td><td>£50.0K</td><td>Decision Maker Bought-In</td><td>96</td><td>Anna Younger</td></tr>
+<tr><td>Finishing Line</td><td>£40.0K</td><td>Engaged</td><td>33</td><td>James Carberry</td></tr>
+</tbody>
+        </table>
+        
+    </div></div><div class="glass-card">
+                <h3 class="card-title">Expected Close Date Distribution</h3>
+                <svg width="100%" viewBox="0 0 500 306"
+         xmlns="http://www.w3.org/2000/svg" role="img"
+         aria-label="Bar chart">
+        <text x="132" y="26.0"
+              text-anchor="end" fill="#6b7280"
+              font-size="12" font-family="system-ui, sans-serif">Dec 24</text>
+        <rect x="140" y="10" width="0" height="22"
+              rx="6" fill="#3CB4AD" opacity="0.85">
+            <animate attributeName="width" from="0" to="15.294117647058822"
+                     dur="0.8s" begin="0.0s" fill="freeze"
+                     calcMode="spline" keySplines="0.25 0.1 0.25 1"/>
+        </rect>
+        <text x="163.2941176470588" y="26.0"
+              fill="#121212" font-size="12" font-weight="600"
+              font-family="system-ui, sans-serif" opacity="0">
+            1
+            <animate attributeName="opacity" from="0" to="1"
+                     dur="0.3s" begin="0.5s" fill="freeze"/>
+        </text>
+        <text x="132" y="52.0"
+              text-anchor="end" fill="#6b7280"
+              font-size="12" font-family="system-ui, sans-serif">May 25</text>
+        <rect x="140" y="36" width="0" height="22"
+              rx="6" fill="#334FB4" opacity="0.85">
+            <animate attributeName="width" from="0" to="15.294117647058822"
+                     dur="0.8s" begin="0.05s" fill="freeze"
+                     calcMode="spline" keySplines="0.25 0.1 0.25 1"/>
+        </rect>
+        <text x="163.2941176470588" y="52.0"
+              fill="#121212" font-size="12" font-weight="600"
+              font-family="system-ui, sans-serif" opacity="0">
+            1
+            <animate attributeName="opacity" from="0" to="1"
+                     dur="0.3s" begin="0.55s" fill="freeze"/>
+        </text>
+        <text x="132" y="78.0"
+              text-anchor="end" fill="#6b7280"
+              font-size="12" font-family="system-ui, sans-serif">Jun 25</text>
+        <rect x="140" y="62" width="0" height="22"
+              rx="6" fill="#a78bfa" opacity="0.85">
+            <animate attributeName="width" from="0" to="76.47058823529412"
+                     dur="0.8s" begin="0.1s" fill="freeze"
+                     calcMode="spline" keySplines="0.25 0.1 0.25 1"/>
+        </rect>
+        <text x="224.47058823529412" y="78.0"
+              fill="#121212" font-size="12" font-weight="600"
+              font-family="system-ui, sans-serif" opacity="0">
+            5
+            <animate attributeName="opacity" from="0" to="1"
+                     dur="0.3s" begin="0.6s" fill="freeze"/>
+        </text>
+        <text x="132" y="104.0"
+              text-anchor="end" fill="#6b7280"
+              font-size="12" font-family="system-ui, sans-serif">Jul 25</text>
+        <rect x="140" y="88" width="0" height="22"
+              rx="6" fill="#34d399" opacity="0.85">
+            <animate attributeName="width" from="0" to="198.8235294117647"
+                     dur="0.8s" begin="0.15000000000000002s" fill="freeze"
+                     calcMode="spline" keySplines="0.25 0.1 0.25 1"/>
+        </rect>
+        <text x="346.8235294117647" y="104.0"
+              fill="#121212" font-size="12" font-weight="600"
+              font-family="system-ui, sans-serif" opacity="0">
+            13
+            <animate attributeName="opacity" from="0" to="1"
+                     dur="0.3s" begin="0.65s" fill="freeze"/>
+        </text>
+        <text x="132" y="130.0"
+              text-anchor="end" fill="#6b7280"
+              font-size="12" font-family="system-ui, sans-serif">Aug 25</text>
+        <rect x="140" y="114" width="0" height="22"
+              rx="6" fill="#f472b6" opacity="0.85">
+            <animate attributeName="width" from="0" to="214.1176470588235"
+                     dur="0.8s" begin="0.2s" fill="freeze"
+                     calcMode="spline" keySplines="0.25 0.1 0.25 1"/>
+        </rect>
+        <text x="362.11764705882354" y="130.0"
+              fill="#121212" font-size="12" font-weight="600"
+              font-family="system-ui, sans-serif" opacity="0">
+            14
+            <animate attributeName="opacity" from="0" to="1"
+                     dur="0.3s" begin="0.7s" fill="freeze"/>
+        </text>
+        <text x="132" y="156.0"
+              text-anchor="end" fill="#6b7280"
+              font-size="12" font-family="system-ui, sans-serif">Oct 25</text>
+        <rect x="140" y="140" width="0" height="22"
+              rx="6" fill="#f59e0b" opacity="0.85">
+            <animate attributeName="width" from="0" to="61.17647058823529"
+                     dur="0.8s" begin="0.25s" fill="freeze"
+                     calcMode="spline" keySplines="0.25 0.1 0.25 1"/>
+        </rect>
+        <text x="209.1764705882353" y="156.0"
+              fill="#121212" font-size="12" font-weight="600"
+              font-family="system-ui, sans-serif" opacity="0">
+            4
+            <animate attributeName="opacity" from="0" to="1"
+                     dur="0.3s" begin="0.75s" fill="freeze"/>
+        </text>
+        <text x="132" y="182.0"
+              text-anchor="end" fill="#6b7280"
+              font-size="12" font-family="system-ui, sans-serif">Dec 25</text>
+        <rect x="140" y="166" width="0" height="22"
+              rx="6" fill="#60a5fa" opacity="0.85">
+            <animate attributeName="width" from="0" to="122.35294117647058"
+                     dur="0.8s" begin="0.30000000000000004s" fill="freeze"
+                     calcMode="spline" keySplines="0.25 0.1 0.25 1"/>
+        </rect>
+        <text x="270.3529411764706" y="182.0"
+              fill="#121212" font-size="12" font-weight="600"
+              font-family="system-ui, sans-serif" opacity="0">
+            8
+            <animate attributeName="opacity" from="0" to="1"
+                     dur="0.3s" begin="0.8s" fill="freeze"/>
+        </text>
+        <text x="132" y="208.0"
+              text-anchor="end" fill="#6b7280"
+              font-size="12" font-family="system-ui, sans-serif">Jan 26</text>
+        <rect x="140" y="192" width="0" height="22"
+              rx="6" fill="#ef4444" opacity="0.85">
+            <animate attributeName="width" from="0" to="260.0"
+                     dur="0.8s" begin="0.35000000000000003s" fill="freeze"
+                     calcMode="spline" keySplines="0.25 0.1 0.25 1"/>
+        </rect>
+        <text x="408.0" y="208.0"
+              fill="#121212" font-size="12" font-weight="600"
+              font-family="system-ui, sans-serif" opacity="0">
+            17
+            <animate attributeName="opacity" from="0" to="1"
+                     dur="0.3s" begin="0.8500000000000001s" fill="freeze"/>
+        </text>
+        <text x="132" y="234.0"
+              text-anchor="end" fill="#6b7280"
+              font-size="12" font-family="system-ui, sans-serif">Feb 26</text>
+        <rect x="140" y="218" width="0" height="22"
+              rx="6" fill="#2dd4bf" opacity="0.85">
+            <animate attributeName="width" from="0" to="137.64705882352942"
+                     dur="0.8s" begin="0.4s" fill="freeze"
+                     calcMode="spline" keySplines="0.25 0.1 0.25 1"/>
+        </rect>
+        <text x="285.6470588235294" y="234.0"
+              fill="#121212" font-size="12" font-weight="600"
+              font-family="system-ui, sans-serif" opacity="0">
+            9
+            <animate attributeName="opacity" from="0" to="1"
+                     dur="0.3s" begin="0.9s" fill="freeze"/>
+        </text>
+        <text x="132" y="260.0"
+              text-anchor="end" fill="#6b7280"
+              font-size="12" font-family="system-ui, sans-serif">Mar 26</text>
+        <rect x="140" y="244" width="0" height="22"
+              rx="6" fill="#c084fc" opacity="0.85">
+            <animate attributeName="width" from="0" to="15.294117647058822"
+                     dur="0.8s" begin="0.45s" fill="freeze"
+                     calcMode="spline" keySplines="0.25 0.1 0.25 1"/>
+        </rect>
+        <text x="163.2941176470588" y="260.0"
+              fill="#121212" font-size="12" font-weight="600"
+              font-family="system-ui, sans-serif" opacity="0">
+            1
+            <animate attributeName="opacity" from="0" to="1"
+                     dur="0.3s" begin="0.95s" fill="freeze"/>
+        </text>
+        <text x="132" y="286.0"
+              text-anchor="end" fill="#6b7280"
+              font-size="12" font-family="system-ui, sans-serif">Jun 26</text>
+        <rect x="140" y="270" width="0" height="22"
+              rx="6" fill="#4ade80" opacity="0.85">
+            <animate attributeName="width" from="0" to="30.588235294117645"
+                     dur="0.8s" begin="0.5s" fill="freeze"
+                     calcMode="spline" keySplines="0.25 0.1 0.25 1"/>
+        </rect>
+        <text x="178.58823529411765" y="286.0"
+              fill="#121212" font-size="12" font-weight="600"
+              font-family="system-ui, sans-serif" opacity="0">
+            2
+            <animate attributeName="opacity" from="0" to="1"
+                     dur="0.3s" begin="1.0s" fill="freeze"/>
+        </text>
+    </svg>
+            </div></div></section>

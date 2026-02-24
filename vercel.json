@@ -3,6 +3,6 @@
   "buildCommand": "",
   "outputDirectory": "dashboard/frontend",
   "rewrites": [
-    { "source": "/", "destination": "/dashboard-v2.html" }
+    { "source": "/", "destination": "/index.html" }
   ]
 }

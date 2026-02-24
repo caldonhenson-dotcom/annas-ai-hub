@@ -1,0 +1,244 @@
+<section class="dashboard-section">
+    <div class="section-header">
+        <h2 class="section-title">Outreach Engine</h2>
+        <p class="section-subtitle">LinkedIn automated outreach &mdash; AI-powered prospecting, sequencing, and engagement</p>
+    </div>
+
+    <!-- Sub-navigation -->
+    <div class="outreach-subnav" id="outreach-subnav">
+        <button class="outreach-subnav-btn active" data-tab="outreach-overview">Overview</button>
+        <button class="outreach-subnav-btn" data-tab="outreach-funnel">Pipeline &amp; Funnel</button>
+        <button class="outreach-subnav-btn" data-tab="outreach-pillars">Pillar Performance</button>
+        <button class="outreach-subnav-btn" data-tab="outreach-approvals">Approval Queue</button>
+        <button class="outreach-subnav-btn" data-tab="outreach-leaderboard">Lead Leaderboard</button>
+        <button class="outreach-subnav-btn" data-tab="outreach-enrollments">Active Enrollments</button>
+        <button class="outreach-subnav-btn" data-tab="outreach-inbox">LinkedIn Inbox</button>
+        <button class="outreach-subnav-btn" data-tab="outreach-ai-usage">AI Usage</button>
+        <button class="outreach-subnav-btn" data-tab="outreach-correspondence">Correspondence</button>
+    </div>
+
+    <!-- ── 1. Overview ────────────────────────────────────────── -->
+    <div class="outreach-subsection active" id="outreach-overview">
+        <div class="kpi-grid" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr))">
+            <div class="stat-card" style="--accent:#3CB4AD">
+                <div style="font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:1px">Total Prospects</div>
+                <div style="font-size:20px;font-weight:800;color:#121212" id="ov-prospects">—</div>
+                <div style="font-size:11px;color:#6b7280">across all pillars</div>
+            </div>
+            <div class="stat-card" style="--accent:#10b981">
+                <div style="font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:1px">Researched</div>
+                <div style="font-size:20px;font-weight:800;color:#121212" id="ov-researched">—</div>
+                <div style="font-size:11px;color:#6b7280">AI-enriched profiles</div>
+            </div>
+            <div class="stat-card" style="--accent:#334FB4">
+                <div style="font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:1px">Messages Sent</div>
+                <div style="font-size:20px;font-weight:800;color:#121212" id="ov-sent">—</div>
+                <div style="font-size:11px;color:#6b7280">outbound total</div>
+            </div>
+            <div class="stat-card" style="--accent:#6366f1">
+                <div style="font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:1px">Reply Rate</div>
+                <div style="font-size:20px;font-weight:800;color:#121212" id="ov-reply-rate">—</div>
+                <div style="font-size:11px;color:#6b7280">inbound / outbound</div>
+            </div>
+            <div class="stat-card" style="--accent:#f59e0b">
+                <div style="font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:1px">Conversion Rate</div>
+                <div style="font-size:20px;font-weight:800;color:#121212" id="ov-conversion">—</div>
+                <div style="font-size:11px;color:#6b7280">interested / total</div>
+            </div>
+            <div class="stat-card" style="--accent:#8b5cf6">
+                <div style="font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:1px">Avg Lead Score</div>
+                <div style="font-size:20px;font-weight:800;color:#121212" id="ov-avg-score">—</div>
+                <div style="font-size:11px;color:#6b7280">composite fit + engagement</div>
+            </div>
+            <div class="stat-card" style="--accent:#ec4899">
+                <div style="font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:1px">AI Calls</div>
+                <div style="font-size:20px;font-weight:800;color:#121212" id="ov-ai-calls">—</div>
+                <div style="font-size:11px;color:#6b7280">research + drafting</div>
+            </div>
+            <div class="stat-card" style="--accent:#ef4444">
+                <div style="font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:1px">Pending Approvals</div>
+                <div style="font-size:20px;font-weight:800;color:#121212" id="ov-pending">—</div>
+                <div style="font-size:11px;color:#6b7280">awaiting review</div>
+            </div>
+            <div class="stat-card" style="--accent:#14b8a6">
+                <div style="font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:1px">Active Enrollments</div>
+                <div style="font-size:20px;font-weight:800;color:#121212" id="ov-enrollments">—</div>
+                <div style="font-size:11px;color:#6b7280">in-sequence now</div>
+            </div>
+        </div>
+
+        <!-- Bot Control Panel -->
+        <div class="glass-card" style="margin-top:18px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+                <div class="card-title" style="margin:0">Outreach Bot</div>
+                <button class="composer-btn primary" onclick="window.LinkedInAuth.quickConnect()" id="li-connect-btn-main" style="font-size:11px;padding:5px 12px">
+                    &#128279; Connect LinkedIn
+                </button>
+            </div>
+            <div id="bot-session-row" style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+                <div class="bot-status-dot idle" id="bot-dot"></div>
+                <span style="font-size:13px;font-weight:600" id="bot-status-label">Idle</span>
+                <span style="font-size:12px;color:#6b7280" id="bot-connected-as"></span>
+            </div>
+            <div id="bot-controls-area" style="display:none">
+                <div class="bot-control-bar" style="margin-bottom:14px">
+                    <button class="bot-btn start" id="bot-start" onclick="window.OutreachBot.start()">&#9654; Start</button>
+                    <button class="bot-btn pause" id="bot-pause" onclick="window.OutreachBot.pause()" disabled>&#10074;&#10074; Pause</button>
+                    <button class="bot-btn stop" id="bot-stop" onclick="window.OutreachBot.stop()" disabled>&#9632; Stop</button>
+                </div>
+                <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr)">
+                    <div class="stat-card" style="--accent:#3b82f6;padding:10px">
+                        <div style="font-size:9px;color:#6b7280;text-transform:uppercase">Queued</div>
+                        <div style="font-size:16px;font-weight:800" id="bot-queued">0</div>
+                    </div>
+                    <div class="stat-card" style="--accent:#10b981;padding:10px">
+                        <div style="font-size:9px;color:#6b7280;text-transform:uppercase">Sent Today</div>
+                        <div style="font-size:16px;font-weight:800" id="bot-sent-today">0</div>
+                    </div>
+                    <div class="stat-card" style="--accent:#ef4444;padding:10px">
+                        <div style="font-size:9px;color:#6b7280;text-transform:uppercase">Errors</div>
+                        <div style="font-size:16px;font-weight:800" id="bot-errors">0</div>
+                    </div>
+                    <div class="stat-card" style="--accent:#8b5cf6;padding:10px">
+                        <div style="font-size:9px;color:#6b7280;text-transform:uppercase">Heartbeat</div>
+                        <div style="font-size:14px;font-weight:700" id="bot-heartbeat">--</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── 2. Pipeline & Funnel ───────────────────────────────── -->
+    <div class="outreach-subsection" id="outreach-funnel">
+        <div class="glass-card" style="margin-bottom:18px">
+            <div class="card-title">Conversion Funnel</div>
+            <div class="funnel-bar" id="funnel-bar"><!-- rendered by JS --></div>
+        </div>
+        <div class="glass-card">
+            <div class="card-title">Funnel by Pillar</div>
+            <div style="overflow-x:auto">
+                <table class="data-table" style="width:100%;font-size:12px">
+                    <thead><tr>
+                        <th>Pillar</th><th>Prospects</th><th>Researched</th><th>Enrolled</th>
+                        <th>Contacted</th><th>Replied</th><th>Interested</th><th>Converted</th>
+                    </tr></thead>
+                    <tbody id="funnel-pillar-tbody"><!-- rendered by JS --></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── 3. Pillar Performance ──────────────────────────────── -->
+    <div class="outreach-subsection" id="outreach-pillars">
+        <div class="pillar-grid" id="pillar-grid"><!-- rendered by JS --></div>
+    </div>
+
+    <!-- ── 4. Approval Queue ──────────────────────────────────── -->
+    <div class="outreach-subsection" id="outreach-approvals">
+        <div class="glass-card">
+            <div class="card-title">Pending AI-Drafted Messages</div>
+            <div style="overflow-x:auto">
+                <table class="data-table" style="width:100%;font-size:12px">
+                    <thead><tr>
+                        <th>Prospect</th><th>Company</th><th>Pillar</th><th>Channel</th>
+                        <th>Preview</th><th>AI Model</th><th>Submitted</th><th>Actions</th>
+                    </tr></thead>
+                    <tbody id="approval-tbody"><!-- rendered by JS --></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── 5. Lead Leaderboard ────────────────────────────────── -->
+    <div class="outreach-subsection" id="outreach-leaderboard">
+        <div class="glass-card">
+            <div class="card-title">Top Prospects by Lead Score</div>
+            <div style="overflow-x:auto">
+                <table class="data-table" style="width:100%;font-size:12px">
+                    <thead><tr>
+                        <th>Prospect</th><th>Company</th><th>Pillar</th><th>Lead Score</th>
+                        <th>Fit Score</th><th>Engagement</th><th>Status</th><th>Last Contact</th>
+                    </tr></thead>
+                    <tbody id="leaderboard-tbody"><!-- rendered by JS --></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── 6. Active Enrollments ──────────────────────────────── -->
+    <div class="outreach-subsection" id="outreach-enrollments">
+        <div class="glass-card">
+            <div class="card-title">Sequence Enrollments</div>
+            <div style="overflow-x:auto">
+                <table class="data-table" style="width:100%;font-size:12px">
+                    <thead><tr>
+                        <th>Prospect</th><th>Sequence</th><th>Step</th><th>Progress</th>
+                        <th>Status</th><th>Next Step</th><th>Started</th>
+                    </tr></thead>
+                    <tbody id="enrollments-tbody"><!-- rendered by JS --></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── 7. LinkedIn Inbox ──────────────────────────────────── -->
+    <div class="outreach-subsection" id="outreach-inbox">
+        <div class="glass-card">
+            <div class="card-title">Recent Conversations</div>
+            <div class="conversation-list" id="inbox-list"><!-- rendered by JS --></div>
+        </div>
+    </div>
+
+    <!-- ── 8. AI Usage ────────────────────────────────────────── -->
+    <div class="outreach-subsection" id="outreach-ai-usage">
+        <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:18px">
+            <div class="stat-card" style="--accent:#8b5cf6">
+                <div style="font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:.05em">Total AI Calls</div>
+                <div style="font-size:20px;font-weight:800;color:#121212" id="ai-total-calls">—</div>
+            </div>
+            <div class="stat-card" style="--accent:#f59e0b">
+                <div style="font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:.05em">Est. Cost</div>
+                <div style="font-size:20px;font-weight:800;color:#121212" id="ai-total-cost">—</div>
+            </div>
+            <div class="stat-card" style="--accent:#3CB4AD">
+                <div style="font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:.05em">Avg Latency</div>
+                <div style="font-size:20px;font-weight:800;color:#121212" id="ai-avg-latency">—</div>
+            </div>
+            <div class="stat-card" style="--accent:#10b981">
+                <div style="font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:.05em">Success Rate</div>
+                <div style="font-size:20px;font-weight:800;color:#121212" id="ai-success-rate">—</div>
+            </div>
+        </div>
+        <div class="glass-card">
+            <div class="card-title">Usage by Provider &amp; Task</div>
+            <div style="overflow-x:auto">
+                <table class="data-table" style="width:100%;font-size:12px">
+                    <thead><tr>
+                        <th>Provider</th><th>Task</th><th>Calls</th><th>Tokens</th>
+                        <th>Avg Latency</th><th>P95 Latency</th><th>Success Rate</th>
+                    </tr></thead>
+                    <tbody id="ai-usage-tbody"><!-- rendered by JS --></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── 9. Correspondence Monitor ──────────────────────────── -->
+    <div class="outreach-subsection" id="outreach-correspondence">
+        <div class="glass-card">
+            <div class="card-title">Inbound Classified Messages</div>
+            <div style="overflow-x:auto">
+                <table class="data-table" style="width:100%;font-size:12px">
+                    <thead><tr>
+                        <th>From</th><th>Company</th><th>Channel</th><th>Intent</th>
+                        <th>Confidence</th><th>Sentiment</th><th>Preview</th><th>Time</th>
+                    </tr></thead>
+                    <tbody id="correspondence-tbody"><!-- rendered by JS --></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</section>
+</div>
+<!-- END OUTREACH ENGINE -->

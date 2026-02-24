@@ -5,6 +5,7 @@
 // Main filter application
 // ----------------------------------------------------------------
 window.applyFilter = function(period) {
+    window.currentPeriod = period;
     var range = getDateRange(period);
     var showYoY = (period === 'ytd' || period === 'all' || period === 'last_year');
 

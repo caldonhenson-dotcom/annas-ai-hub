@@ -1,0 +1,62 @@
+<section class="dashboard-section anna-section">
+    <div class="anna-layout">
+        <!-- Conversation sidebar -->
+        <div class="anna-sidebar" id="anna-sidebar">
+            <button class="anna-new-chat" onclick="window.AnnaPage.newChat()">
+                &#43; New Chat
+            </button>
+            <div class="anna-conv-list" id="anna-conv-list"></div>
+            <div class="anna-sidebar-divider"></div>
+            <div class="anna-sidebar-label">&#128196; Reports</div>
+            <button class="anna-report-btn" onclick="window.AnnaPage.runReport('monthly-deal-flow')">
+                <span>&#9733;</span> Monthly Deal Flow</button>
+            <button class="anna-report-btn" onclick="window.AnnaPage.runReport('pipeline-health')">
+                <span>&#9881;</span> Pipeline Health</button>
+            <button class="anna-report-btn" onclick="window.AnnaPage.runReport('lead-source')">
+                <span>&#10024;</span> Lead Source Analysis</button>
+            <button class="anna-report-btn" onclick="window.AnnaPage.runReport('weekly-activity')">
+                <span>&#9993;</span> Weekly Activity</button>
+            <button class="anna-report-btn" onclick="window.AnnaPage.runReport('ma-pipeline')">
+                <span>&#128188;</span> M&amp;A Pipeline</button>
+            <button class="anna-report-btn" onclick="window.AnnaPage.runReport('rep-scorecard')">
+                <span>&#9879;</span> Rep Scorecard</button>
+        </div>
+
+        <!-- Main chat area -->
+        <div class="anna-chat-area">
+            <div class="anna-chat-header">
+                <div class="anna-avatar">e</div>
+                <div class="anna-header-info">
+                    <div class="anna-header-name">eComplete AI</div>
+                    <div class="anna-header-status">Sales &amp; M&amp;A Intelligence Assistant</div>
+                </div>
+                <div class="anna-header-actions">
+                    <button class="anna-header-btn" onclick="window.AnnaPage.clearChat()" title="Clear chat">&#128465;</button>
+                </div>
+            </div>
+            <div class="anna-messages" id="anna-page-msgs">
+                <div class="anna-welcome" id="anna-welcome">
+                    <div class="anna-welcome-avatar">e</div>
+                    <div class="anna-welcome-title">eComplete AI</div>
+                    <div class="anna-welcome-sub">Your sales &amp; M&amp;A intelligence assistant. Ask me anything about your dashboard data.</div>
+                    <div class="anna-suggestions" id="anna-suggestions">
+                        <button class="anna-suggest-btn" onclick="window.AnnaPage.ask(this.textContent)">Summarise deal flow this month</button>
+                        <button class="anna-suggest-btn" onclick="window.AnnaPage.ask(this.textContent)">Which deals are stale or at risk?</button>
+                        <button class="anna-suggest-btn" onclick="window.AnnaPage.ask(this.textContent)">Pipeline health &amp; coverage</button>
+                        <button class="anna-suggest-btn" onclick="window.AnnaPage.ask(this.textContent)">Lead source effectiveness</button>
+                        <button class="anna-suggest-btn" onclick="window.AnnaPage.ask(this.textContent)">Top performing rep this month</button>
+                        <button class="anna-suggest-btn" onclick="window.AnnaPage.ask(this.textContent)">M&amp;A pipeline status</button>
+                        <button class="anna-suggest-btn" onclick="window.AnnaPage.ask(this.textContent)">Revenue forecast next 90 days</button>
+                        <button class="anna-suggest-btn" onclick="window.AnnaPage.ask(this.textContent)">Weekly summary</button>
+                    </div>
+                </div>
+            </div>
+            <div class="anna-input-area">
+                <input class="anna-input" id="anna-page-input" type="text"
+                    placeholder="Ask eComplete AI about your data..."
+                    onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();window.AnnaPage.send()}" />
+                <button class="anna-send-btn" onclick="window.AnnaPage.send()">&#10148;</button>
+            </div>
+        </div>
+    </div>
+    </section>

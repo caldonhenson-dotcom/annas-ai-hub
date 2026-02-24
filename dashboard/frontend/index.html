@@ -1,2 +1,424 @@
 <!DOCTYPE html>
-<html><head><meta http-equiv="refresh" content="0;url=dashboard-v2.html"><title>Redirecting...</title></head><body></body></html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>eComplete &mdash; Sales &amp; M&amp;A Intelligence</title>
+    <meta name="description" content="eComplete Sales &amp; M&amp;A Intelligence Dashboard — HubSpot CRM + Monday.com">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&amp;display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="css/tokens.css">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/pages.css">
+    <link rel="stylesheet" href="css/chat.css">
+    <link rel="stylesheet" href="css/anna.css">
+    <link rel="stylesheet" href="css/outreach.css">
+    <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+    <div class="login-overlay" id="login-overlay">
+        <div class="login-card">
+            <div class="login-brand">
+                <span class="brand-dot">e</span>
+                <span>eComplete</span>
+            </div>
+            <div class="login-title">Welcome</div>
+            <p class="login-subtitle">Enter your name to continue</p>
+            <input class="login-input" id="login-name" type="text" placeholder="Your name..." autofocus />
+            <button class="login-btn" id="login-btn" onclick="window.doLogin()">Continue &#10148;</button>
+        </div>
+    </div>
+
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+            <span class="brand-dot">e</span>
+            <span class="sidebar-brand-text">eComplete</span>
+        </div>
+        <div class="sidebar-user" id="sidebar-user">
+            <span class="sidebar-user-icon">&#128100;</span>
+            <span class="sidebar-user-name" id="sidebar-user-name"></span>
+        </div>
+        <nav class="sidebar-nav">
+            <div class="sidebar-favs-group" id="sidebar-favs">
+                <div class="sidebar-group-label">&#9733; Favourites</div>
+                <div id="sidebar-favs-list"></div>
+            </div>
+            <div class="sidebar-group">
+                <div class="sidebar-group-label">&#9889; Assistant</div>
+                <a href="javascript:void(0)" onclick="showPage('anna')" class="sidebar-link" data-page="anna">eComplete AI<button class="sidebar-fav" data-fav="anna" onclick="event.preventDefault();event.stopPropagation();toggleFav('anna')" title="Toggle favourite">&#9733;</button></a>
+            </div>
+            <div class="sidebar-group">
+                <div class="sidebar-group-label">&#9679; Overview</div>
+                <a href="javascript:void(0)" onclick="showPage('executive')" class="sidebar-link" data-page="executive">Executive Summary<button class="sidebar-fav" data-fav="executive" onclick="event.preventDefault();event.stopPropagation();toggleFav('executive')" title="Toggle favourite">&#9733;</button></a>
+            </div>
+            <div class="sidebar-group">
+                <div class="sidebar-group-label">&#9733; Sales</div>
+                <a href="javascript:void(0)" onclick="showPage('leads')" class="sidebar-link" data-page="leads">Leads &amp; Conversion<button class="sidebar-fav" data-fav="leads" onclick="event.preventDefault();event.stopPropagation();toggleFav('leads')" title="Toggle favourite">&#9733;</button></a>
+                <a href="javascript:void(0)" onclick="showPage('pipeline')" class="sidebar-link" data-page="pipeline">Pipeline View<button class="sidebar-fav" data-fav="pipeline" onclick="event.preventDefault();event.stopPropagation();toggleFav('pipeline')" title="Toggle favourite">&#9733;</button></a>
+                <a href="javascript:void(0)" onclick="showPage('targets')" class="sidebar-link" data-page="targets">Targets &amp; Rev Eng<button class="sidebar-fav" data-fav="targets" onclick="event.preventDefault();event.stopPropagation();toggleFav('targets')" title="Toggle favourite">&#9733;</button></a>
+            </div>
+            <div class="sidebar-group">
+                <div class="sidebar-group-label">&#9993; Performance</div>
+                <a href="javascript:void(0)" onclick="showPage('activities')" class="sidebar-link" data-page="activities">Activity &amp; Contacts<button class="sidebar-fav" data-fav="activities" onclick="event.preventDefault();event.stopPropagation();toggleFav('activities')" title="Toggle favourite">&#9733;</button></a>
+                <a href="javascript:void(0)" onclick="showPage('insights')" class="sidebar-link" data-page="insights">Insights &amp; Forecast<button class="sidebar-fav" data-fav="insights" onclick="event.preventDefault();event.stopPropagation();toggleFav('insights')" title="Toggle favourite">&#9733;</button></a>
+            </div>
+            <div class="sidebar-group">
+                <div class="sidebar-group-label">&#128188; M&amp;A</div>
+                <a href="javascript:void(0)" onclick="showPage('monday-pipeline')" class="sidebar-link" data-page="monday-pipeline">M&amp;A Pipeline<button class="sidebar-fav" data-fav="monday-pipeline" onclick="event.preventDefault();event.stopPropagation();toggleFav('monday-pipeline')" title="Toggle favourite">&#9733;</button></a>
+                <a href="javascript:void(0)" onclick="showPage('monday-ic')" class="sidebar-link" data-page="monday-ic">IC Scorecards<button class="sidebar-fav" data-fav="monday-ic" onclick="event.preventDefault();event.stopPropagation();toggleFav('monday-ic')" title="Toggle favourite">&#9733;</button></a>
+            </div>
+            <div class="sidebar-group">
+                <div class="sidebar-group-label">&#129302; Operations</div>
+                <a href="javascript:void(0)" onclick="showPage('ai-roadmap')" class="sidebar-link" data-page="ai-roadmap">AI Roadmap<button class="sidebar-fav" data-fav="ai-roadmap" onclick="event.preventDefault();event.stopPropagation();toggleFav('ai-roadmap')" title="Toggle favourite">&#9733;</button></a>
+                <a href="javascript:void(0)" onclick="showPage('inbound-queue')" class="sidebar-link" data-page="inbound-queue">Inbound Queue<button class="sidebar-fav" data-fav="inbound-queue" onclick="event.preventDefault();event.stopPropagation();toggleFav('inbound-queue')" title="Toggle favourite">&#9733;</button></a>
+            </div>
+            <div class="sidebar-group">
+                <div class="sidebar-group-label">&#128640; Outreach</div>
+                <a href="javascript:void(0)" onclick="showPage('outreach')" class="sidebar-link" data-page="outreach">Outreach Engine<button class="sidebar-fav" data-fav="outreach" onclick="event.preventDefault();event.stopPropagation();toggleFav('outreach')" title="Toggle favourite">&#9733;</button></a>
+            </div>
+        </nav>
+        <div class="sidebar-footer">
+            Sales &amp; M&amp;A &amp; AI Intelligence
+        </div>
+    </aside>
+    <button class="sidebar-toggle" id="sidebar-toggle" onclick="toggleSidebar()" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+    </button>
+    <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+    <div class="layout-main" id="layout-main">
+        <div class="filter-bar" id="filter-bar">
+            <div class="filter-inner">
+                <span class="filter-label">Period</span>
+                <button class="filter-btn" data-period="this_week" onclick="applyFilter('this_week')">This Week</button>
+                <button class="filter-btn" data-period="last_week" onclick="applyFilter('last_week')">Last Week</button>
+                <button class="filter-btn" data-period="mtd" onclick="applyFilter('mtd')">MTD</button>
+                <button class="filter-btn active" data-period="ytd" onclick="applyFilter('ytd')">YTD</button>
+                <button class="filter-btn" data-period="last_year" onclick="applyFilter('last_year')">Last Year</button>
+                <button class="filter-btn" data-period="all" onclick="applyFilter('all')">All Time</button>
+                <span class="filter-period-label" id="filter-period-label">Year to Date</span>
+            </div>
+        </div>
+        <div class="freshness-bar" id="freshness-bar">
+            <span class="freshness-pill" title="Last sync">HubSpot: --</span>
+            <span class="freshness-pill" title="Last sync">Monday: --</span>
+            <span class="freshness-pill" title="Last sync">Queue: --</span>
+        </div>
+
+        <main class="main-content">
+            <!-- Page containers — content loaded lazily from pages/ -->
+            <div class="dash-page" id="page-anna"></div>
+            <div class="dash-page" id="page-executive"></div>
+            <div class="dash-page" id="page-leads"></div>
+            <div class="dash-page" id="page-pipeline"></div>
+            <div class="dash-page" id="page-targets"></div>
+            <div class="dash-page" id="page-activities"></div>
+            <div class="dash-page" id="page-insights"></div>
+            <div class="dash-page" id="page-monday-pipeline"></div>
+            <div class="dash-page" id="page-monday-ic"></div>
+            <div class="dash-page" id="page-ai-roadmap"></div>
+            <div class="dash-page" id="page-inbound-queue"></div>
+            <div class="dash-page" id="page-outreach"></div>
+        </main>
+
+        <footer class="dashboard-footer">
+            <p><span class="brand">eComplete</span> &mdash; Sales &amp; M&amp;A Intelligence Dashboard</p>
+            <p style="margin-top:4px">Contacts: 44,602 | Companies: 17,781 | Deals: 75</p>
+            <p style="margin-top:4px" id="generated-ts"></p>
+        </footer>
+    </div>
+
+    <!-- ═══ LinkedIn Auth Modal ═══ -->
+    <div class="linkedin-auth-overlay hidden" id="linkedin-auth-overlay" onclick="if(event.target===this)window.LinkedInAuth.close()">
+        <div class="linkedin-auth-card">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+                <h3 style="margin:0;font-size:18px;font-weight:700">
+                    <span style="color:#0077B5">&#9679;</span> Connect LinkedIn
+                </h3>
+                <button onclick="window.LinkedInAuth.close()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#6b7280;padding:4px">&times;</button>
+            </div>
+            <div id="li-session-status" style="margin-bottom:16px">
+                <div class="li-status-disconnected" id="li-status-box">
+                    <span style="font-size:18px">&#128274;</span>
+                    <div>
+                        <div style="font-weight:600;font-size:13px" id="li-status-text">Not connected</div>
+                        <div style="font-size:11px;color:#6b7280" id="li-status-detail">Connect your LinkedIn to enable outreach</div>
+                    </div>
+                </div>
+            </div>
+            <div id="li-auth-methods">
+                <div id="li-oneclick-area" style="text-align:center;padding:16px 0">
+                    <button class="li-submit-btn" id="li-oneclick-btn" style="background:linear-gradient(135deg,#0077B5,#005885);font-size:15px;padding:14px 20px;border-radius:12px;letter-spacing:0.3px" onclick="window.LinkedInAuth.oneClick()">
+                        <span id="li-oneclick-label">&#128279; Connect My LinkedIn</span>
+                    </button>
+                    <div id="li-oneclick-status" style="margin-top:12px;font-size:12px;color:#6b7280"></div>
+                </div>
+                <div id="li-ext-install" style="display:none;margin-top:12px">
+                    <div style="background:#fffbeb;border:1px solid #fcd34d;border-radius:10px;padding:14px">
+                        <div style="font-size:12px;font-weight:700;color:#92400e;margin-bottom:6px">One-time setup needed</div>
+                        <div style="font-size:13px;color:#374151;line-height:1.6;margin-bottom:10px">
+                            Install the <strong>Annas AI Hub LinkedIn Connector</strong> Chrome extension for single-click login:
+                        </div>
+                        <ol style="font-size:12px;color:#4b5563;line-height:1.8;margin:0 0 10px 16px;padding:0">
+                            <li>Open <strong>chrome://extensions</strong> in a new tab</li>
+                            <li>Enable <strong>Developer mode</strong> (top-right toggle)</li>
+                            <li>Click <strong>Load unpacked</strong></li>
+                            <li>Select the <code style="background:#f3f4f6;padding:1px 4px;border-radius:3px">chrome-extension</code> folder from your project</li>
+                        </ol>
+                        <button class="li-submit-btn" style="background:#0077B5;font-size:12px;padding:8px 14px" onclick="window.LinkedInAuth.retryExtension()">
+                            I've installed it &mdash; try again
+                        </button>
+                    </div>
+                </div>
+                <details style="margin-top:12px">
+                    <summary style="font-size:12px;color:#6b7280;cursor:pointer;padding:6px 0">Manual connection (without extension)</summary>
+                    <div style="padding-top:10px">
+                        <div style="font-size:12px;color:#374151;line-height:1.6;margin-bottom:10px">
+                            In Chrome DevTools (<kbd style="background:#e5e7eb;padding:2px 6px;border-radius:3px;font-size:11px">F12</kbd>) &rarr; <strong>Application</strong> &rarr; <strong>Cookies</strong> &rarr; <strong>linkedin.com</strong>:
+                        </div>
+                        <input class="li-input" id="li-input-li_at" placeholder="li_at cookie value..." autocomplete="off" />
+                        <input class="li-input" id="li-input-csrf" placeholder="JSESSIONID value (without quotes)..." autocomplete="off" />
+                        <button class="li-submit-btn" id="li-submit-btn" onclick="window.LinkedInAuth.submit()">
+                            Connect &amp; Validate
+                        </button>
+                    </div>
+                </details>
+            </div>
+            <div id="li-disconnect-section" style="display:none;margin-top:12px">
+                <button class="li-submit-btn" style="background:#ef4444" onclick="window.LinkedInAuth.disconnect()">Disconnect LinkedIn</button>
+            </div>
+            <div id="li-auth-message" style="display:none;margin-top:12px;padding:10px;border-radius:8px;font-size:13px"></div>
+        </div>
+    </div>
+
+    <!-- ═══ Prospect Detail Panel ═══ -->
+    <div class="prospect-panel-overlay" id="prospect-panel-overlay" onclick="window.ProspectPanel.close()"></div>
+    <div class="prospect-panel" id="prospect-panel">
+        <div class="prospect-panel-header">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start">
+                <div style="flex:1">
+                    <div style="display:flex;align-items:center;gap:12px">
+                        <div class="score-circle" id="pp-score-circle" style="background:var(--accent)">—</div>
+                        <div>
+                            <div style="font-size:16px;font-weight:700" id="pp-name">—</div>
+                            <div style="font-size:13px;color:#6b7280" id="pp-title-company">—</div>
+                        </div>
+                    </div>
+                    <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap" id="pp-badges"></div>
+                    <div style="display:flex;gap:12px;margin-top:8px;font-size:12px;color:#6b7280" id="pp-links"></div>
+                </div>
+                <button onclick="window.ProspectPanel.close()" style="background:none;border:none;font-size:22px;cursor:pointer;color:#6b7280;padding:4px">&times;</button>
+            </div>
+        </div>
+        <div class="prospect-panel-tabs">
+            <button class="prospect-panel-tab active" data-ptab="pp-research">Research</button>
+            <button class="prospect-panel-tab" data-ptab="pp-messages">Messages</button>
+            <button class="prospect-panel-tab" data-ptab="pp-composer">Compose</button>
+            <button class="prospect-panel-tab" data-ptab="pp-scoring">Scoring</button>
+        </div>
+        <div class="prospect-panel-body">
+            <div class="prospect-tab-content active" id="pp-research">
+                <div id="pp-research-content">
+                    <div style="text-align:center;padding:40px 20px;color:#6b7280">
+                        <div style="font-size:32px;margin-bottom:8px">&#128269;</div>
+                        <div style="font-size:14px;font-weight:600;margin-bottom:4px">No research yet</div>
+                        <div style="font-size:12px;margin-bottom:16px">Click below to run AI-powered deep research on this prospect</div>
+                        <button class="composer-btn primary" id="pp-run-research-btn" onclick="window.ProspectPanel.runResearch()">
+                            &#9889; Run AI Research
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="prospect-tab-content" id="pp-messages">
+                <div id="pp-messages-content" style="font-size:13px;color:#6b7280;text-align:center;padding:40px">
+                    No messages yet
+                </div>
+            </div>
+            <div class="prospect-tab-content" id="pp-composer">
+                <div style="margin-bottom:12px">
+                    <div style="display:flex;gap:8px;margin-bottom:10px">
+                        <select id="pp-step-select" style="padding:6px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:12px;flex:1">
+                            <option value="1">Step 1: Introduction</option>
+                            <option value="2">Step 2: Value-add follow-up</option>
+                            <option value="3">Step 3: Social proof</option>
+                            <option value="4">Step 4: Soft close</option>
+                        </select>
+                        <select id="pp-channel-select" style="padding:6px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:12px;">
+                            <option value="linkedin">LinkedIn</option>
+                            <option value="email">Email</option>
+                        </select>
+                    </div>
+                    <button class="composer-btn primary" onclick="window.ProspectPanel.generateDraft()" id="pp-generate-btn">
+                        &#9889; Generate AI Draft
+                    </button>
+                </div>
+                <textarea class="composer-area" id="pp-draft-area" placeholder="AI-generated message will appear here... You can also write directly."></textarea>
+                <div class="composer-toolbar">
+                    <button class="composer-btn secondary" onclick="window.ProspectPanel.generateDraft()" id="pp-regen-btn">&#8635; Regenerate</button>
+                    <button class="composer-btn success" onclick="window.ProspectPanel.approveAndQueue()" id="pp-approve-btn">&#10003; Approve &amp; Queue</button>
+                    <button class="composer-btn primary" onclick="window.ProspectPanel.sendNow()" id="pp-send-btn" style="display:none">&#9993; Send Now</button>
+                </div>
+                <div id="pp-composer-status" style="display:none;margin-top:8px;font-size:12px;padding:8px;border-radius:6px"></div>
+            </div>
+            <div class="prospect-tab-content" id="pp-scoring">
+                <div id="pp-scoring-content" style="font-size:13px;color:#6b7280;text-align:center;padding:40px">
+                    Select a prospect to view scoring
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Chat Assistant FAB -->
+    <button class="chat-fab" id="chat-fab" onclick="window.AnnaChat.open()" aria-label="Ask eComplete AI" title="eComplete AI (Ctrl+K)">
+        &#9889;
+    </button>
+    <div class="chat-panel" id="chat-panel">
+        <div class="chat-header">
+            <div class="chat-header-avatar">e</div>
+            <div class="chat-header-info">
+                <div class="chat-header-name">eComplete AI</div>
+                <div class="chat-header-status">Sales &amp; M&amp;A Intelligence</div>
+            </div>
+            <button class="chat-close" onclick="window.AnnaChat.close()" aria-label="Close">&times;</button>
+        </div>
+        <div class="chat-tabs">
+            <button class="chat-tab active" data-tab="chat" onclick="window.AnnaChat.switchTab('chat')">&#9889; Chat</button>
+            <button class="chat-tab" data-tab="reports" onclick="window.AnnaChat.switchTab('reports')">&#128196; Reports</button>
+        </div>
+        <div class="chat-messages" id="chat-messages">
+            <div class="chat-msg system">Ask me anything about your sales data, pipeline, M&amp;A projects, or team activity.</div>
+        </div>
+        <div class="chat-suggestions" id="chat-suggestions">
+            <div class="chat-suggest-group">
+                <div class="chat-suggest-header" onclick="window.AnnaChat.toggleGroup(this)">
+                    &#9733; Pipeline &amp; Deals <span class="chat-suggest-arrow">&#9662;</span>
+                </div>
+                <div class="chat-suggest-items">
+                    <button class="chat-suggestion" onclick="window.AnnaChat.ask(this.textContent)">Summarise deal flow this month</button>
+                    <button class="chat-suggestion" onclick="window.AnnaChat.ask(this.textContent)">Which deals are stale or at risk?</button>
+                    <button class="chat-suggestion" onclick="window.AnnaChat.ask(this.textContent)">Pipeline health &amp; coverage ratio</button>
+                    <button class="chat-suggestion" onclick="window.AnnaChat.ask(this.textContent)">What is the current win rate?</button>
+                </div>
+            </div>
+            <div class="chat-suggest-group">
+                <div class="chat-suggest-header" onclick="window.AnnaChat.toggleGroup(this)">
+                    &#10024; Leads &amp; Marketing <span class="chat-suggest-arrow">&#9662;</span>
+                </div>
+                <div class="chat-suggest-items">
+                    <button class="chat-suggestion" onclick="window.AnnaChat.ask(this.textContent)">Summarise leads by source</button>
+                    <button class="chat-suggestion" onclick="window.AnnaChat.ask(this.textContent)">Lead source effectiveness</button>
+                    <button class="chat-suggestion" onclick="window.AnnaChat.ask(this.textContent)">MQL to SQL conversion trends</button>
+                </div>
+            </div>
+            <div class="chat-suggest-group">
+                <div class="chat-suggest-header" onclick="window.AnnaChat.toggleGroup(this)">
+                    &#9993; Team Activity <span class="chat-suggest-arrow">&#9662;</span>
+                </div>
+                <div class="chat-suggest-items">
+                    <button class="chat-suggestion" onclick="window.AnnaChat.ask(this.textContent)">Top performing rep this month</button>
+                    <button class="chat-suggestion" onclick="window.AnnaChat.ask(this.textContent)">Team activity breakdown</button>
+                    <button class="chat-suggestion" onclick="window.AnnaChat.ask(this.textContent)">Touches per won deal average</button>
+                </div>
+            </div>
+            <div class="chat-suggest-group">
+                <div class="chat-suggest-header" onclick="window.AnnaChat.toggleGroup(this)">
+                    &#128188; M&amp;A <span class="chat-suggest-arrow">&#9662;</span>
+                </div>
+                <div class="chat-suggest-items">
+                    <button class="chat-suggestion" onclick="window.AnnaChat.ask(this.textContent)">M&amp;A pipeline status</button>
+                    <button class="chat-suggestion" onclick="window.AnnaChat.ask(this.textContent)">Stale M&amp;A projects</button>
+                    <button class="chat-suggestion" onclick="window.AnnaChat.ask(this.textContent)">IC scorecard summary</button>
+                </div>
+            </div>
+            <div class="chat-suggest-group">
+                <div class="chat-suggest-header" onclick="window.AnnaChat.toggleGroup(this)">
+                    &#9889; Quick Reports <span class="chat-suggest-arrow">&#9662;</span>
+                </div>
+                <div class="chat-suggest-items">
+                    <button class="chat-suggestion" onclick="window.AnnaChat.ask(this.textContent)">Weekly summary</button>
+                    <button class="chat-suggestion" onclick="window.AnnaChat.ask(this.textContent)">Revenue forecast next 90 days</button>
+                    <button class="chat-suggestion" onclick="window.AnnaChat.ask(this.textContent)">Key risks and blockers</button>
+                </div>
+            </div>
+        </div>
+        <div class="chat-reports" id="chat-reports" style="display:none">
+            <div class="chat-report-item" onclick="window.AnnaChat.runReport('monthly-deal-flow')">
+                <span class="chat-report-icon">&#9733;</span>
+                <div class="chat-report-info">
+                    <div class="chat-report-title">Monthly Deal Flow Summary</div>
+                    <div class="chat-report-desc">Deals created, won, lost &amp; pipeline movement</div>
+                </div>
+                <span class="chat-report-arrow">&#8594;</span>
+            </div>
+            <div class="chat-report-item" onclick="window.AnnaChat.runReport('pipeline-health')">
+                <span class="chat-report-icon">&#9881;</span>
+                <div class="chat-report-info">
+                    <div class="chat-report-title">Pipeline Health Report</div>
+                    <div class="chat-report-desc">Coverage ratio, stage distribution &amp; stale deals</div>
+                </div>
+                <span class="chat-report-arrow">&#8594;</span>
+            </div>
+            <div class="chat-report-item" onclick="window.AnnaChat.runReport('lead-source')">
+                <span class="chat-report-icon">&#10024;</span>
+                <div class="chat-report-info">
+                    <div class="chat-report-title">Lead Source Analysis</div>
+                    <div class="chat-report-desc">Source effectiveness, MQL/SQL conversion rates</div>
+                </div>
+                <span class="chat-report-arrow">&#8594;</span>
+            </div>
+            <div class="chat-report-item" onclick="window.AnnaChat.runReport('weekly-activity')">
+                <span class="chat-report-icon">&#9993;</span>
+                <div class="chat-report-info">
+                    <div class="chat-report-title">Weekly Activity Report</div>
+                    <div class="chat-report-desc">Calls, emails, meetings &amp; tasks by rep</div>
+                </div>
+                <span class="chat-report-arrow">&#8594;</span>
+            </div>
+            <div class="chat-report-item" onclick="window.AnnaChat.runReport('ma-pipeline')">
+                <span class="chat-report-icon">&#128188;</span>
+                <div class="chat-report-info">
+                    <div class="chat-report-title">M&amp;A Pipeline Status</div>
+                    <div class="chat-report-desc">Active projects, stages &amp; owner summary</div>
+                </div>
+                <span class="chat-report-arrow">&#8594;</span>
+            </div>
+            <div class="chat-report-item" onclick="window.AnnaChat.runReport('rep-scorecard')">
+                <span class="chat-report-icon">&#9879;</span>
+                <div class="chat-report-info">
+                    <div class="chat-report-title">Rep Performance Scorecard</div>
+                    <div class="chat-report-desc">Individual rep metrics, pipeline &amp; activities</div>
+                </div>
+                <span class="chat-report-arrow">&#8594;</span>
+            </div>
+        </div>
+        <div class="chat-input-area" id="chat-input-area">
+            <input class="chat-input" id="chat-input" type="text"
+                   placeholder="Ask about your data..."
+                   onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();window.AnnaChat.send()}" />
+            <button class="chat-send" id="chat-send" onclick="window.AnnaChat.send()" aria-label="Send">&#10148;</button>
+        </div>
+    </div>
+
+    <!-- Core scripts -->
+    <script src="js/app.js"></script>
+    <script src="js/tables.js"></script>
+    <script src="js/router.js"></script>
+    <script src="js/favourites.js"></script>
+    <script src="js/data.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/charts.js"></script>
+    <script src="js/filters.js"></script>
+    <!-- Chat -->
+    <script src="js/chat-widget.js"></script>
+    <script src="js/anna-page.js"></script>
+    <!-- Outreach Engine -->
+    <script src="js/outreach-data.js"></script>
+    <script src="js/outreach-render.js"></script>
+    <script src="js/outreach-actions.js"></script>
+    <script src="js/outreach-panel.js"></script>
+    <script src="js/outreach-bot.js"></script>
+</body>
+</html>

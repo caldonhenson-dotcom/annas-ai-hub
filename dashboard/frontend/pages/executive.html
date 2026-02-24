@@ -1,0 +1,90 @@
+<section id="executive" class="dashboard-section">
+        <div class="section-header">
+            <div>
+                <h2 class="section-title">📊 Dashboard</h2>
+                <p class="section-subtitle">Live business intelligence overview</p>
+            </div>
+        </div><div class="exec-kpi-strip"><div class="exec-kpi">
+            <div class="exec-kpi-val" style="color:#3CB4AD">£699.7K</div>
+            <div class="exec-kpi-label">Pipeline</div>
+        </div><div class="exec-kpi">
+            <div class="exec-kpi-val" style="color:#334FB4">£270.5K</div>
+            <div class="exec-kpi-label">Weighted</div>
+        </div><div class="exec-kpi">
+            <div class="exec-kpi-val" style="color:#34d399">0.3%</div>
+            <div class="exec-kpi-label">Win Rate</div>
+        </div><div class="exec-kpi">
+            <div class="exec-kpi-val" style="color:#a78bfa">38</div>
+            <div class="exec-kpi-label">Open Deals</div>
+        </div><div class="exec-kpi">
+            <div class="exec-kpi-val" style="color:#f59e0b">£15.7K</div>
+            <div class="exec-kpi-label">Avg Size</div>
+        </div><div class="exec-kpi">
+            <div class="exec-kpi-val" style="color:#3b82f6">44,602</div>
+            <div class="exec-kpi-label">Leads</div>
+        </div><div class="exec-kpi">
+            <div class="exec-kpi-val" style="color:#f472b6">11,787</div>
+            <div class="exec-kpi-label">Activities</div>
+        </div><div class="exec-kpi">
+            <div class="exec-kpi-val" style="color:#f59e0b">£0</div>
+            <div class="exec-kpi-label">30d Forecast</div>
+        </div></div><div class="exec-pillars"><div class="exec-pillar" onclick="showPage('pipeline')" style="cursor:pointer">
+            <div class="exec-pillar-header">
+                <span class="exec-pillar-icon" style="background:#3CB4AD15;color:#3CB4AD">&#9733;</span>
+                <span class="exec-pillar-title">Sales & Pipeline</span>
+                <span class="exec-pillar-arrow" style="color:#3CB4AD">&#8594;</span>
+            </div>
+            <ul class="exec-pillar-points"><li><strong>£699.7K</strong> total pipeline (38 open deals)</li><li><strong>10</strong> deals won vs <strong>27</strong> lost &mdash; 0.3% win rate</li><li>Average sales cycle: <strong>104.9 days</strong></li><li><span style="color:#f59e0b">&#9888; 7 stale deals</span> sitting in stage &gt;30 days</li></ul>
+        </div><div class="exec-pillar" onclick="showPage('leads')" style="cursor:pointer">
+            <div class="exec-pillar-header">
+                <span class="exec-pillar-icon" style="background:#334FB415;color:#334FB4">&#10024;</span>
+                <span class="exec-pillar-title">Leads & Conversion</span>
+                <span class="exec-pillar-arrow" style="color:#334FB4">&#8594;</span>
+            </div>
+            <ul class="exec-pillar-points"><li><strong>44,602</strong> total leads (251 new in last 30d)</li><li>Top source: <strong>OFFLINE</strong> (44,547 leads)</li><li><strong>44,602</strong> contacts, <strong>17,781</strong> companies in CRM</li></ul>
+        </div><div class="exec-pillar" onclick="showPage('monday-pipeline')" style="cursor:pointer">
+            <div class="exec-pillar-header">
+                <span class="exec-pillar-icon" style="background:#a78bfa15;color:#a78bfa">&#128188;</span>
+                <span class="exec-pillar-title">M&A</span>
+                <span class="exec-pillar-arrow" style="color:#a78bfa">&#8594;</span>
+            </div>
+            <ul class="exec-pillar-points"><li><strong>887</strong> active projects out of 1303 total</li><li>Top stages: not started: 202, for re-targetting: 183, unknown: 175</li><li><span style="color:#f59e0b">&#9888; 859 stale projects</span> need follow-up</li><li><strong>61</strong> IC items awaiting decision</li></ul>
+        </div><div class="exec-pillar" onclick="showPage('activities')" style="cursor:pointer">
+            <div class="exec-pillar-header">
+                <span class="exec-pillar-icon" style="background:#f472b615;color:#f472b6">&#9889;</span>
+                <span class="exec-pillar-title">Activity & Operations</span>
+                <span class="exec-pillar-arrow" style="color:#f472b6">&#8594;</span>
+            </div>
+            <ul class="exec-pillar-points"><li>Activity mix: <strong>86</strong> calls, <strong>0</strong> emails, <strong>3,670</strong> meetings</li><li><strong>35</strong> items on AI roadmap</li></ul>
+        </div></div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px">
+        <div class="glass-card" style="padding:10px 12px">
+            <div class="card-title" style="font-size:10px;margin-bottom:4px">Leads (6mo)</div>
+            <div id="dynamic-leads-barchart"></div>
+        </div>
+        <div class="glass-card" style="padding:10px 12px">
+            <div class="card-title" style="font-size:10px;margin-bottom:4px">Revenue (6mo)</div>
+            <div id="dynamic-revenue-barchart"></div>
+        </div>
+        <div class="glass-card" style="padding:10px 12px">
+            <div class="card-title" style="font-size:10px;margin-bottom:4px">Deals Created (6mo)</div>
+            <div id="dynamic-deals-barchart"></div>
+        </div>
+        <div class="glass-card" style="padding:10px 12px">
+            <div class="card-title" style="font-size:10px;margin-bottom:4px">Activity (6mo)</div>
+            <div id="dynamic-activity-barchart"></div>
+        </div>
+    </div><div class="glass-card" style="margin-top:8px;padding:10px 14px">
+        <div style="font-size:10px;color:#6b7280;text-transform:uppercase;
+            letter-spacing:0.04em;margin-bottom:4px">Revenue Target Progress</div>
+        <div style="margin-bottom:8px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:13px">
+            <span style="color:#6b7280">Weighted Pipeline vs Monthly Target (£100.0K)</span>
+            <span style="font-weight:600;color:#121212">
+            270,453.9 / 100,000</span>
+        </div>
+        <div style="height:10px;background:#e2e5ea;border-radius:5px;overflow:hidden">
+            <div class="progress-fill" style="height:100%;width:100.0%;
+                background:linear-gradient(90deg,#34d399,#34d399cc);border-radius:5px"></div>
+        </div>
+    </div>
+    </div></section>
