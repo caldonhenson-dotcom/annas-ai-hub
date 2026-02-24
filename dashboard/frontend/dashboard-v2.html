@@ -13864,10 +13864,13 @@
     <div class="linkedin-auth-overlay hidden" id="linkedin-auth-overlay" onclick="if(event.target===this)window.LinkedInAuth.close()">
         <div class="linkedin-auth-card">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-                <h3 style="margin:0;font-size:18px;font-weight:700">Connect LinkedIn</h3>
+                <h3 style="margin:0;font-size:18px;font-weight:700">
+                    <span style="color:#0077B5">&#9679;</span> Connect LinkedIn
+                </h3>
                 <button onclick="window.LinkedInAuth.close()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#6b7280;padding:4px">&times;</button>
             </div>
 
+            <!-- Session Status -->
             <div id="li-session-status" style="margin-bottom:16px">
                 <div class="li-status-disconnected" id="li-status-box">
                     <span style="font-size:18px">&#128274;</span>
@@ -13878,46 +13881,57 @@
                 </div>
             </div>
 
+            <!-- Auth Flow (shown when not connected) -->
             <div id="li-auth-methods">
-                <div class="li-method-tabs">
-                    <button class="li-method-tab active" onclick="window.LinkedInAuth.switchMethod('bookmarklet')">Bookmarklet</button>
-                    <button class="li-method-tab" onclick="window.LinkedInAuth.switchMethod('manual')">Manual Paste</button>
-                </div>
-
-                <div id="li-method-bookmarklet">
-                    <div style="font-size:13px;color:#374151;line-height:1.6;margin-bottom:12px">
-                        <strong>Step 1:</strong> Drag this button to your bookmarks bar<br>
-                        <strong>Step 2:</strong> Go to <a href="https://www.linkedin.com" target="_blank" style="color:var(--accent)">linkedin.com</a> and log in<br>
-                        <strong>Step 3:</strong> Click the bookmarklet &mdash; done!
-                    </div>
-                    <div style="text-align:center;padding:12px;background:#f9fafb;border-radius:8px;border:1px dashed #d1d5db">
-                        <a id="li-bookmarklet-link" class="li-bookmarklet-btn" href="#" draggable="true">
-                            &#128279; Get LinkedIn Session
-                        </a>
-                        <div style="font-size:11px;color:#9ca3af;margin-top:8px">Drag to your bookmarks bar</div>
-                    </div>
-                </div>
-
-                <div id="li-method-manual" style="display:none">
-                    <div style="font-size:13px;color:#374151;line-height:1.6;margin-bottom:14px">
-                        <strong>1.</strong> Open <a href="https://www.linkedin.com" target="_blank" style="color:var(--accent)">linkedin.com</a> and ensure you're logged in<br>
-                        <strong>2.</strong> Press <kbd style="background:#f3f4f6;padding:1px 4px;border-radius:3px;font-size:12px">F12</kbd> to open DevTools<br>
-                        <strong>3.</strong> Go to <strong>Application</strong> tab &rarr; <strong>Cookies</strong> &rarr; <strong>linkedin.com</strong><br>
-                        <strong>4.</strong> Copy the value of <code style="background:#f3f4f6;padding:1px 4px;border-radius:3px">li_at</code><br>
-                        <strong>5.</strong> Copy the value of <code style="background:#f3f4f6;padding:1px 4px;border-radius:3px">JSESSIONID</code> (remove quotes)
-                    </div>
-                    <input class="li-input" id="li-input-li_at" placeholder="Paste li_at cookie value..." autocomplete="off" />
-                    <input class="li-input" id="li-input-csrf" placeholder="Paste JSESSIONID value (without quotes)..." autocomplete="off" />
-                    <button class="li-submit-btn" id="li-submit-btn" onclick="window.LinkedInAuth.submit()">
-                        Connect &amp; Validate
+                <!-- Step 1: Open LinkedIn -->
+                <div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:10px;padding:16px;margin-bottom:12px">
+                    <div style="font-size:12px;font-weight:700;color:#0077B5;margin-bottom:8px">STEP 1 &mdash; Open LinkedIn</div>
+                    <div style="font-size:13px;color:#374151;margin-bottom:10px">Make sure you're logged into LinkedIn in your browser.</div>
+                    <button class="li-submit-btn" style="background:#0077B5" onclick="window.open('https://www.linkedin.com/feed/','_blank')">
+                        Open LinkedIn &#8599;
                     </button>
                 </div>
+
+                <!-- Step 2: Run capture script -->
+                <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:16px;margin-bottom:12px">
+                    <div style="font-size:12px;font-weight:700;color:#059669;margin-bottom:8px">STEP 2 &mdash; Capture Session</div>
+                    <div style="font-size:13px;color:#374151;margin-bottom:6px">
+                        On the LinkedIn tab, press <kbd style="background:#e5e7eb;padding:2px 6px;border-radius:3px;font-size:12px;font-weight:600">F12</kbd> to open DevTools, go to the <strong>Console</strong> tab, then paste this script:
+                    </div>
+                    <div style="position:relative;margin-top:8px">
+                        <pre id="li-capture-script" style="background:#1e293b;color:#e2e8f0;padding:12px;border-radius:8px;font-size:11px;overflow-x:auto;white-space:pre-wrap;word-break:break-all;margin:0;line-height:1.5;max-height:80px"></pre>
+                        <button onclick="window.LinkedInAuth.copyScript()" id="li-copy-btn" style="position:absolute;top:6px;right:6px;background:#334155;color:#e2e8f0;border:none;border-radius:4px;padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer">
+                            Copy
+                        </button>
+                    </div>
+                    <div id="li-polling-status" style="display:none;margin-top:10px;text-align:center">
+                        <span class="loading-spinner" style="vertical-align:middle"></span>
+                        <span style="font-size:12px;color:#6b7280;margin-left:6px;vertical-align:middle">Waiting for connection...</span>
+                    </div>
+                </div>
+
+                <!-- Fallback: Manual paste -->
+                <details style="margin-top:4px">
+                    <summary style="font-size:12px;color:#6b7280;cursor:pointer;padding:6px 0">Alternative: Paste cookies manually</summary>
+                    <div style="padding-top:10px">
+                        <div style="font-size:12px;color:#374151;line-height:1.6;margin-bottom:10px">
+                            In DevTools &rarr; <strong>Application</strong> tab &rarr; <strong>Cookies</strong> &rarr; <strong>linkedin.com</strong>, copy these two values:
+                        </div>
+                        <input class="li-input" id="li-input-li_at" placeholder="li_at cookie value..." autocomplete="off" />
+                        <input class="li-input" id="li-input-csrf" placeholder="JSESSIONID value (without quotes)..." autocomplete="off" />
+                        <button class="li-submit-btn" id="li-submit-btn" onclick="window.LinkedInAuth.submit()">
+                            Connect &amp; Validate
+                        </button>
+                    </div>
+                </details>
             </div>
 
+            <!-- Disconnect (shown when connected) -->
             <div id="li-disconnect-section" style="display:none;margin-top:12px">
                 <button class="li-submit-btn" style="background:#ef4444" onclick="window.LinkedInAuth.disconnect()">Disconnect LinkedIn</button>
             </div>
 
+            <!-- Status messages -->
             <div id="li-auth-message" style="display:none;margin-top:12px;padding:10px;border-radius:8px;font-size:13px"></div>
         </div>
     </div>
@@ -15749,22 +15763,17 @@
         window.LinkedInAuth = {
             _connected: false,
             _profile: null,
+            _pollTimer: null,
 
             open: function() {
                 document.getElementById('linkedin-auth-overlay').classList.remove('hidden');
+                this._generateScript();
                 this.checkStatus();
             },
 
             close: function() {
                 document.getElementById('linkedin-auth-overlay').classList.add('hidden');
-            },
-
-            switchMethod: function(method) {
-                var tabs = document.querySelectorAll('.li-method-tab');
-                tabs.forEach(function(t) { t.classList.remove('active'); });
-                event.target.classList.add('active');
-                document.getElementById('li-method-bookmarklet').style.display = method === 'bookmarklet' ? '' : 'none';
-                document.getElementById('li-method-manual').style.display = method === 'manual' ? '' : 'none';
+                this._stopPolling();
             },
 
             checkStatus: function() {
@@ -15779,6 +15788,60 @@
                     .catch(function() {
                         self._updateUI({ authenticated: false });
                     });
+            },
+
+            // Generate the capture script shown in the modal
+            _generateScript: function() {
+                var origin = window.location.origin;
+                var script = 'fetch("' + origin + '/api/linkedin-session",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({li_at:document.cookie.match(/li_at=([^;]+)/)[1],csrf_token:decodeURIComponent(document.cookie.match(/JSESSIONID=([^;]+)/)[1]).replace(/"/g,"")})}).then(r=>r.json()).then(d=>d.authenticated?console.log("%c Connected as "+d.display_name+" ","background:#10b981;color:#fff;font-size:14px;padding:4px 12px;border-radius:4px"):console.log("%c Failed: "+(d.error||"Unknown"),"background:#ef4444;color:#fff;padding:4px 12px")).catch(e=>console.log("Error:",e))';
+                var el = document.getElementById('li-capture-script');
+                if (el) el.textContent = script;
+            },
+
+            copyScript: function() {
+                var el = document.getElementById('li-capture-script');
+                if (!el) return;
+                navigator.clipboard.writeText(el.textContent).then(function() {
+                    var btn = document.getElementById('li-copy-btn');
+                    btn.textContent = 'Copied!';
+                    btn.style.background = '#10b981';
+                    setTimeout(function() { btn.textContent = 'Copy'; btn.style.background = '#334155'; }, 2000);
+                });
+                // Start auto-polling for the session
+                window.LinkedInAuth._startPolling();
+            },
+
+            _startPolling: function() {
+                var polling = document.getElementById('li-polling-status');
+                if (polling) polling.style.display = '';
+                this._stopPolling();
+                var self = this;
+                var attempts = 0;
+                this._pollTimer = setInterval(function() {
+                    attempts++;
+                    if (attempts > 40) { self._stopPolling(); return; } // Stop after 2 min
+                    fetch(API.session)
+                        .then(function(r) { return r.json(); })
+                        .then(function(d) {
+                            if (d.authenticated) {
+                                self._connected = true;
+                                self._profile = d;
+                                self._updateUI(d);
+                                self._stopPolling();
+                                self._showMsg('Connected as ' + d.display_name, 'success');
+                            }
+                        })
+                        .catch(function() {});
+                }, 3000);
+            },
+
+            _stopPolling: function() {
+                if (this._pollTimer) {
+                    clearInterval(this._pollTimer);
+                    this._pollTimer = null;
+                }
+                var polling = document.getElementById('li-polling-status');
+                if (polling) polling.style.display = 'none';
             },
 
             submit: function() {
@@ -15830,24 +15893,6 @@
                     });
             },
 
-            // Called from bookmarklet
-            receiveSession: function(liAt, csrf) {
-                var self = this;
-                fetch(API.session, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ li_at: liAt, csrf_token: csrf })
-                })
-                .then(function(r) { return r.json(); })
-                .then(function(d) {
-                    if (d.authenticated) {
-                        self._connected = true;
-                        self._profile = d;
-                        self._updateUI(d);
-                    }
-                });
-            },
-
             _updateUI: function(data) {
                 var box = document.getElementById('li-status-box');
                 var text = document.getElementById('li-status-text');
@@ -15865,13 +15910,11 @@
                     disconnect.style.display = '';
                     if (mainBtn) mainBtn.innerHTML = '&#9989; ' + (data.display_name || 'Connected');
 
-                    // Show bot controls
                     var botArea = document.getElementById('bot-controls-area');
                     if (botArea) botArea.style.display = '';
                     var connAs = document.getElementById('bot-connected-as');
                     if (connAs) connAs.textContent = 'as ' + (data.display_name || '');
 
-                    // Show send button in composer
                     var sendBtn = document.getElementById('pp-send-btn');
                     if (sendBtn) sendBtn.style.display = '';
                 } else {
@@ -15897,14 +15940,6 @@
                 setTimeout(function() { el.style.display = 'none'; }, 5000);
             }
         };
-
-        // Generate bookmarklet href
-        (function() {
-            var origin = window.location.origin;
-            var code = "javascript:void((function(){var c=document.cookie;var a=c.match(/li_at=([^;]+)/);var j=c.match(/JSESSIONID=%22?([^;%22]+)/);if(!a||!j){alert('Could not find LinkedIn cookies. Make sure you are on linkedin.com and logged in.');return;}fetch('" + origin + "/api/linkedin-session',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({li_at:a[1],csrf_token:j[1]})}).then(function(r){return r.json()}).then(function(d){if(d.authenticated)alert('Connected as '+d.display_name+'! Return to the dashboard.');else alert('Failed: '+(d.error||'Unknown error'))}).catch(function(e){alert('Error: '+e.message)})})())";
-            var link = document.getElementById('li-bookmarklet-link');
-            if (link) link.href = code;
-        })();
 
         // Check session on page load
         window.LinkedInAuth.checkStatus();
