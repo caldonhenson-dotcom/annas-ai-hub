@@ -15,6 +15,8 @@
         'executive': ['js/pages/render-executive.js'],
         'inbound-queue': ['js/pages/render-inbound.js'],
         'skills': [
+            'js/skills/connectors-registry.js',
+            'js/skills/blocks-registry.js',
             'js/skills/skills-registry.js',
             'js/skills/skills-deal-sourcing.js',
             'js/skills/skills-nda-legal.js',
@@ -24,6 +26,8 @@
             'js/skills/skills-ops.js',
             'js/skills/skills-reporting-intel.js',
             'js/skills/skills-engine.js',
+            'js/skills/connectors-ui.js',
+            'js/skills/skills-expanded.js',
             'js/skills/skills-ui.js'
         ]
     };
@@ -155,14 +159,15 @@
         // Stop particles when leaving Anna page
         if (pageId !== 'anna' && window.AIParticles) window.AIParticles.stop();
 
-        // Hide chat FAB, top bar, filter bar on Anna page
+        // Hide chat FAB + top bar on Anna page; hide filter bar on non-report pages
         var isAnna = (pageId === 'anna');
+        var noFilterPages = ['anna', 'skills', 'ai-roadmap', 'inbound-queue'];
         var fab = document.getElementById('chat-fab');
         var topBar = document.getElementById('top-bar');
         var filterBar = document.getElementById('filter-bar');
         if (fab) fab.style.display = isAnna ? 'none' : '';
         if (topBar) topBar.style.display = isAnna ? 'none' : '';
-        if (filterBar) filterBar.style.display = isAnna ? 'none' : '';
+        if (filterBar) filterBar.style.display = noFilterPages.indexOf(pageId) !== -1 ? 'none' : '';
 
         // Persist last page
         window.savePrefs({ lastPage: pageId });

@@ -17,6 +17,9 @@
         renderStatsRow();
         renderCategoryPills();
         renderGrid(getFilteredSkills());
+        if (window.ConnectorsUI) window.ConnectorsUI.render();
+        if (window.Connectors) window.Connectors.checkAll();
+        if (window.renderSkillFavs) window.renderSkillFavs();
         document.addEventListener('skill-progress', onProgress);
     };
 
@@ -90,9 +93,13 @@
         var stars = '';
         for (var i = 1; i <= 5; i++) stars += '<span class="skill-star' + (i <= skill.impact ? ' filled' : '') + '">&#9733;</span>';
         var statusCls = skill.status === 'ready' ? 'ready' : (skill.status === 'partial' ? 'partial' : 'planned');
-        return '<div class="skill-card" data-skill-id="' + skill.id + '">'
+        var fav = window.SkillsExpanded && window.SkillsExpanded.isFav(skill.id);
+        return '<div class="skill-card" data-skill-id="' + skill.id + '" '
+            + 'onclick="if(window.SkillsExpanded)window.SkillsExpanded.open(\'' + skill.id + '\')">'
             + '<div class="skill-card-header">'
             + '<span class="skill-card-icon" style="color:' + (cat.color || '#6b7280') + '">' + (skill.icon || cat.icon || '') + '</span>'
+            + '<button class="skill-fav-btn' + (fav ? ' is-fav' : '') + '" '
+            + 'onclick="event.stopPropagation();if(window.SkillsExpanded)window.SkillsExpanded.toggleFav(\'' + skill.id + '\')">&#9733;</button>'
             + '<span class="skill-status-badge ' + statusCls + '">' + esc(skill.status) + '</span>'
             + '</div>'
             + '<div class="skill-card-name">' + esc(skill.name) + '</div>'
@@ -102,7 +109,7 @@
             + '<span class="skill-card-time">' + esc(skill.estimatedTime || '') + '</span>'
             + '</div>'
             + '<div class="skill-card-cat" style="color:' + (cat.color || '#6b7280') + '">' + (cat.icon || '') + ' ' + esc(cat.name || '') + '</div>'
-            + '<button class="skill-exec-btn" onclick="window.SkillsUI.openExecModal(\'' + skill.id + '\')"'
+            + '<button class="skill-exec-btn" onclick="event.stopPropagation();window.SkillsUI.openExecModal(\'' + skill.id + '\')"'
             + (skill.status !== 'ready' ? ' disabled title="Not yet available"' : '')
             + '>&#9889; Execute</button>'
             + '</div>';

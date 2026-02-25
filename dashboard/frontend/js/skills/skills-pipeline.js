@@ -18,7 +18,10 @@
               { key: 'criteria', label: 'Additional criteria (optional)', type: 'textarea', placeholder: 'e.g. Profitable, owner-managed, strong brand, repeat revenue model' }
           ], buildPayload: function (i) { return { question: 'Identify 10-15 acquisition opportunities for eComplete in the ' + i.sector + ' sector, ' + i.revenue + ' revenue range, ' + i.geography + ' geography. ' + (i.criteria ? 'Additional criteria: ' + i.criteria + '. ' : '') + '\nFor each opportunity provide:\n1. Company name and brief description\n2. Estimated revenue and growth\n3. Ownership type (PE-backed, founder-led, corporate)\n4. Key strengths\n5. FIT SCORE (1-10) with justification\n6. Approach strategy suggestion\n\nRank by fit score descending. Focus on actionable targets that could realistically be acquired.', report: true }; },
             resultType: 'markdown', actions: [{ label: '&#128203; Copy', handler: 'copyResult' }, { label: '&#128424; Export', handler: 'exportPdf' }] },
-          requires: ['groq'], tags: ['acquisition', 'opportunity', 'sourcing', 'pipeline'] },
+          requires: ['groq'],
+          blocks: [{id:'ai-analyse',role:'core'},{id:'web-fetch',role:'enhance'},{id:'companies-house-lookup',role:'enhance'},{id:'hubspot-read',role:'enhance'},{id:'hubspot-write',role:'enhance'},{id:'dashboard-context',role:'enhance'},{id:'pdf-export',role:'output'}],
+          features: ['web-scraping','ch-data','crm-dedup','auto-create-deal'],
+          tags: ['acquisition', 'opportunity', 'sourcing', 'pipeline'] },
 
         { id: 'opportunity-reviewer', name: 'Opportunity Reviewer', icon: '&#128209;', category: 'pipeline',
           impact: 5, complexity: 'Medium', status: 'ready', timeSavedMin: 60, estimatedTime: '20-35s',
@@ -28,7 +31,9 @@
               { key: 'data', label: 'Available data about the opportunity', type: 'textarea', required: true, placeholder: 'Revenue, sector, ownership, any known details...' }
           ], buildPayload: function (i) { return { question: 'Review this acquisition opportunity for eComplete: ' + i.company + '.\n\nData provided:\n' + i.data + '\n\nScore against eComplete\'s acquisition criteria:\n1. STRATEGIC FIT (1-10): Sector alignment, portfolio synergies\n2. FINANCIAL ATTRACTIVENESS (1-10): Revenue quality, margins, growth\n3. OPERATIONAL QUALITY (1-10): Team, processes, scalability\n4. MARKET POSITION (1-10): Competitive moat, brand strength\n5. DEAL FEASIBILITY (1-10): Willing seller signals, valuation expectations, complexity\n\nOVERALL SCORE and RECOMMENDATION: Strong Go / Conditional Go / Watch / No-Go\nKEY RISKS and MITIGATIONS\nSUGGESTED NEXT STEPS', report: true }; },
             resultType: 'markdown', actions: [{ label: '&#128203; Copy', handler: 'copyResult' }, { label: '&#128424; Export', handler: 'exportPdf' }] },
-          requires: ['groq'], tags: ['opportunity', 'review', 'scoring', 'ma'] },
+          requires: ['groq'],
+          blocks: [{id:'ai-analyse',role:'core'},{id:'web-fetch',role:'enhance'},{id:'companies-house-lookup',role:'enhance'},{id:'hubspot-read',role:'enhance'},{id:'dashboard-context',role:'enhance'},{id:'pdf-export',role:'output'}],
+          tags: ['opportunity', 'review', 'scoring', 'ma'] },
 
         { id: 'deal-create-new', name: 'Create New Deal', icon: '&#10133;', category: 'pipeline',
           impact: 3, complexity: 'Low', status: 'planned', timeSavedMin: 10, estimatedTime: '3-5s',
@@ -41,7 +46,9 @@
                   { value: 'referral', label: 'Referral' }, { value: 'broker', label: 'Broker' }] }
           ], buildPayload: function (i) { return { target: 'hubspot', path: '/crm/v3/objects/deals', method: 'POST', body: { properties: { dealname: i.company, amount: i.value, pipeline: 'default', dealstage: 'qualifiedtobuy', deal_source: i.source } } }; },
             resultType: 'json' },
-          requires: ['hubspot'], tags: ['deal', 'create', 'pipeline'] },
+          requires: ['hubspot'],
+          blocks: [{id:'hubspot-write',role:'core'}],
+          tags: ['deal', 'create', 'pipeline'] },
 
         { id: 'deal-advance-stage', name: 'Advance Deal Stage', icon: '&#9654;', category: 'pipeline',
           impact: 2, complexity: 'Low', status: 'planned', timeSavedMin: 5, estimatedTime: '2-3s',
@@ -54,7 +61,9 @@
                   { value: 'completion', label: 'Completion' }] }
           ], buildPayload: function (i) { return { target: 'hubspot', path: '/crm/v3/objects/deals/' + i.deal_id, method: 'PATCH', body: { properties: { dealstage: i.new_stage } } }; },
             resultType: 'json' },
-          requires: ['hubspot'], tags: ['deal', 'stage', 'advance'] },
+          requires: ['hubspot'],
+          blocks: [{id:'hubspot-write',role:'core'},{id:'hubspot-read',role:'core'}],
+          tags: ['deal', 'stage', 'advance'] },
 
         { id: 'deal-stale-report', name: 'Stale Deals Report', icon: '&#9203;', category: 'pipeline',
           impact: 4, complexity: 'Low', status: 'ready', timeSavedMin: 15, estimatedTime: '10-15s',
@@ -64,7 +73,9 @@
                   { value: '7', label: '7+ days' }, { value: '14', label: '14+ days' }, { value: '30', label: '30+ days' }] }
           ], buildPayload: function (i) { return { question: 'Analyse our deal pipeline and identify stale deals (no activity for ' + i.days + '+ days). For each stale deal provide: deal name, current stage, days since last activity, owner, estimated value, and a SPECIFIC recommended next action. Prioritise by deal value and staleness. Use the dashboard data available.' }; },
             resultType: 'markdown', actions: [{ label: '&#128203; Copy', handler: 'copyResult' }] },
-          requires: ['groq'], tags: ['stale', 'deals', 'pipeline', 'action'] },
+          requires: ['groq'],
+          blocks: [{id:'ai-analyse',role:'core'},{id:'hubspot-read',role:'enhance'},{id:'dashboard-context',role:'enhance'}],
+          tags: ['stale', 'deals', 'pipeline', 'action'] },
 
         { id: 'deal-pipeline-snapshot', name: 'Pipeline Snapshot', icon: '&#128248;', category: 'pipeline',
           impact: 3, complexity: 'Low', status: 'ready', timeSavedMin: 10, estimatedTime: '8-15s',
@@ -72,7 +83,9 @@
           execute: { type: 'ai-query', inputs: [],
             buildPayload: function () { return { question: 'Generate a pipeline snapshot report. Include: total deals by stage (Lead, Qualified, NDA, CDD, LOI, Completion), total pipeline value, weighted pipeline value, current win rate, pipeline coverage ratio (target 3x), average deal size, and notable movements this month. Use the dashboard data.' }; },
             resultType: 'markdown', actions: [{ label: '&#128203; Copy', handler: 'copyResult' }] },
-          requires: ['groq'], tags: ['pipeline', 'snapshot', 'summary'] },
+          requires: ['groq'],
+          blocks: [{id:'ai-analyse',role:'core'},{id:'hubspot-read',role:'enhance'},{id:'dashboard-context',role:'enhance'}],
+          tags: ['pipeline', 'snapshot', 'summary'] },
 
         { id: 'deal-forecast-90day', name: '90-Day Forecast', icon: '&#128302;', category: 'pipeline',
           impact: 4, complexity: 'Medium', status: 'ready', timeSavedMin: 20, estimatedTime: '10-20s',
@@ -80,7 +93,9 @@
           execute: { type: 'ai-query', inputs: [],
             buildPayload: function () { return { question: 'Generate a 90-day revenue forecast based on our current pipeline. For each deal in advanced stages (NDA+), estimate: probability of closing, expected close date, and weighted value. Provide three scenarios: BEST CASE, EXPECTED, WORST CASE with total forecasted revenue for each. Include assumptions and key risks to the forecast.' }; },
             resultType: 'markdown', actions: [{ label: '&#128203; Copy', handler: 'copyResult' }, { label: '&#128424; Export', handler: 'exportPdf' }] },
-          requires: ['groq'], tags: ['forecast', 'revenue', 'pipeline', '90-day'] },
+          requires: ['groq'],
+          blocks: [{id:'ai-analyse',role:'core'},{id:'hubspot-read',role:'enhance'},{id:'dashboard-context',role:'enhance'},{id:'pdf-export',role:'output'}],
+          tags: ['forecast', 'revenue', 'pipeline', '90-day'] },
 
         { id: 'deal-ic-scorecard-generate', name: 'Generate IC Scorecard', icon: '&#127942;', category: 'pipeline',
           impact: 4, complexity: 'Medium', status: 'ready', timeSavedMin: 30, estimatedTime: '15-25s',
@@ -90,7 +105,9 @@
               { key: 'data', label: 'Available deal data', type: 'textarea', required: true, placeholder: 'Revenue, sector, CDD findings, key risks, valuation expectations...' }
           ], buildPayload: function (i) { return { question: 'Generate an Investment Committee Scorecard for ' + i.deal + '. Score each dimension 1-10:\n1. MARKET ATTRACTIVENESS: Size, growth, trends\n2. COMPETITIVE POSITION: Moat, differentiation, market share\n3. FINANCIAL QUALITY: Revenue growth, margins, cash generation\n4. MANAGEMENT TEAM: Depth, track record, retention risk\n5. STRATEGIC FIT: Portfolio synergies, platform potential\n6. DEAL TERMS: Valuation, structure, conditions\n7. INTEGRATION RISK: Complexity, timeline, cultural fit\n\nOVERALL SCORE with GO/CONDITIONAL/NO-GO recommendation.\n\nData: ' + i.data, report: true }; },
             resultType: 'markdown', actions: [{ label: '&#128203; Copy', handler: 'copyResult' }, { label: '&#128424; Export', handler: 'exportPdf' }] },
-          requires: ['groq'], tags: ['ic', 'scorecard', 'investment-committee'] },
+          requires: ['groq'],
+          blocks: [{id:'ai-analyse',role:'core'},{id:'hubspot-read',role:'enhance'},{id:'dashboard-context',role:'enhance'},{id:'pdf-export',role:'output'}],
+          tags: ['ic', 'scorecard', 'investment-committee'] },
 
         { id: 'deal-loi-checklist', name: 'LOI Prep Checklist', icon: '&#9989;', category: 'pipeline',
           impact: 3, complexity: 'Low', status: 'ready', timeSavedMin: 15, estimatedTime: '8-12s',
@@ -100,7 +117,9 @@
               { key: 'status', label: 'Current deal status summary', type: 'textarea', placeholder: 'e.g. NDA signed, CDD 80% complete, valuation range £5-7M discussed' }
           ], buildPayload: function (i) { return { question: 'Generate an LOI Preparation Checklist for ' + i.deal + '. Current status: ' + (i.status || 'unknown') + '.\n\nInclude:\n1. PRE-LOI CHECKLIST: CDD complete? NDA in place? Valuation agreed? Key terms discussed?\n2. LOI KEY TERMS: Price/range, payment structure, exclusivity period, conditions precedent, timeline to completion\n3. NEGOTIATION STRATEGY: What to push on, what to concede, walk-away points\n4. NEXT STEPS: Specific actions with owners and deadlines\n5. RISKS: Deal-breakers to watch for' }; },
             resultType: 'markdown', actions: [{ label: '&#128203; Copy', handler: 'copyResult' }] },
-          requires: ['groq'], tags: ['loi', 'checklist', 'preparation'] },
+          requires: ['groq'],
+          blocks: [{id:'ai-analyse',role:'core'},{id:'hubspot-read',role:'enhance'},{id:'dashboard-context',role:'enhance'}],
+          tags: ['loi', 'checklist', 'preparation'] },
 
         { id: 'deal-health-check', name: 'Deal Health Check', icon: '&#129657;', category: 'pipeline',
           impact: 3, complexity: 'Low', status: 'ready', timeSavedMin: 15, estimatedTime: '10-15s',
@@ -110,7 +129,9 @@
               { key: 'details', label: 'Deal details', type: 'textarea', required: true, placeholder: 'Stage, days in stage, last activity, value, key contacts, any issues...' }
           ], buildPayload: function (i) { return { question: 'Conduct a Deal Health Check for ' + i.deal + '. Details: ' + i.details + '\n\nAssess:\n1. ENGAGEMENT LEVEL: How active is the counterparty? (Hot/Warm/Cold)\n2. VELOCITY: Is the deal moving at expected pace? Days in current stage vs average\n3. RISK FACTORS: What could derail this deal?\n4. PROBABILITY: Estimated close probability (%)\n5. RECOMMENDED ACTIONS: Top 3 actions to move this forward\n6. OVERALL HEALTH: Green/Amber/Red with justification' }; },
             resultType: 'markdown', actions: [{ label: '&#128203; Copy', handler: 'copyResult' }] },
-          requires: ['groq'], tags: ['health', 'deal', 'assessment'] },
+          requires: ['groq'],
+          blocks: [{id:'ai-analyse',role:'core'},{id:'hubspot-read',role:'enhance'},{id:'dashboard-context',role:'enhance'}],
+          tags: ['health', 'deal', 'assessment'] },
 
         { id: 'deal-win-loss-analysis', name: 'Win/Loss Analysis', icon: '&#128201;', category: 'pipeline',
           impact: 4, complexity: 'Medium', status: 'ready', timeSavedMin: 25, estimatedTime: '10-20s',
@@ -121,7 +142,9 @@
                   { value: 'last_year', label: 'Last year' }] }
           ], buildPayload: function () { return { question: 'Analyse our deal pipeline win/loss patterns using dashboard data. Include: won deal count & total value, lost deal count & value, win rate by stage, average time-to-close, most common loss reasons, stage where deals most frequently die, and actionable insights to improve win rate.' }; },
             resultType: 'markdown', actions: [{ label: '&#128203; Copy', handler: 'copyResult' }] },
-          requires: ['groq'], tags: ['win-loss', 'analysis', 'pipeline'] },
+          requires: ['groq'],
+          blocks: [{id:'ai-analyse',role:'core'},{id:'hubspot-read',role:'enhance'},{id:'dashboard-context',role:'enhance'}],
+          tags: ['win-loss', 'analysis', 'pipeline'] },
 
         { id: 'deal-handover-pack', name: 'Deal Handover Pack', icon: '&#128188;', category: 'pipeline',
           impact: 4, complexity: 'Medium', status: 'ready', timeSavedMin: 30, estimatedTime: '15-25s',
@@ -131,6 +154,8 @@
               { key: 'data', label: 'All available deal data', type: 'textarea', required: true, placeholder: 'Contacts, activity history, CDD status, NDA status, financial data, next steps...' }
           ], buildPayload: function (i) { return { question: 'Generate a Deal Handover Pack for ' + i.deal + '. Structure:\n1. DEAL OVERVIEW: Company, sector, value, current stage\n2. KEY CONTACTS: Names, roles, relationship status, last interaction\n3. ACTIVITY TIMELINE: Key events and milestones chronologically\n4. CDD STATUS: What is complete, what is outstanding\n5. NDA STATUS: Signed/pending, key terms\n6. FINANCIAL SUMMARY: Known financials\n7. OUTSTANDING ITEMS: What needs to happen next\n8. RISK REGISTER: Active risks\n9. HANDOVER NOTES: Critical context the new owner needs to know\n\nData: ' + i.data, report: true }; },
             resultType: 'markdown', actions: [{ label: '&#128203; Copy', handler: 'copyResult' }, { label: '&#128424; Export', handler: 'exportPdf' }] },
-          requires: ['groq'], tags: ['handover', 'deal', 'pack', 'summary'] }
+          requires: ['groq'],
+          blocks: [{id:'ai-analyse',role:'core'},{id:'hubspot-read',role:'enhance'},{id:'dashboard-context',role:'enhance'},{id:'pdf-export',role:'output'}],
+          tags: ['handover', 'deal', 'pack', 'summary'] }
     ]);
 })();

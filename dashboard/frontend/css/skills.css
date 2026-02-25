@@ -56,10 +56,11 @@
 .skill-card {
     background: var(--card, #fff); border: 1px solid var(--card-border, #e5e7eb);
     border-radius: 14px; padding: 16px; display: flex; flex-direction: column;
-    gap: 8px; transition: transform 0.15s, box-shadow 0.15s;
+    gap: 8px; transition: transform 0.15s, box-shadow 0.15s; cursor: pointer;
 }
 .skill-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg, 0 4px 12px rgba(0,0,0,0.08)); }
-.skill-card-header { display: flex; justify-content: space-between; align-items: center; }
+.skill-card-header { display: flex; align-items: center; gap: 8px; }
+.skill-card-header .skill-fav-btn { margin-left: auto; font-size: 16px; padding: 2px; }
 .skill-card-icon { font-size: 24px; }
 .skill-status-badge {
     font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;

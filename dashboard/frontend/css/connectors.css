@@ -1,0 +1,117 @@
+/* ============================================================
+   Connectors bar + Expanded card + Feature toggles
+   ============================================================ */
+
+/* Connectors bar */
+.connectors-bar {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 16px;
+    padding: 12px 16px; background: var(--card, #fff);
+    border: 1px solid var(--card-border, #e5e7eb); border-radius: 12px;
+}
+.connectors-bar-label {
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.5px; color: var(--text-muted, #6b7280); white-space: nowrap;
+}
+.connectors-pills { display: flex; gap: 6px; flex-wrap: wrap; }
+.connector-pill {
+    display: flex; align-items: center; gap: 5px; padding: 4px 10px;
+    border: 1px solid var(--card-border, #e5e7eb); border-radius: 16px;
+    background: var(--bg, #f9fafb); font-size: 11px; cursor: pointer;
+    color: var(--text, #121212); transition: all 0.15s;
+}
+.connector-pill:hover { border-color: var(--accent, #3CB4AD); }
+.connector-pill-icon { font-size: 13px; }
+.connector-pill-name { font-weight: 600; }
+.connector-dot {
+    width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
+}
+.dot-green { background: #16a34a; }
+.dot-red { background: #ef4444; }
+.dot-amber { background: #d97706; animation: pulse-dot 1.5s ease infinite; }
+.dot-gray { background: #9ca3af; }
+@keyframes pulse-dot { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+/* Popover */
+.connector-popover {
+    position: fixed; z-index: 1200; background: var(--card, #fff);
+    border: 1px solid var(--card-border, #e5e7eb); border-radius: 12px;
+    padding: 16px; min-width: 240px; max-width: 320px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.14);
+}
+.connector-pop-header { display: flex; gap: 12px; align-items: center; margin-bottom: 12px; }
+.connector-pop-name { font-size: 15px; font-weight: 700; color: var(--text, #121212); }
+.connector-pop-status { font-size: 12px; font-weight: 600; }
+.connector-pop-section { margin-bottom: 10px; }
+.connector-pop-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted, #6b7280); margin-bottom: 4px; }
+.connector-pop-value { font-size: 12px; color: var(--text, #121212); }
+.connector-pop-caps { display: flex; gap: 4px; flex-wrap: wrap; }
+.connector-cap-tag {
+    font-size: 10px; padding: 2px 8px; border-radius: 10px;
+    background: var(--bg, #f9fafb); border: 1px solid var(--card-border, #e5e7eb);
+    color: var(--text-muted, #6b7280);
+}
+.connector-auth-btn {
+    width: 100%; padding: 8px; border: none; border-radius: 8px;
+    background: var(--accent, #3CB4AD); color: #fff; font-size: 13px;
+    font-weight: 700; cursor: pointer; margin-top: 4px;
+}
+.connector-auth-btn:hover { opacity: 0.88; }
+.connector-recheck-btn {
+    padding: 6px 14px; border: 1px solid var(--card-border, #e5e7eb);
+    border-radius: 8px; background: var(--card, #fff); color: var(--text-muted, #6b7280);
+    font-size: 12px; cursor: pointer; margin-top: 4px;
+}
+.connector-pop-hint { font-size: 11px; color: var(--text-muted, #6b7280); font-style: italic; margin-top: 4px; }
+
+/* Expanded skill card */
+.skill-card.expanded {
+    grid-column: 1 / -1; padding: 20px;
+    transition: all 0.25s ease;
+}
+.skill-expanded-body { margin-top: 12px; }
+.skill-blocks-section, .skill-features-section {
+    background: var(--bg, #f9fafb); border-radius: 10px; padding: 12px 14px; margin-bottom: 12px;
+}
+.skill-blocks-label, .skill-features-label {
+    font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+    color: var(--text-muted, #6b7280); margin-bottom: 8px;
+}
+.skill-blocks-grid { display: flex; gap: 8px; flex-wrap: wrap; }
+.skill-block-chip {
+    display: flex; align-items: center; gap: 5px; padding: 4px 10px;
+    border-radius: 8px; font-size: 11px; font-weight: 600;
+    background: var(--card, #fff); border: 1px solid var(--card-border, #e5e7eb);
+}
+.skill-block-chip .connector-dot { width: 6px; height: 6px; }
+.skill-block-role { font-size: 9px; font-weight: 700; text-transform: uppercase; padding: 1px 5px; border-radius: 4px; margin-left: 2px; }
+.role-core { background: rgba(60,180,173,0.15); color: #0d9488; }
+.role-enhance { background: rgba(139,92,246,0.15); color: #7c3aed; }
+.role-output { background: rgba(107,114,128,0.15); color: #6b7280; }
+
+/* Feature toggles */
+.skill-features-grid { display: flex; gap: 10px; flex-wrap: wrap; }
+.skill-feature-toggle { display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 12px; }
+.skill-feature-toggle input[type="checkbox"] { accent-color: var(--accent, #3CB4AD); }
+
+/* Expanded card actions */
+.skill-expanded-actions {
+    display: flex; gap: 8px; align-items: center; margin-top: 14px; padding-top: 12px;
+    border-top: 1px solid var(--card-border, #e5e7eb);
+}
+.skill-expanded-meta { flex: 1; font-size: 12px; color: var(--text-muted, #6b7280); }
+.skill-fav-btn {
+    background: none; border: none; font-size: 18px; cursor: pointer;
+    color: #d1d5db; transition: color 0.2s;
+}
+.skill-fav-btn.is-fav { color: #f59e0b; }
+.skill-close-btn {
+    padding: 6px 14px; border: 1px solid var(--card-border, #e5e7eb);
+    border-radius: 8px; background: var(--card, #fff); color: var(--text-muted, #6b7280);
+    font-size: 12px; cursor: pointer;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .connectors-bar { flex-direction: column; align-items: flex-start; }
+    .connector-popover { left: 8px !important; right: 8px; max-width: none; }
+}

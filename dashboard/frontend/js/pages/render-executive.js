@@ -61,6 +61,19 @@
             + '</div></div>';
     }
 
+    // Time saved KPI — reads skill execution history from localStorage directly
+    function getTimeSaved() {
+        try {
+            var h = JSON.parse(localStorage.getItem('ecomplete_skill_history') || '[]');
+            var now = Date.now();
+            var today = h.filter(function (e) { return e.success && (now - e.timestamp) < 86400000; });
+            var saved = today.length * 15; // ~15 min saved per successful skill run
+            var hrs = Math.floor(saved / 60);
+            var mins = saved % 60;
+            return hrs > 0 ? hrs + 'h ' + mins + 'm' : mins + 'm';
+        } catch (e) { return '0m'; }
+    }
+
     window.renderExecutive = function () {
         var container = document.getElementById('page-executive');
         if (!container || !D) return;
@@ -70,7 +83,6 @@
         if (!bodyEl) {
             bodyEl = document.createElement('div');
             bodyEl.className = 'exec-body';
-            // Keep section header, replace body
             var header = section.querySelector('.section-header');
             if (header) {
                 while (header.nextSibling) header.nextSibling.remove();
@@ -81,7 +93,11 @@
             }
         }
 
-        bodyEl.innerHTML = renderKPIStrip(D.EXEC_KPIS)
+        var kpis = (D.EXEC_KPIS || []).concat([{
+            label: 'AI Time Saved Today', value: getTimeSaved(), color: '#f59e0b'
+        }]);
+
+        bodyEl.innerHTML = renderKPIStrip(kpis)
             + renderPillars(D.EXEC_PILLARS)
             + renderChartGrid(D.EXEC_CHARTS)
             + renderTargetBar(D.EXEC_TARGET);

@@ -63,6 +63,27 @@
         renderFavs();
     };
 
+    // ------------------------------------------------------------------
+    // Skill favourites — sidebar "Quick Skills" section
+    // ------------------------------------------------------------------
+    function renderSkillFavs() {
+        var prefs = window.loadPrefs ? window.loadPrefs() : {};
+        var favs = Array.isArray(prefs.skillFavs) ? prefs.skillFavs : [];
+        var container = document.getElementById('sidebar-skill-favs');
+        var list = document.getElementById('sidebar-skill-favs-list');
+        if (!container || !list) return;
+        if (favs.length === 0) { container.style.display = 'none'; list.innerHTML = ''; return; }
+        container.style.display = '';
+        list.innerHTML = favs.map(function (f) {
+            return '<a href="javascript:void(0)" class="sidebar-link" '
+                + 'onclick="showPage(\'skills\');setTimeout(function(){if(window.SkillsUI)window.SkillsUI.openExecModal(\'' + f.id + '\')},500)">'
+                + '<span>' + (f.icon || '&#9889;') + '</span> '
+                + (f.name || f.id) + '</a>';
+        }).join('');
+    }
+    window.renderSkillFavs = renderSkillFavs;
+
     // Initial render
     renderFavs();
+    renderSkillFavs();
 })();
