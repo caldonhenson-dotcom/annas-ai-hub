@@ -1,0 +1,37 @@
+<!-- Skills Engine — page fragment loaded by router -->
+<section class="dashboard-section">
+    <div class="section-header">
+        <h2 class="section-title">&#9889; Skills Engine</h2>
+        <p class="section-subtitle">100 one-click AI-powered actions across your entire stack</p>
+    </div>
+
+    <!-- Stats row -->
+    <div class="skills-stats-row" id="skills-stats-row"></div>
+
+    <!-- Search and category filters -->
+    <div class="skills-toolbar">
+        <div class="skills-search-wrap">
+            <span class="skills-search-icon">&#128269;</span>
+            <input type="text" class="skills-search" id="skills-search"
+                   placeholder="Search skills..."
+                   oninput="window.SkillsUI.onSearch(this.value)" />
+        </div>
+        <div class="skills-category-pills" id="skills-category-pills"></div>
+    </div>
+
+    <!-- Skills grid -->
+    <div class="skills-grid" id="skills-grid"></div>
+</section>
+
+<!-- Execution modal overlay -->
+<div class="skill-exec-overlay hidden" id="skill-exec-overlay"
+     onclick="if(event.target===this)window.SkillsUI.closeExecModal()">
+    <div class="skill-exec-modal">
+        <button class="skill-exec-close" onclick="window.SkillsUI.closeExecModal()">&times;</button>
+        <div class="skill-exec-header" id="skill-exec-header"></div>
+        <div class="skill-exec-inputs" id="skill-exec-inputs"></div>
+        <div class="skill-exec-actions" id="skill-exec-actions"></div>
+        <div class="skill-exec-progress hidden" id="skill-exec-progress"></div>
+        <div class="skill-exec-result hidden" id="skill-exec-result"></div>
+    </div>
+</div>

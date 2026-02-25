@@ -13,14 +13,27 @@
         'monday-ic': ['js/monday-ic.js'],
         'ai-roadmap': ['js/ai-roadmap.js'],
         'executive': ['js/pages/render-executive.js'],
-        'inbound-queue': ['js/pages/render-inbound.js']
+        'inbound-queue': ['js/pages/render-inbound.js'],
+        'skills': [
+            'js/skills/skills-registry.js',
+            'js/skills/skills-deal-sourcing.js',
+            'js/skills/skills-nda-legal.js',
+            'js/skills/skills-email-comms.js',
+            'js/skills/skills-cdd.js',
+            'js/skills/skills-pipeline.js',
+            'js/skills/skills-ops.js',
+            'js/skills/skills-reporting-intel.js',
+            'js/skills/skills-engine.js',
+            'js/skills/skills-ui.js'
+        ]
     };
 
     // Page renderers called after scripts load
     var PAGE_RENDERERS = {
         'executive': 'renderExecutive',
         'inbound-queue': 'renderInbound',
-        'ma-hub': 'renderMAHub'
+        'ma-hub': 'renderMAHub',
+        'skills': 'renderSkills'
     };
 
     // ------------------------------------------------------------------
