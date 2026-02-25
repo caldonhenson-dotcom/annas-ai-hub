@@ -87,6 +87,15 @@
     .filter-bar { padding: var(--space-2) var(--space-4); }
     .filter-btn { padding: 5px var(--space-3); font-size: var(--text-xs); }
     .filter-period-label { display: none; }
+
+    /* Top bar */
+    .top-bar { padding: 4px var(--space-4); }
+    .top-bar-inner { flex-wrap: wrap; gap: var(--space-1); }
+    .top-bar-right { gap: var(--space-2); }
+    .top-bar-token { display: none; }
+
+    /* M&A Hub tabs */
+    .ma-hub-tab { padding: 8px 14px; font-size: 13px; }
 }
 
 /* ---- 600px: Executive compact ---- */
@@ -101,7 +110,7 @@
    ============================================================ */
 @media print {
     body { background: white; color: #1a1a1a; display: block; }
-    .sidebar, .sidebar-toggle, .filter-bar, .freshness-bar { display: none; }
+    .sidebar, .sidebar-toggle, .filter-bar, .top-bar { display: none; }
     .layout-main { margin-left: 0; }
     .glass-card, .stat-card {
         background: white; border: 1px solid #ddd;

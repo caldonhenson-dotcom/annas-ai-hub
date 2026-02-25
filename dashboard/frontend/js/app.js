@@ -94,4 +94,39 @@
             }
         });
     });
+
+    // ------------------------------------------------------------------
+    // Collapsible sidebar groups — persist via localStorage
+    // ------------------------------------------------------------------
+    var NAV_COLLAPSED_KEY = 'ecomplete_nav_collapsed';
+
+    function getCollapsedGroups() {
+        try { return JSON.parse(localStorage.getItem(NAV_COLLAPSED_KEY) || '[]'); }
+        catch (e) { return []; }
+    }
+
+    function saveCollapsedGroups(groups) {
+        try { localStorage.setItem(NAV_COLLAPSED_KEY, JSON.stringify(groups)); }
+        catch (e) { /* empty */ }
+    }
+
+    // Restore collapsed state on load
+    var collapsed = getCollapsedGroups();
+    collapsed.forEach(function (groupId) {
+        var el = document.querySelector('.sidebar-group[data-group="' + groupId + '"]');
+        if (el) el.classList.add('collapsed');
+    });
+
+    window.toggleNavGroup = function (groupEl) {
+        if (!groupEl) return;
+        var groupId = groupEl.getAttribute('data-group');
+        groupEl.classList.toggle('collapsed');
+        var current = getCollapsedGroups();
+        if (groupEl.classList.contains('collapsed')) {
+            if (current.indexOf(groupId) === -1) current.push(groupId);
+        } else {
+            current = current.filter(function (g) { return g !== groupId; });
+        }
+        saveCollapsedGroups(current);
+    };
 })();

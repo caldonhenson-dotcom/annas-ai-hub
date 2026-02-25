@@ -41,23 +41,19 @@
         var conv = apGetActive();
         msgs.innerHTML = '';
         if (!conv || conv.messages.length === 0) {
-            // Show welcome
             var w = document.getElementById('anna-welcome');
             if (!w) {
+                var suggests = ['Summarise deal flow this month','Which deals are stale or at risk?',
+                    'Pipeline health &amp; coverage','Lead source effectiveness',
+                    'Top performing rep this month','M&amp;A pipeline status',
+                    'Revenue forecast next 90 days','Weekly summary'];
+                var btns = suggests.map(function(s) {
+                    return '<button class="anna-suggest-btn" onclick="window.AnnaPage.ask(this.textContent)">' + s + '</button>';
+                }).join('');
                 msgs.innerHTML = '<div class="anna-welcome" id="anna-welcome">'
-                    + '<div class="anna-welcome-avatar">e</div>'
-                    + '<div class="anna-welcome-title">eComplete AI</div>'
+                    + '<div class="anna-welcome-avatar">e</div><div class="anna-welcome-title">eComplete AI</div>'
                     + '<div class="anna-welcome-sub">Your sales &amp; M&amp;A intelligence assistant. Ask me anything about your dashboard data.</div>'
-                    + '<div class="anna-suggestions" id="anna-suggestions">'
-                    + '<button class="anna-suggest-btn" onclick="window.AnnaPage.ask(this.textContent)">Summarise deal flow this month</button>'
-                    + '<button class="anna-suggest-btn" onclick="window.AnnaPage.ask(this.textContent)">Which deals are stale or at risk?</button>'
-                    + '<button class="anna-suggest-btn" onclick="window.AnnaPage.ask(this.textContent)">Pipeline health &amp; coverage</button>'
-                    + '<button class="anna-suggest-btn" onclick="window.AnnaPage.ask(this.textContent)">Lead source effectiveness</button>'
-                    + '<button class="anna-suggest-btn" onclick="window.AnnaPage.ask(this.textContent)">Top performing rep this month</button>'
-                    + '<button class="anna-suggest-btn" onclick="window.AnnaPage.ask(this.textContent)">M&amp;A pipeline status</button>'
-                    + '<button class="anna-suggest-btn" onclick="window.AnnaPage.ask(this.textContent)">Revenue forecast next 90 days</button>'
-                    + '<button class="anna-suggest-btn" onclick="window.AnnaPage.ask(this.textContent)">Weekly summary</button>'
-                    + '</div></div>';
+                    + '<div class="anna-suggestions" id="anna-suggestions">' + btns + '</div></div>';
             }
             return;
         }
@@ -146,11 +142,22 @@
         text = text.trim();
         if (!text) return;
 
+        if (window.AIMemory) window.AIMemory.trackQuestion(text);
+        var cmd = window.AIMemory ? window.AIMemory.checkDashboardCommand(text) : null;
+        if (cmd) {
+            cmd.action();
+            apEnsureConv();
+            var c = apGetActive();
+            var reply = 'Done! I\'ve navigated to that page for you.';
+            if (c) { c.messages.push({ role: 'user', content: text }, { role: 'assistant', content: reply }); apSaveConvs(); }
+            apAddMsgDOM('user', text, null);
+            apAddMsgDOM('assistant', reply, null);
+            return;
+        }
         apEnsureConv();
         var conv = apGetActive();
         if (!conv) return;
 
-        // Set title from first message
         if (!conv.title) {
             conv.title = text.length > 40 ? text.substring(0, 40) + '...' : text;
             apRenderConvList();
@@ -166,13 +173,15 @@
         apLoading = true;
         apShowTyping();
 
-        fetch(FUNC_URL, {
+        var endpoint = window.getApiEndpoint ? window.getApiEndpoint() : FUNC_URL;
+        var payload = window.buildPayload
+            ? window.buildPayload(text, conv.messages.slice(-6))
+            : { question: text, history: conv.messages.slice(-6) };
+
+        fetch(endpoint, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                question: text,
-                history: conv.messages.slice(-6)
-            })
+            body: JSON.stringify(payload)
         })
         .then(function(r) {
             if (!r.ok) return r.json().then(function(d) { throw new Error(d.error || 'Request failed'); });
@@ -185,6 +194,9 @@
             conv.messages.push({ role: 'assistant', content: answer });
             apSaveConvs();
             apAddMsgDOM('assistant', answer, null);
+            if (data.usage && window.APIConfig) {
+                window.APIConfig.addTokens(data.usage.input_tokens || 0, data.usage.output_tokens || 0);
+            }
         })
         .catch(function(err) {
             apLoading = false;
@@ -210,14 +222,15 @@
         apLoading = true;
         apShowTyping();
 
-        fetch(FUNC_URL, {
+        var rptEndpoint = window.getApiEndpoint ? window.getApiEndpoint() : FUNC_URL;
+        var rptPayload = window.buildPayload
+            ? window.buildPayload(prompt, [], { report: true })
+            : { question: prompt, history: [], report: true };
+
+        fetch(rptEndpoint, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                question: prompt,
-                history: [],
-                report: true
-            })
+            body: JSON.stringify(rptPayload)
         })
         .then(function(r) {
             if (!r.ok) throw new Error('Request failed (' + r.status + ')');
@@ -230,6 +243,9 @@
             conv.messages.push({ role: 'assistant', content: answer, reportTitle: title });
             apSaveConvs();
             apAddMsgDOM('assistant', answer, title);
+            if (data.usage && window.APIConfig) {
+                window.APIConfig.addTokens(data.usage.input_tokens || 0, data.usage.output_tokens || 0);
+            }
         })
         .catch(function(err) {
             apLoading = false;
@@ -238,79 +254,46 @@
         });
     }
 
-    // Init AnnaPage on load
     document.addEventListener('DOMContentLoaded', function() {
         apLoadConvs();
-        if (apConvs.length > 0) {
-            apActiveId = apConvs[apConvs.length - 1].id;
-        }
+        if (apConvs.length > 0) apActiveId = apConvs[apConvs.length - 1].id;
         apRenderConvList();
         apRenderMessages();
     });
 
+    function apRefreshUI() { apRenderConvList(); apRenderMessages(); }
+
     window.AnnaPage = {
-        send: function() {
-            var input = document.getElementById('anna-page-input');
-            if (input) apSend(input.value);
-        },
-        ask: function(text) {
-            apSend(text);
-        },
+        send: function() { var i = document.getElementById('anna-page-input'); if (i) apSend(i.value); },
+        ask: function(text) { apSend(text); },
         newChat: function() {
             var id = 'conv_' + Date.now();
             apConvs.push({ id: id, title: '', messages: [] });
-            apActiveId = id;
-            apSaveConvs();
-            apRenderConvList();
-            apRenderMessages();
-            var input = document.getElementById('anna-page-input');
-            if (input) input.focus();
+            apActiveId = id; apSaveConvs(); apRefreshUI();
+            var i = document.getElementById('anna-page-input'); if (i) i.focus();
         },
-        switchConv: function(cid) {
-            apActiveId = cid;
-            apRenderConvList();
-            apRenderMessages();
-        },
+        switchConv: function(cid) { apActiveId = cid; apRefreshUI(); },
         deleteConv: function(cid) {
             apConvs = apConvs.filter(function(c) { return c.id !== cid; });
-            if (apActiveId === cid) {
-                apActiveId = apConvs.length > 0 ? apConvs[apConvs.length - 1].id : null;
-            }
-            apSaveConvs();
-            apRenderConvList();
-            apRenderMessages();
+            if (apActiveId === cid) apActiveId = apConvs.length > 0 ? apConvs[apConvs.length - 1].id : null;
+            apSaveConvs(); apRefreshUI();
         },
         clearChat: function() {
             var conv = apGetActive();
-            if (conv) {
-                conv.messages = [];
-                conv.title = '';
-                apSaveConvs();
-                apRenderConvList();
-                apRenderMessages();
-            }
+            if (conv) { conv.messages = []; conv.title = ''; apSaveConvs(); apRefreshUI(); }
         },
-        runReport: function(reportId) {
-            apRunReport(reportId);
-        },
+        runReport: function(id) { apRunReport(id); },
         copyReport: function(btn) {
-            var card = btn.closest('.anna-report-card');
-            if (!card) return;
-            var raw = card.getAttribute('data-raw') || '';
-            navigator.clipboard.writeText(raw).then(function() {
-                var orig = btn.innerHTML;
-                btn.innerHTML = '&#10003; Copied';
+            var card = btn.closest('.anna-report-card'); if (!card) return;
+            navigator.clipboard.writeText(card.getAttribute('data-raw') || '').then(function() {
+                var orig = btn.innerHTML; btn.innerHTML = '&#10003; Copied';
                 setTimeout(function() { btn.innerHTML = orig; }, 1500);
             });
         },
         downloadReport: function(btn) {
-            var card = btn.closest('.anna-report-card');
-            if (!card) return;
-            var raw = card.getAttribute('data-raw') || '';
-            var title = card.getAttribute('data-title') || 'Report';
-            openPrintWindow(title, md(raw));
+            var card = btn.closest('.anna-report-card'); if (!card) return;
+            openPrintWindow(card.getAttribute('data-title') || 'Report', md(card.getAttribute('data-raw') || ''));
         }
     };
 
-        })();
 })();

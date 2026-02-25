@@ -5,6 +5,8 @@
     'use strict';
 
     var FUNC_URL = '/api/ai-query';
+    var md = window.md;
+    var escHtml = window.escHtml;
     var history = [];
     var isOpen = false;
     var isLoading = false;
@@ -23,29 +25,6 @@
     window.REPORT_PROMPTS = REPORT_PROMPTS;
 
     function $(id) { return document.getElementById(id); }
-
-    function escHtml(s) {
-        if (!s) return '';
-        return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-    }
-
-    function md(text) {
-        if (!text) return '';
-        var s = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-        s = s.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-        s = s.replace(/`([^`]+)`/g, '<code>$1</code>');
-        s = s.replace(/^[\-\*] (.+)$/gm, '<li>$1</li>');
-        s = s.replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>');
-        s = s.replace(/<\/ul>\s*<ul>/g, '');
-        s = s.replace(/^\d+\. (.+)$/gm, '<li>$1</li>');
-        s = s.replace(/\n/g, '<br>');
-        s = s.replace(/(<br>){3,}/g, '<br><br>');
-        return s;
-    }
-
-    // Expose helpers globally for Anna page
-    window.escHtml = escHtml;
-    window.md = md;
 
     // ---- Add message to chat ----
     function addMessage(role, content) {
@@ -100,6 +79,9 @@
         text = text.trim();
         if (!text) return;
 
+        // Track for self-learning
+        if (window.AIMemory) window.AIMemory.trackQuestion(text);
+
         // Hide suggestions after first message
         var suggestions = $('chat-suggestions');
         if (suggestions) suggestions.style.display = 'none';
@@ -112,13 +94,13 @@
 
         setLoading(true);
 
-        fetch(FUNC_URL, {
+        var endpoint = window.getApiEndpoint ? window.getApiEndpoint() : FUNC_URL;
+        var payload = window.buildPayload ? window.buildPayload(text, history.slice(-6)) : { question: text, history: history.slice(-6) };
+
+        fetch(endpoint, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                question: text,
-                history: history.slice(-6)
-            })
+            body: JSON.stringify(payload)
         })
         .then(function(r) {
             if (!r.ok) {
@@ -133,6 +115,10 @@
             var answer = data.answer || 'No response received.';
             addMessage('assistant', answer);
             history.push({ role: 'assistant', content: answer });
+            // Track Claude token usage
+            if (data.usage && window.APIConfig) {
+                window.APIConfig.addTokens(data.usage.input_tokens || 0, data.usage.output_tokens || 0);
+            }
         })
         .catch(function(err) {
             setLoading(false);
@@ -229,14 +215,13 @@
 
             var title = reportId.replace(/-/g, ' ').replace(/\b\w/g, function(c) { return c.toUpperCase(); });
 
-            fetch(FUNC_URL, {
+            var rptEndpoint = window.getApiEndpoint ? window.getApiEndpoint() : FUNC_URL;
+            var rptPayload = window.buildPayload ? window.buildPayload(prompt, [], { report: true }) : { question: prompt, history: [], report: true };
+
+            fetch(rptEndpoint, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    question: prompt,
-                    history: [],
-                    report: true
-                })
+                body: JSON.stringify(rptPayload)
             })
             .then(function(r) {
                 if (!r.ok) throw new Error('Request failed (' + r.status + ')');
@@ -244,6 +229,9 @@
             })
             .then(function(data) {
                 var answer = data.answer || 'No response received.';
+                if (data.usage && window.APIConfig) {
+                    window.APIConfig.addTokens(data.usage.input_tokens || 0, data.usage.output_tokens || 0);
+                }
                 var now = new Date();
                 var dateStr = now.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
                 var timeStr = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });

@@ -16,6 +16,7 @@
     <link rel="stylesheet" href="css/chat.css">
     <link rel="stylesheet" href="css/anna.css">
     <link rel="stylesheet" href="css/outreach.css">
+    <link rel="stylesheet" href="css/overlays.css">
     <link rel="stylesheet" href="css/utilities.css">
     <link rel="stylesheet" href="css/responsive.css">
 
@@ -58,37 +59,36 @@
                 <div class="sidebar-group-label">&#9733; Favourites</div>
                 <div id="sidebar-favs-list"></div>
             </div>
-            <div class="sidebar-group">
-                <div class="sidebar-group-label">&#9889; Assistant</div>
+            <div class="sidebar-group" data-group="assistant">
+                <div class="sidebar-group-label" onclick="window.toggleNavGroup(this.parentElement)">&#9889; Assistant <span class="sidebar-chevron">&#9660;</span></div>
                 <a href="javascript:void(0)" onclick="showPage('anna')" class="sidebar-link" data-page="anna">eComplete AI<button class="sidebar-fav" data-fav="anna" onclick="event.preventDefault();event.stopPropagation();toggleFav('anna')" title="Toggle favourite">&#9733;</button></a>
             </div>
-            <div class="sidebar-group">
-                <div class="sidebar-group-label">&#9679; Overview</div>
+            <div class="sidebar-group" data-group="overview">
+                <div class="sidebar-group-label" onclick="window.toggleNavGroup(this.parentElement)">&#9679; Overview <span class="sidebar-chevron">&#9660;</span></div>
                 <a href="javascript:void(0)" onclick="showPage('executive')" class="sidebar-link" data-page="executive">Executive Summary<button class="sidebar-fav" data-fav="executive" onclick="event.preventDefault();event.stopPropagation();toggleFav('executive')" title="Toggle favourite">&#9733;</button></a>
             </div>
-            <div class="sidebar-group">
-                <div class="sidebar-group-label">&#9733; Sales</div>
+            <div class="sidebar-group" data-group="sales">
+                <div class="sidebar-group-label" onclick="window.toggleNavGroup(this.parentElement)">&#9733; Sales <span class="sidebar-chevron">&#9660;</span></div>
                 <a href="javascript:void(0)" onclick="showPage('leads')" class="sidebar-link" data-page="leads">Leads &amp; Conversion<button class="sidebar-fav" data-fav="leads" onclick="event.preventDefault();event.stopPropagation();toggleFav('leads')" title="Toggle favourite">&#9733;</button></a>
                 <a href="javascript:void(0)" onclick="showPage('pipeline')" class="sidebar-link" data-page="pipeline">Pipeline View<button class="sidebar-fav" data-fav="pipeline" onclick="event.preventDefault();event.stopPropagation();toggleFav('pipeline')" title="Toggle favourite">&#9733;</button></a>
                 <a href="javascript:void(0)" onclick="showPage('targets')" class="sidebar-link" data-page="targets">Targets &amp; Rev Eng<button class="sidebar-fav" data-fav="targets" onclick="event.preventDefault();event.stopPropagation();toggleFav('targets')" title="Toggle favourite">&#9733;</button></a>
             </div>
-            <div class="sidebar-group">
-                <div class="sidebar-group-label">&#9993; Performance</div>
+            <div class="sidebar-group" data-group="performance">
+                <div class="sidebar-group-label" onclick="window.toggleNavGroup(this.parentElement)">&#9993; Performance <span class="sidebar-chevron">&#9660;</span></div>
                 <a href="javascript:void(0)" onclick="showPage('activities')" class="sidebar-link" data-page="activities">Activity &amp; Contacts<button class="sidebar-fav" data-fav="activities" onclick="event.preventDefault();event.stopPropagation();toggleFav('activities')" title="Toggle favourite">&#9733;</button></a>
                 <a href="javascript:void(0)" onclick="showPage('insights')" class="sidebar-link" data-page="insights">Insights &amp; Forecast<button class="sidebar-fav" data-fav="insights" onclick="event.preventDefault();event.stopPropagation();toggleFav('insights')" title="Toggle favourite">&#9733;</button></a>
             </div>
-            <div class="sidebar-group">
-                <div class="sidebar-group-label">&#128188; M&amp;A</div>
-                <a href="javascript:void(0)" onclick="showPage('monday-pipeline')" class="sidebar-link" data-page="monday-pipeline">M&amp;A Pipeline<button class="sidebar-fav" data-fav="monday-pipeline" onclick="event.preventDefault();event.stopPropagation();toggleFav('monday-pipeline')" title="Toggle favourite">&#9733;</button></a>
-                <a href="javascript:void(0)" onclick="showPage('monday-ic')" class="sidebar-link" data-page="monday-ic">IC Scorecards<button class="sidebar-fav" data-fav="monday-ic" onclick="event.preventDefault();event.stopPropagation();toggleFav('monday-ic')" title="Toggle favourite">&#9733;</button></a>
+            <div class="sidebar-group" data-group="ma">
+                <div class="sidebar-group-label" onclick="window.toggleNavGroup(this.parentElement)">&#128188; M&amp;A <span class="sidebar-chevron">&#9660;</span></div>
+                <a href="javascript:void(0)" onclick="showPage('ma-hub')" class="sidebar-link" data-page="ma-hub">M&amp;A Hub<button class="sidebar-fav" data-fav="ma-hub" onclick="event.preventDefault();event.stopPropagation();toggleFav('ma-hub')" title="Toggle favourite">&#9733;</button></a>
             </div>
-            <div class="sidebar-group">
-                <div class="sidebar-group-label">&#129302; Operations</div>
+            <div class="sidebar-group" data-group="operations">
+                <div class="sidebar-group-label" onclick="window.toggleNavGroup(this.parentElement)">&#129302; Operations <span class="sidebar-chevron">&#9660;</span></div>
                 <a href="javascript:void(0)" onclick="showPage('ai-roadmap')" class="sidebar-link" data-page="ai-roadmap">AI Roadmap<button class="sidebar-fav" data-fav="ai-roadmap" onclick="event.preventDefault();event.stopPropagation();toggleFav('ai-roadmap')" title="Toggle favourite">&#9733;</button></a>
                 <a href="javascript:void(0)" onclick="showPage('inbound-queue')" class="sidebar-link" data-page="inbound-queue">Inbound Queue<button class="sidebar-fav" data-fav="inbound-queue" onclick="event.preventDefault();event.stopPropagation();toggleFav('inbound-queue')" title="Toggle favourite">&#9733;</button></a>
             </div>
-            <div class="sidebar-group">
-                <div class="sidebar-group-label">&#128640; Outreach</div>
+            <div class="sidebar-group" data-group="outreach">
+                <div class="sidebar-group-label" onclick="window.toggleNavGroup(this.parentElement)">&#128640; Outreach <span class="sidebar-chevron">&#9660;</span></div>
                 <a href="javascript:void(0)" onclick="showPage('outreach')" class="sidebar-link" data-page="outreach">Outreach Engine<button class="sidebar-fav" data-fav="outreach" onclick="event.preventDefault();event.stopPropagation();toggleFav('outreach')" title="Toggle favourite">&#9733;</button></a>
             </div>
         </nav>
@@ -117,10 +117,22 @@
                 <span class="filter-period-label" id="filter-period-label">Year to Date</span>
             </div>
         </div>
-        <div class="freshness-bar" id="freshness-bar">
-            <span class="freshness-pill" title="Last sync">HubSpot: --</span>
-            <span class="freshness-pill" title="Last sync">Monday: --</span>
-            <span class="freshness-pill" title="Last sync">Queue: --</span>
+        <div class="top-bar" id="top-bar">
+            <div class="top-bar-inner">
+                <div class="top-bar-left">
+                    <span class="freshness-pill" title="Last sync">HubSpot: --</span>
+                    <span class="freshness-pill" title="Last sync">Monday: --</span>
+                    <span class="freshness-pill" title="Last sync">Queue: --</span>
+                </div>
+                <div class="top-bar-right">
+                    <button class="top-bar-btn" id="notif-bell" title="Notifications" aria-label="Notifications">
+                        &#128276;<span class="notif-badge" id="notif-badge" style="display:none">0</span>
+                    </button>
+                    <span class="top-bar-divider"></span>
+                    <span class="top-bar-token" id="top-bar-token" title="API tokens used">&#9889; 0 tokens</span>
+                    <span class="top-bar-status" id="top-bar-status" title="Click to configure AI provider" style="cursor:pointer" onclick="window.APIConfig&&window.APIConfig.openSettings()"><span class="live-dot"></span> Online</span>
+                </div>
+            </div>
         </div>
 
         <main class="main-content" role="main" aria-label="Dashboard content">
@@ -132,6 +144,7 @@
             <div class="dash-page" id="page-targets" role="region" aria-label="Targets"></div>
             <div class="dash-page" id="page-activities" role="region" aria-label="Activity Tracking"></div>
             <div class="dash-page" id="page-insights" role="region" aria-label="Insights and Forecast"></div>
+            <div class="dash-page" id="page-ma-hub" role="region" aria-label="M and A Hub"></div>
             <div class="dash-page" id="page-monday-pipeline" role="region" aria-label="M and A Pipeline"></div>
             <div class="dash-page" id="page-monday-ic" role="region" aria-label="IC Scorecards"></div>
             <div class="dash-page" id="page-ai-roadmap" role="region" aria-label="AI Roadmap"></div>
@@ -144,6 +157,42 @@
             <p style="margin-top:4px">Contacts: 44,602 | Companies: 17,781 | Deals: 75</p>
             <p style="margin-top:4px" id="generated-ts"></p>
         </footer>
+    </div>
+
+    <!-- ═══ API Settings Modal ═══ -->
+    <div class="api-settings-overlay hidden" id="api-settings-overlay" onclick="if(event.target===this)window.APIConfig.closeSettings()">
+        <div class="api-settings-card">
+            <div class="api-settings-header">
+                <h3 class="api-settings-title">&#9881; AI Provider Settings</h3>
+                <button onclick="window.APIConfig.closeSettings()" class="api-settings-close">&times;</button>
+            </div>
+            <div class="api-settings-providers">
+                <button class="provider-btn active" data-provider="groq" onclick="window.APIConfig.selectProvider('groq')">
+                    <span class="provider-icon">&#9889;</span>
+                    <span class="provider-name">Groq</span>
+                    <span class="provider-desc">Free &middot; Server-side key</span>
+                </button>
+                <button class="provider-btn" data-provider="claude" onclick="window.APIConfig.selectProvider('claude')">
+                    <span class="provider-icon">&#10024;</span>
+                    <span class="provider-name">Claude</span>
+                    <span class="provider-desc">Your API key &middot; Sonnet 4.5</span>
+                </button>
+            </div>
+            <div class="api-settings-key-section">
+                <label class="api-settings-label">Claude API Key</label>
+                <div class="api-settings-key-row">
+                    <input type="password" class="api-settings-input" id="api-key-input" placeholder="sk-ant-api03-..." autocomplete="off" />
+                    <button class="api-settings-btn primary" onclick="window.APIConfig.saveApiKey()">Save</button>
+                    <button class="api-settings-btn danger" onclick="window.APIConfig.removeApiKey()">Remove</button>
+                </div>
+                <div class="api-settings-cost-warning">
+                    &#9888; Claude API charges apply. Sonnet 4.5: ~$3/M input, ~$15/M output tokens.
+                    A typical question costs $0.005&ndash;$0.02.
+                </div>
+            </div>
+            <div class="api-settings-msg" id="api-settings-msg" style="display:none"></div>
+            <div class="api-settings-usage" id="api-usage-summary"></div>
+        </div>
     </div>
 
     <!-- ═══ LinkedIn Auth Modal ═══ -->
@@ -429,6 +478,11 @@
     <script src="js/charts.js"></script>
     <script src="js/animations.js"></script>
     <script src="js/filters.js"></script>
+    <script src="js/ma-hub.js"></script>
+    <script src="js/api-config.js"></script>
+    <script src="js/ai-memory.js"></script>
+    <script src="js/notifications.js"></script>
+    <script src="js/ai-particles.js"></script>
     <!-- Chat -->
     <script src="js/chat-widget.js"></script>
     <script src="js/anna-page.js"></script>

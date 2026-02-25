@@ -178,7 +178,31 @@
         w.document.close();
     }
 
+    // ------------------------------------------------------------------
+    // Text formatting — shared by chat-widget.js + anna-page.js
+    // ------------------------------------------------------------------
+    function escHtml(s) {
+        if (!s) return '';
+        return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function md(text) {
+        if (!text) return '';
+        var s = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        s = s.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+        s = s.replace(/`([^`]+)`/g, '<code>$1</code>');
+        s = s.replace(/^[\-\*] (.+)$/gm, '<li>$1</li>');
+        s = s.replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>');
+        s = s.replace(/<\/ul>\s*<ul>/g, '');
+        s = s.replace(/^\d+\. (.+)$/gm, '<li>$1</li>');
+        s = s.replace(/\n/g, '<br>');
+        s = s.replace(/(<br>){3,}/g, '<br><br>');
+        return s;
+    }
+
     // Expose to global scope
+    window.escHtml = escHtml;
+    window.md = md;
     window.getDateRange = getDateRange;
     window.formatDate = formatDate;
     window.sumDaily = sumDaily;

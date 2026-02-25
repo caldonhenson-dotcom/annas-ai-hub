@@ -19,7 +19,8 @@
     // Page renderers called after scripts load
     var PAGE_RENDERERS = {
         'executive': 'renderExecutive',
-        'inbound-queue': 'renderInbound'
+        'inbound-queue': 'renderInbound',
+        'ma-hub': 'renderMAHub'
     };
 
     // ------------------------------------------------------------------
@@ -131,15 +132,23 @@
             if (target && window.initCountUps) {
                 window.initCountUps(target);
             }
+            // Render memory panel + start particles on Anna page
+            if (pageId === 'anna') {
+                if (window.AIMemory) window.AIMemory.renderMemoryPanel();
+                if (window.AIParticles) window.AIParticles.init();
+            }
         });
 
-        // Hide chat FAB, freshness bar, filter bar on Anna page
+        // Stop particles when leaving Anna page
+        if (pageId !== 'anna' && window.AIParticles) window.AIParticles.stop();
+
+        // Hide chat FAB, top bar, filter bar on Anna page
         var isAnna = (pageId === 'anna');
         var fab = document.getElementById('chat-fab');
-        var freshBar = document.getElementById('freshness-bar');
+        var topBar = document.getElementById('top-bar');
         var filterBar = document.getElementById('filter-bar');
         if (fab) fab.style.display = isAnna ? 'none' : '';
-        if (freshBar) freshBar.style.display = isAnna ? 'none' : '';
+        if (topBar) topBar.style.display = isAnna ? 'none' : '';
         if (filterBar) filterBar.style.display = isAnna ? 'none' : '';
 
         // Persist last page
