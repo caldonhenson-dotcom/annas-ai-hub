@@ -7,6 +7,16 @@
     var instances = {};
     var MONTH_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
+    // Theme-aware colors
+    function isDark() {
+        return document.documentElement.getAttribute('data-theme') === 'dark';
+    }
+    function tickColor() { return isDark() ? '#9ca3af' : '#94a3b8'; }
+    function tooltipBg() { return isDark() ? '#1a1d27' : '#242833'; }
+    function mutedText() { return isDark() ? '#9ca3af' : '#6b7280'; }
+    function valueText() { return isDark() ? '#e5e7eb' : '#121212'; }
+    function barTrack()  { return isDark() ? '#2a2d3a' : '#e5e7eb'; }
+
     // Chart.js global defaults
     if (window.Chart) {
         Chart.defaults.font.family = '"Assistant", sans-serif';
@@ -40,7 +50,7 @@
         maxItems = maxItems || 8;
         var sorted = Object.entries(data).sort(function (a, b) { return b[1] - a[1]; }).slice(0, maxItems);
         if (sorted.length === 0) {
-            el.innerHTML = '<div style="text-align:center;padding:20px;color:#6b7280;font-size:13px">No data for this period</div>';
+            el.innerHTML = '<div class="text-center" style="padding:20px;color:var(--text-muted);font-size:13px">No data for this period</div>';
             return;
         }
         var maxVal = sorted[0][1] || 1;
@@ -53,9 +63,9 @@
             var color = palette[i % palette.length];
             html += '<div style="margin-bottom:5px">'
                 + '<div style="display:flex;justify-content:space-between;margin-bottom:3px;font-size:12px">'
-                + '<span style="color:#6b7280">' + label + '</span>'
-                + '<span style="color:#121212;font-weight:600">' + fmtNum(val) + '</span></div>'
-                + '<div style="height:6px;background:#e5e7eb;border-radius:3px;overflow:hidden">'
+                + '<span style="color:var(--text-muted)">' + label + '</span>'
+                + '<span style="color:var(--text);font-weight:600">' + fmtNum(val) + '</span></div>'
+                + '<div style="height:6px;background:' + barTrack() + ';border-radius:3px;overflow:hidden">'
                 + '<div style="height:100%;width:' + pct.toFixed(1) + '%;background:' + color
                 + ';border-radius:3px;transition:width 0.6s cubic-bezier(.25,.1,.25,1)"></div></div></div>';
         });
@@ -72,7 +82,7 @@
         var entries = Object.entries(data).sort();
         if (entries.length > 6) entries = entries.slice(entries.length - 6);
         if (entries.length === 0) {
-            canvas.parentElement.innerHTML = '<span style="color:#64748b;font-size:11px">No data</span>';
+            canvas.parentElement.innerHTML = '<span style="color:var(--text-muted);font-size:11px">No data</span>';
             delete instances[containerId];
             return;
         }
@@ -83,15 +93,12 @@
         });
         var values = entries.map(function (e) { return e[1]; });
 
-        // Update existing chart or create new
+        // Destroy and recreate on theme change for color updates
         if (instances[containerId]) {
-            var chart = instances[containerId];
-            chart.data.labels = labels;
-            chart.data.datasets[0].data = values;
-            chart.data.datasets[0].backgroundColor = color + 'CC';
-            chart.data.datasets[0].borderColor = color;
-            chart.update();
-            return;
+            instances[containerId].destroy();
+            delete instances[containerId];
+            canvas = getCanvas(containerId);
+            if (!canvas) return;
         }
 
         instances[containerId] = new Chart(canvas, {
@@ -114,8 +121,10 @@
                 plugins: {
                     legend: { display: false },
                     tooltip: {
-                        backgroundColor: '#242833',
+                        backgroundColor: tooltipBg(),
                         titleFont: { weight: '600' },
+                        titleColor: '#fff',
+                        bodyColor: '#fff',
                         bodyFont: { size: 13 },
                         padding: 10,
                         cornerRadius: 8,
@@ -128,16 +137,13 @@
                     }
                 },
                 scales: {
-                    y: {
-                        display: false,
-                        beginAtZero: true
-                    },
+                    y: { display: false, beginAtZero: true },
                     x: {
                         grid: { display: false },
                         border: { display: false },
                         ticks: {
                             font: { size: 11, weight: '600' },
-                            color: '#94a3b8'
+                            color: tickColor()
                         }
                     }
                 }
@@ -164,14 +170,12 @@
         var values = entries.map(function (e) { return e[1]; });
 
         if (instances[containerId]) {
-            var chart = instances[containerId];
-            chart.data.labels = labels;
-            chart.data.datasets[0].data = values;
-            chart.update();
-            return;
+            instances[containerId].destroy();
+            delete instances[containerId];
+            canvas = getCanvas(containerId);
+            if (!canvas) return;
         }
 
-        // Set compact height for sparklines
         canvas.parentElement.style.height = '40px';
 
         instances[containerId] = new Chart(canvas, {
@@ -196,7 +200,9 @@
                 plugins: {
                     legend: { display: false },
                     tooltip: {
-                        backgroundColor: '#242833',
+                        backgroundColor: tooltipBg(),
+                        titleColor: '#fff',
+                        bodyColor: '#fff',
                         cornerRadius: 6,
                         padding: 8,
                         bodyFont: { size: 12 }
@@ -209,6 +215,15 @@
             }
         });
     }
+
+    // ------------------------------------------------------------------
+    // Theme change callback — re-render all active charts
+    // ------------------------------------------------------------------
+    window.onThemeChange = function () {
+        if (window.applyFilter && window.currentPeriod) {
+            window.applyFilter(window.currentPeriod);
+        }
+    };
 
     window.renderMiniBar = renderMiniBar;
     window.renderSparkline = renderSparkline;

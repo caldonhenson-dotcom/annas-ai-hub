@@ -264,3 +264,39 @@
     cursor: pointer; transition: opacity 0.2s;
 }
 .login-btn:hover { opacity: 0.9; }
+
+/* ============================================================
+   Dark Mode — layout overrides
+   ============================================================ */
+[data-theme="dark"] .filter-bar {
+    background: rgba(15, 17, 23, 0.92);
+}
+[data-theme="dark"] .login-card {
+    background: var(--card);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+}
+[data-theme="dark"] .login-input {
+    background: var(--surface2);
+    color: var(--text);
+    border-color: var(--card-border);
+}
+[data-theme="dark"] ::-webkit-scrollbar-track { background: var(--bg); }
+[data-theme="dark"] ::-webkit-scrollbar-thumb { background: #3a3d4a; }
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover { background: #4a4d5a; }
+
+/* Theme toggle button */
+.theme-toggle {
+    background: none; border: none; cursor: pointer;
+    padding: 6px 8px; border-radius: 6px;
+    color: rgba(255,255,255,0.5); font-size: 16px;
+    transition: color 0.2s, background 0.2s;
+    display: flex; align-items: center; gap: 6px;
+}
+.theme-toggle:hover {
+    color: rgba(255,255,255,0.9);
+    background: rgba(255,255,255,0.06);
+}
+.theme-toggle .theme-label {
+    font-size: 10px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.04em;
+}

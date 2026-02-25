@@ -16,9 +16,19 @@
     <link rel="stylesheet" href="css/chat.css">
     <link rel="stylesheet" href="css/anna.css">
     <link rel="stylesheet" href="css/outreach.css">
+    <link rel="stylesheet" href="css/utilities.css">
     <link rel="stylesheet" href="css/responsive.css">
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+
+    <!-- Anti-flash: apply saved or OS theme before paint -->
+    <script>
+    (function(){
+        var t = localStorage.getItem('ecomplete_theme');
+        if (!t && window.matchMedia && window.matchMedia('(prefers-color-scheme:dark)').matches) t = 'dark';
+        if (t === 'dark') document.documentElement.setAttribute('data-theme','dark');
+    })();
+    </script>
 </head>
 <body>
     <div class="login-overlay" id="login-overlay">
@@ -82,8 +92,11 @@
                 <a href="javascript:void(0)" onclick="showPage('outreach')" class="sidebar-link" data-page="outreach">Outreach Engine<button class="sidebar-fav" data-fav="outreach" onclick="event.preventDefault();event.stopPropagation();toggleFav('outreach')" title="Toggle favourite">&#9733;</button></a>
             </div>
         </nav>
-        <div class="sidebar-footer">
-            Sales &amp; M&amp;A &amp; AI Intelligence
+        <div class="sidebar-footer" style="display:flex;align-items:center;justify-content:space-between">
+            <span>Sales &amp; M&amp;A &amp; AI Intelligence</span>
+            <button class="theme-toggle" id="theme-toggle" onclick="window.toggleTheme()" title="Toggle dark mode" aria-label="Toggle dark mode">
+                <span id="theme-icon">&#9790;</span>
+            </button>
         </div>
     </aside>
     <button class="sidebar-toggle" id="sidebar-toggle" onclick="toggleSidebar()" aria-label="Toggle menu">
@@ -147,7 +160,7 @@
                     <span style="font-size:18px">&#128274;</span>
                     <div>
                         <div style="font-weight:600;font-size:13px" id="li-status-text">Not connected</div>
-                        <div style="font-size:11px;color:#6b7280" id="li-status-detail">Connect your LinkedIn to enable outreach</div>
+                        <div class="text-muted-sm" id="li-status-detail">Connect your LinkedIn to enable outreach</div>
                     </div>
                 </div>
             </div>
@@ -261,7 +274,7 @@
                 <div class="composer-toolbar">
                     <button class="composer-btn secondary" onclick="window.ProspectPanel.generateDraft()" id="pp-regen-btn">&#8635; Regenerate</button>
                     <button class="composer-btn success" onclick="window.ProspectPanel.approveAndQueue()" id="pp-approve-btn">&#10003; Approve &amp; Queue</button>
-                    <button class="composer-btn primary" onclick="window.ProspectPanel.sendNow()" id="pp-send-btn" style="display:none">&#9993; Send Now</button>
+                    <button class="composer-btn primary hidden" onclick="window.ProspectPanel.sendNow()" id="pp-send-btn">&#9993; Send Now</button>
                 </div>
                 <div id="pp-composer-status" style="display:none;margin-top:8px;font-size:12px;padding:8px;border-radius:6px"></div>
             </div>
@@ -346,7 +359,7 @@
                 </div>
             </div>
         </div>
-        <div class="chat-reports" id="chat-reports" style="display:none">
+        <div class="chat-reports hidden" id="chat-reports">
             <div class="chat-report-item" onclick="window.AnnaChat.runReport('monthly-deal-flow')">
                 <span class="chat-report-icon">&#9733;</span>
                 <div class="chat-report-info">
@@ -406,12 +419,15 @@
 
     <!-- Core scripts -->
     <script src="js/app.js"></script>
+    <script src="js/components.js"></script>
     <script src="js/tables.js"></script>
     <script src="js/router.js"></script>
     <script src="js/favourites.js"></script>
     <script src="js/data.js"></script>
+    <script src="js/static-data.js"></script>
     <script src="js/utils.js"></script>
     <script src="js/charts.js"></script>
+    <script src="js/animations.js"></script>
     <script src="js/filters.js"></script>
     <!-- Chat -->
     <script src="js/chat-widget.js"></script>

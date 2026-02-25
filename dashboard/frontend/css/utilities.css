@@ -1,0 +1,96 @@
+/* ============================================================
+   Utility Classes — Replace top 30 inline style patterns
+   ============================================================ */
+
+/* --- Text & Typography --- */
+.text-primary       { font-weight: 500; color: #121212; }
+.text-dark          { color: #121212; }
+.text-muted-sm      { font-size: 11px; color: #6b7280; }
+.text-muted-xs      { font-size: 10px; color: #6b7280; }
+.text-muted-xs-ml   { font-size: 10px; color: #6b7280; margin-left: auto; }
+.text-muted-xs-ml6  { font-size: 10px; color: #6b7280; margin-left: 6px; }
+.text-muted-xs-ml8  { font-size: 10px; color: #6b7280; margin-left: 8px; }
+.text-label         { font-size: 12px; color: #6b7280; font-weight: 500; }
+.text-label-sm      { font-size: 12px; color: #6b7280; }
+.text-value         { font-size: 12px; color: #121212; font-weight: 500; }
+.text-value-sm      { font-size: 12px; color: #121212; margin-top: 2px; }
+.text-value-lg      { font-size: 17px; color: #121212; font-weight: 800; }
+.text-hero          { font-size: 20px; font-weight: 800; color: #121212; }
+.text-italic-muted  { font-size: 11px; color: #6b7280; font-style: italic; }
+.text-strikethrough { color: #6b7280; text-decoration: line-through; }
+.text-12            { font-size: 12px; }
+.text-error-sm      { font-size: 11px; font-weight: 600; color: #F44336; }
+
+/* --- Layout --- */
+.flex-between       { display: flex; justify-content: space-between; align-items: center; }
+.flex-center        { display: flex; align-items: center; justify-content: center; }
+.flex-gap-1         { display: flex; align-items: center; gap: 4px; }
+.flex-gap-2         { display: flex; align-items: center; gap: 8px; }
+.flex-gap-3         { display: flex; align-items: center; gap: 12px; }
+.text-right         { text-align: right; }
+.text-center        { text-align: center; }
+.nowrap             { white-space: nowrap; }
+.truncate           { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hidden             { display: none; }
+
+/* --- Spacing --- */
+.mt-1 { margin-top: 4px; }   .mt-2 { margin-top: 8px; }   .mt-3 { margin-top: 12px; }   .mt-4 { margin-top: 16px; }
+.mb-1 { margin-bottom: 4px; } .mb-2 { margin-bottom: 8px; } .mb-3 { margin-bottom: 12px; } .mb-4 { margin-bottom: 16px; }
+.p-1  { padding: 4px; }       .p-2  { padding: 8px; }       .p-3  { padding: 12px; }       .p-4  { padding: 16px; }
+.px-2 { padding-left: 8px; padding-right: 8px; }
+.py-2 { padding-top: 8px; padding-bottom: 8px; }
+
+/* --- Monday Board Grids --- */
+.grid-board-3col    { display: grid; grid-template-columns: 2fr 100px 100px; align-items: center; }
+
+/* --- Status & Progress --- */
+.bar-full-green     { width: 100%; background: #00CA72; }
+.clr-success        { color: #16a34a; }
+.clr-danger         { color: #dc2626; }
+.clr-warning        { color: #f59e0b; }
+.clr-accent         { color: #3CB4AD; }
+.clr-accent2        { color: #334FB4; }
+.bg-success-light   { background: rgba(34, 197, 94, 0.1); }
+.bg-danger-light    { background: rgba(239, 68, 68, 0.1); }
+.bg-warning-light   { background: rgba(245, 158, 11, 0.1); }
+
+/* --- Board Cell Padding --- */
+.cell-pad           { padding: 6px; }
+.cell-pad-muted     { padding: 6px; color: #6b7280; }
+.cell-pad-value     { padding: 6px; font-weight: 500; color: #121212; }
+.cell-pad-cap       { padding: 6px; color: #6b7280; text-transform: capitalize; }
+.cell-pad-accent2   { padding: 6px; color: #334FB4; font-size: 11px; }
+
+/* --- Monday Status Pills (inline) --- */
+.pill-done-sm       { background: #00CA7222; color: #00CA72; min-width: auto; padding: 2px 6px; margin: 1px 2px; font-size: 10px; }
+.pill-working-sm    { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; background: #FFCB0033; color: #FFCB00; }
+.border-bottom-sep  { border-bottom: 1px solid #e2e5ea; }
+.row-pad-sep        { padding: 4px 0; border-bottom: 1px solid #e2e5ea; }
+
+/* --- Interactive --- */
+.clickable          { cursor: pointer; user-select: none; }
+.expand-arrow       { opacity: 0.4; font-size: 10px; }
+
+/* --- Dark Mode Overrides --- */
+[data-theme="dark"] .text-primary,
+[data-theme="dark"] .text-dark,
+[data-theme="dark"] .text-value,
+[data-theme="dark"] .text-value-sm,
+[data-theme="dark"] .text-value-lg,
+[data-theme="dark"] .text-hero,
+[data-theme="dark"] .cell-pad-value { color: var(--text); }
+
+[data-theme="dark"] .text-muted-sm,
+[data-theme="dark"] .text-muted-xs,
+[data-theme="dark"] .text-muted-xs-ml,
+[data-theme="dark"] .text-muted-xs-ml6,
+[data-theme="dark"] .text-muted-xs-ml8,
+[data-theme="dark"] .text-label,
+[data-theme="dark"] .text-label-sm,
+[data-theme="dark"] .text-italic-muted,
+[data-theme="dark"] .text-strikethrough,
+[data-theme="dark"] .cell-pad-muted,
+[data-theme="dark"] .cell-pad-cap { color: var(--text-muted); }
+
+[data-theme="dark"] .border-bottom-sep,
+[data-theme="dark"] .row-pad-sep { border-color: var(--card-border); }

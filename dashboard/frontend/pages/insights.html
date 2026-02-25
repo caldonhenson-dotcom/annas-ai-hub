@@ -14,7 +14,7 @@
                     letter-spacing:0.05em;margin-bottom:1px">30-Day Forecast</div>
         <div data-role="stat-value" style="font-size:17px;font-weight:800;color:#121212;
                     line-height:1.1;margin-bottom:1px">£0</div>
-        <div data-role="stat-subtitle" style="font-size:11px;color:#6b7280"></div>
+        <div data-role="stat-subtitle" class="text-muted-sm"></div>
         
     </div><div class="stat-card" style="--accent:#334FB4">
         <div style="width:22px;height:22px;border-radius:5px;
@@ -26,7 +26,7 @@
                     letter-spacing:0.05em;margin-bottom:1px">60-Day Forecast</div>
         <div data-role="stat-value" style="font-size:17px;font-weight:800;color:#121212;
                     line-height:1.1;margin-bottom:1px">£0</div>
-        <div data-role="stat-subtitle" style="font-size:11px;color:#6b7280"></div>
+        <div data-role="stat-subtitle" class="text-muted-sm"></div>
         
     </div><div class="stat-card" style="--accent:#34d399">
         <div style="width:22px;height:22px;border-radius:5px;
@@ -38,9 +38,9 @@
                     letter-spacing:0.05em;margin-bottom:1px">90-Day Forecast</div>
         <div data-role="stat-value" style="font-size:17px;font-weight:800;color:#121212;
                     line-height:1.1;margin-bottom:1px">£0</div>
-        <div data-role="stat-subtitle" style="font-size:11px;color:#6b7280"></div>
+        <div data-role="stat-subtitle" class="text-muted-sm"></div>
         
-    </div></div><div class="grid-3" style="margin-top:8px"><div class="glass-card">
+    </div></div><div class="grid-3 mt-2"><div class="glass-card">
                 <h3 class="card-title">Win/Loss Analysis</h3>
                 <div style="display:flex;gap:16px;align-items:flex-start">
                     <div style="flex-shrink:0">
@@ -75,7 +75,7 @@
                             Win Rate: <strong style="color:#34d399">0.3%</strong>
                         </div>
                     </div>
-                    <div style="flex:1;min-width:0"><h4 style="font-size:11px;color:#34d399;margin:6px 0 2px;text-transform:uppercase">Won</h4><div style="font-size:12px;padding:2px 0;color:#6b7280">Onboarded an live : <strong style="color:#121212">1</strong></div><div style="font-size:12px;padding:2px 0;color:#6b7280">GMC US Warehouse Provider: <strong style="color:#121212">1</strong></div><div style="font-size:12px;padding:2px 0;color:#6b7280">Contract signed: <strong style="color:#121212">1</strong></div><h4 style="font-size:11px;color:#ef4444;margin:6px 0 2px;text-transform:uppercase">Lost</h4><div style="font-size:12px;padding:2px 0;color:#6b7280">Ghosted: <strong style="color:#121212">3</strong></div><div style="font-size:12px;padding:2px 0;color:#6b7280">no meeting booked: <strong style="color:#121212">2</strong></div><div style="font-size:12px;padding:2px 0;color:#6b7280">Not specified: <strong style="color:#121212">2</strong></div></div>
+                    <div style="flex:1;min-width:0"><h4 style="font-size:11px;color:#34d399;margin:6px 0 2px;text-transform:uppercase">Won</h4><div style="font-size:12px;padding:2px 0;color:#6b7280">Onboarded an live : <strong class="text-dark">1</strong></div><div style="font-size:12px;padding:2px 0;color:#6b7280">GMC US Warehouse Provider: <strong class="text-dark">1</strong></div><div style="font-size:12px;padding:2px 0;color:#6b7280">Contract signed: <strong class="text-dark">1</strong></div><h4 style="font-size:11px;color:#ef4444;margin:6px 0 2px;text-transform:uppercase">Lost</h4><div style="font-size:12px;padding:2px 0;color:#6b7280">Ghosted: <strong class="text-dark">3</strong></div><div style="font-size:12px;padding:2px 0;color:#6b7280">no meeting booked: <strong class="text-dark">2</strong></div><div style="font-size:12px;padding:2px 0;color:#6b7280">Not specified: <strong class="text-dark">2</strong></div></div>
                 </div>
             </div><div class="glass-card">
                 <h3 class="card-title">Sales Cycle Trend (Days)</h3>
@@ -270,11 +270,11 @@
                      dur="0.3s" begin="0.75s" fill="freeze"/>
         </text>
     </svg>
-            </div></div><div class="glass-card" style="margin-top:8px">
+            </div></div><div class="glass-card mt-2">
                 <h3 class="card-title">Rep Performance Leaderboard</h3>
                 <div class="table-wrapper">
         <table id="rep_perf" class="data-table">
-            <thead><tr><th onclick="sortTable('rep_perf', 0)" style="cursor:pointer;user-select:none">Rep <span style="opacity:0.4;font-size:10px">&#x25B2;&#x25BC;</span></th><th onclick="sortTable('rep_perf', 1)" style="cursor:pointer;user-select:none">Won <span style="opacity:0.4;font-size:10px">&#x25B2;&#x25BC;</span></th><th onclick="sortTable('rep_perf', 2)" style="cursor:pointer;user-select:none">Lost <span style="opacity:0.4;font-size:10px">&#x25B2;&#x25BC;</span></th><th onclick="sortTable('rep_perf', 3)" style="cursor:pointer;user-select:none">Revenue <span style="opacity:0.4;font-size:10px">&#x25B2;&#x25BC;</span></th><th onclick="sortTable('rep_perf', 4)" style="cursor:pointer;user-select:none">Pipeline <span style="opacity:0.4;font-size:10px">&#x25B2;&#x25BC;</span></th><th onclick="sortTable('rep_perf', 5)" style="cursor:pointer;user-select:none">Win Rate <span style="opacity:0.4;font-size:10px">&#x25B2;&#x25BC;</span></th><th onclick="sortTable('rep_perf', 6)" style="cursor:pointer;user-select:none">Avg Cycle (Days) <span style="opacity:0.4;font-size:10px">&#x25B2;&#x25BC;</span></th></tr></thead>
+            <thead><tr><th onclick="sortTable('rep_perf', 0)" class="clickable">Rep <span class="expand-arrow">&#x25B2;&#x25BC;</span></th><th onclick="sortTable('rep_perf', 1)" class="clickable">Won <span class="expand-arrow">&#x25B2;&#x25BC;</span></th><th onclick="sortTable('rep_perf', 2)" class="clickable">Lost <span class="expand-arrow">&#x25B2;&#x25BC;</span></th><th onclick="sortTable('rep_perf', 3)" class="clickable">Revenue <span class="expand-arrow">&#x25B2;&#x25BC;</span></th><th onclick="sortTable('rep_perf', 4)" class="clickable">Pipeline <span class="expand-arrow">&#x25B2;&#x25BC;</span></th><th onclick="sortTable('rep_perf', 5)" class="clickable">Win Rate <span class="expand-arrow">&#x25B2;&#x25BC;</span></th><th onclick="sortTable('rep_perf', 6)" class="clickable">Avg Cycle (Days) <span class="expand-arrow">&#x25B2;&#x25BC;</span></th></tr></thead>
             <tbody><tr><td>🥇 Josh Elliott</td><td>0</td><td>0</td><td>£117.5K</td><td>£300.0K</td><td>0.7%</td><td>14</td></tr>
 <tr><td>🥈 James Carberry</td><td>0</td><td>0</td><td>£18.0K</td><td>£160.2K</td><td>0.2%</td><td>124</td></tr>
 <tr><td>🥉 Rose Galbally</td><td>0</td><td>0</td><td>£9.0K</td><td>£0</td><td>0.2%</td><td>186</td></tr>
@@ -286,11 +286,11 @@
         </table>
         
     </div>
-            </div><div class="glass-card" style="margin-top:8px">
+            </div><div class="glass-card mt-2">
             <h3 class="card-title">Cohort Analysis</h3>
             <div class="table-wrapper">
         <table id="cohorts" class="data-table">
-            <thead><tr><th onclick="sortTable('cohorts', 0)" style="cursor:pointer;user-select:none">Cohort <span style="opacity:0.4;font-size:10px">&#x25B2;&#x25BC;</span></th><th onclick="sortTable('cohorts', 1)" style="cursor:pointer;user-select:none">Leads <span style="opacity:0.4;font-size:10px">&#x25B2;&#x25BC;</span></th><th onclick="sortTable('cohorts', 2)" style="cursor:pointer;user-select:none">MQL <span style="opacity:0.4;font-size:10px">&#x25B2;&#x25BC;</span></th><th onclick="sortTable('cohorts', 3)" style="cursor:pointer;user-select:none">SQL <span style="opacity:0.4;font-size:10px">&#x25B2;&#x25BC;</span></th><th onclick="sortTable('cohorts', 4)" style="cursor:pointer;user-select:none">Customer <span style="opacity:0.4;font-size:10px">&#x25B2;&#x25BC;</span></th><th onclick="sortTable('cohorts', 5)" style="cursor:pointer;user-select:none">Conv. Rate <span style="opacity:0.4;font-size:10px">&#x25B2;&#x25BC;</span></th></tr></thead>
+            <thead><tr><th onclick="sortTable('cohorts', 0)" class="clickable">Cohort <span class="expand-arrow">&#x25B2;&#x25BC;</span></th><th onclick="sortTable('cohorts', 1)" class="clickable">Leads <span class="expand-arrow">&#x25B2;&#x25BC;</span></th><th onclick="sortTable('cohorts', 2)" class="clickable">MQL <span class="expand-arrow">&#x25B2;&#x25BC;</span></th><th onclick="sortTable('cohorts', 3)" class="clickable">SQL <span class="expand-arrow">&#x25B2;&#x25BC;</span></th><th onclick="sortTable('cohorts', 4)" class="clickable">Customer <span class="expand-arrow">&#x25B2;&#x25BC;</span></th><th onclick="sortTable('cohorts', 5)" class="clickable">Conv. Rate <span class="expand-arrow">&#x25B2;&#x25BC;</span></th></tr></thead>
             <tbody><tr><td>2025-05</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0.0%</td></tr>
 <tr><td>2025-06</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0.0%</td></tr>
 <tr><td>2025-07</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0.0%</td></tr>

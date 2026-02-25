@@ -55,6 +55,32 @@
         if (overlay) overlay.classList.toggle('visible');
     };
 
+    // ------------------------------------------------------------------
+    // Dark mode toggle
+    // ------------------------------------------------------------------
+    function updateThemeIcon() {
+        var icon = document.getElementById('theme-icon');
+        if (!icon) return;
+        var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        icon.innerHTML = isDark ? '&#9728;' : '&#9790;';
+    }
+    updateThemeIcon();
+
+    window.toggleTheme = function () {
+        var html = document.documentElement;
+        var isDark = html.getAttribute('data-theme') === 'dark';
+        if (isDark) {
+            html.removeAttribute('data-theme');
+            localStorage.setItem('ecomplete_theme', 'light');
+        } else {
+            html.setAttribute('data-theme', 'dark');
+            localStorage.setItem('ecomplete_theme', 'dark');
+        }
+        updateThemeIcon();
+        // Notify charts to re-render with new theme colors
+        if (window.onThemeChange) window.onThemeChange();
+    };
+
     // Close sidebar when a link is clicked (mobile)
     document.querySelectorAll('.sidebar-link').forEach(function (link) {
         link.addEventListener('click', function () {

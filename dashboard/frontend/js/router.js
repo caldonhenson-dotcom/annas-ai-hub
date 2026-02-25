@@ -11,7 +11,15 @@
     var PAGE_SCRIPTS = {
         'monday-pipeline': ['js/monday-pipeline.js'],
         'monday-ic': ['js/monday-ic.js'],
-        'ai-roadmap': ['js/ai-roadmap.js']
+        'ai-roadmap': ['js/ai-roadmap.js'],
+        'executive': ['js/pages/render-executive.js'],
+        'inbound-queue': ['js/pages/render-inbound.js']
+    };
+
+    // Page renderers called after scripts load
+    var PAGE_RENDERERS = {
+        'executive': 'renderExecutive',
+        'inbound-queue': 'renderInbound'
     };
 
     // ------------------------------------------------------------------
@@ -72,6 +80,11 @@
                 }
             })
             .then(function () {
+                // Call page renderer if one exists
+                var renderer = PAGE_RENDERERS[pageId];
+                if (renderer && typeof window[renderer] === 'function') {
+                    window[renderer]();
+                }
                 // Re-apply current filter to populate data on newly loaded page
                 if (window.applyFilter && window.currentPeriod) {
                     window.applyFilter(window.currentPeriod);
@@ -110,18 +123,13 @@
         if (main) main.scrollTop = 0;
         window.scrollTo(0, 0);
 
-        // Load fragment if not cached, then animate
+        // Load fragment if not cached, then animate cards
         loadPage(pageId).then(function () {
-            if (target) {
-                target.querySelectorAll('.glass-card, .stat-card').forEach(function (el) {
-                    el.style.opacity = '0';
-                    el.style.transform = 'translateY(20px)';
-                    setTimeout(function () {
-                        el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-                        el.style.opacity = '1';
-                        el.style.transform = 'translateY(0)';
-                    }, 50);
-                });
+            if (target && window.staggerCards) {
+                window.staggerCards(target);
+            }
+            if (target && window.initCountUps) {
+                window.initCountUps(target);
             }
         });
 

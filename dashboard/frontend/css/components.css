@@ -106,8 +106,51 @@
 .data-table tbody tr:last-child td { border-bottom: none; }
 
 /* Sort indicator */
-.data-table th[onclick] { cursor: pointer; user-select: none; }
-.data-table th[onclick]:hover { color: var(--accent); }
+.data-table th[onclick],
+.data-table th[data-col] { cursor: pointer; user-select: none; }
+.data-table th[onclick]:hover,
+.data-table th[data-col]:hover { color: var(--accent); }
+
+/* Sort arrow */
+.sort-arrow { margin-left: 4px; font-size: 10px; opacity: 0.3; transition: opacity 0.2s; }
+.sort-arrow.active { opacity: 1; color: var(--accent); }
+
+/* Table controls (search + pagination) */
+.table-controls {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: var(--space-2); gap: var(--space-2);
+}
+.table-search {
+    padding: 6px 12px; border: 1px solid var(--card-border);
+    border-radius: var(--radius-sm); font-size: 13px;
+    font-family: var(--font); background: var(--card);
+    color: var(--text); outline: none; min-width: 180px;
+    transition: border-color 0.2s;
+}
+.table-search:focus { border-color: var(--accent); }
+.table-row-count { white-space: nowrap; }
+
+.table-pagination {
+    display: flex; align-items: center; gap: var(--space-2);
+    margin-top: var(--space-2); flex-wrap: wrap;
+}
+.table-page-btns { display: flex; gap: 2px; }
+.table-page-btn {
+    padding: 4px 10px; border-radius: 4px;
+    border: 1px solid var(--card-border); background: var(--card);
+    color: var(--text); font-size: 12px; font-family: var(--font);
+    cursor: pointer; transition: all 0.15s;
+}
+.table-page-btn:hover { border-color: var(--accent); color: var(--accent); }
+.table-page-btn.active {
+    background: var(--accent); color: #fff;
+    border-color: var(--accent);
+}
+.table-page-size {
+    padding: 4px 8px; border: 1px solid var(--card-border);
+    border-radius: 4px; font-size: 12px; font-family: var(--font);
+    background: var(--card); color: var(--text); cursor: pointer;
+}
 
 /* ============================================================
    Progress Bars

@@ -105,3 +105,38 @@ body {
     background-size: 200px 100%;
     animation: skeleton-shimmer 1.4s ease infinite;
 }
+
+/* Dark mode skeleton */
+/* ============================================================
+   Card Entry Animation
+   ============================================================ */
+@keyframes card-enter {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+.card-animate {
+    animation: card-enter 0.35s ease-out forwards;
+    opacity: 0;
+}
+
+/* Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+    .card-animate,
+    .dash-page.active { animation: none !important; opacity: 1 !important; }
+    .progress-fill { transition: none !important; }
+}
+
+[data-theme="dark"] .skeleton-line,
+[data-theme="dark"] .skeleton-card {
+    background: linear-gradient(90deg, #2a2d3a 25%, #32354a 50%, #2a2d3a 75%);
+    background-size: 200px 100%;
+}
+[data-theme="dark"] .data-table tbody tr:nth-child(even) {
+    background: rgba(255,255,255,0.02);
+}
+[data-theme="dark"] .data-table tbody tr:hover {
+    background: rgba(60, 180, 173, 0.08);
+}
+[data-theme="dark"] .board-group-header:hover {
+    background: #2a2d3a;
+}

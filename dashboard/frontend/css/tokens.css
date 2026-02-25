@@ -1,3 +1,7 @@
+
+
+
+
 /* ============================================================
    Design Tokens — eComplete Brand
    ============================================================ */
@@ -62,4 +66,23 @@
 
     /* Transitions */
     --transition: all 0.3s cubic-bezier(.25,.1,.25,1);
+}
+
+/* ============================================================
+   Dark Mode — override all surface/text tokens
+   ============================================================ */
+[data-theme="dark"] {
+    --bg:          #0f1117;
+    --card:        #1a1d27;
+    --card-border: #2a2d3a;
+    --surface:     #1a1d27;
+    --surface2:    #22252f;
+
+    --text:        #e5e7eb;
+    --text-muted:  #9ca3af;
+    --text-tertiary:#6b7280;
+
+    --shadow:      0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2);
+    --shadow-md:   0 4px 6px rgba(0,0,0,0.35), 0 2px 4px rgba(0,0,0,0.2);
+    --shadow-lg:   0 4px 16px rgba(0,0,0,0.4), 0 1px 4px rgba(0,0,0,0.2);
 }
