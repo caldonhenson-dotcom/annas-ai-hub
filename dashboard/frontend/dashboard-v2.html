@@ -18,6 +18,7 @@
     <link rel="stylesheet" href="css/outreach.css">
     <link rel="stylesheet" href="css/overlays.css">
     <link rel="stylesheet" href="css/utilities.css">
+    <link rel="stylesheet" href="css/skills.css">
     <link rel="stylesheet" href="css/responsive.css">
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
@@ -86,6 +87,7 @@
                 <div class="sidebar-group-label" onclick="window.toggleNavGroup(this.parentElement)">&#129302; Operations <span class="sidebar-chevron">&#9660;</span></div>
                 <a href="javascript:void(0)" onclick="showPage('ai-roadmap')" class="sidebar-link" data-page="ai-roadmap">AI Roadmap<button class="sidebar-fav" data-fav="ai-roadmap" onclick="event.preventDefault();event.stopPropagation();toggleFav('ai-roadmap')" title="Toggle favourite">&#9733;</button></a>
                 <a href="javascript:void(0)" onclick="showPage('inbound-queue')" class="sidebar-link" data-page="inbound-queue">Inbound Queue<button class="sidebar-fav" data-fav="inbound-queue" onclick="event.preventDefault();event.stopPropagation();toggleFav('inbound-queue')" title="Toggle favourite">&#9733;</button></a>
+                <a href="javascript:void(0)" onclick="showPage('skills')" class="sidebar-link" data-page="skills">&#9889; Skills Engine<button class="sidebar-fav" data-fav="skills" onclick="event.preventDefault();event.stopPropagation();toggleFav('skills')" title="Toggle favourite">&#9733;</button></a>
             </div>
             <div class="sidebar-group" data-group="outreach">
                 <div class="sidebar-group-label" onclick="window.toggleNavGroup(this.parentElement)">&#128640; Outreach <span class="sidebar-chevron">&#9660;</span></div>
@@ -150,6 +152,7 @@
             <div class="dash-page" id="page-ai-roadmap" role="region" aria-label="AI Roadmap"></div>
             <div class="dash-page" id="page-inbound-queue" role="region" aria-label="Inbound Queue"></div>
             <div class="dash-page" id="page-outreach" role="region" aria-label="Outreach Engine"></div>
+            <div class="dash-page" id="page-skills" role="region" aria-label="Skills Engine"></div>
         </main>
 
         <footer class="dashboard-footer">
