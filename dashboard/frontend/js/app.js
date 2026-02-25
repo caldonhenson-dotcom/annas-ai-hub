@@ -129,4 +129,40 @@
         }
         saveCollapsedGroups(current);
     };
+
+    // ------------------------------------------------------------------
+    // Data freshness — derive latest dates from TS data
+    // ------------------------------------------------------------------
+    function getLatestKey(obj) {
+        if (!obj) return null;
+        var keys = Object.keys(obj);
+        return keys.length > 0 ? keys.sort().pop() : null;
+    }
+
+    function formatFreshness(dateStr) {
+        if (!dateStr) return '--';
+        var d = new Date(dateStr + 'T00:00:00');
+        var now = new Date();
+        var diffDays = Math.floor((now - d) / 86400000);
+        var label = d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+        if (diffDays === 0) return label + ' (today)';
+        if (diffDays === 1) return label + ' (1d ago)';
+        return label + ' (' + diffDays + 'd ago)';
+    }
+
+    function updateFreshnessPills() {
+        if (typeof TS === 'undefined') return;
+        var pills = document.querySelectorAll('.freshness-pill');
+        var hubDate = getLatestKey(TS.leads_by_day) || getLatestKey(TS.contacts_created_by_day);
+        var monDate = getLatestKey(TS.deals_created_by_day);
+        var queueDate = getLatestKey(TS.activities_by_type_by_day);
+        pills.forEach(function (pill) {
+            var text = pill.textContent.trim();
+            if (text.indexOf('HubSpot') === 0) pill.textContent = 'HubSpot: ' + formatFreshness(hubDate);
+            if (text.indexOf('Monday') === 0) pill.textContent = 'Monday: ' + formatFreshness(monDate);
+            if (text.indexOf('Queue') === 0) pill.textContent = 'Queue: ' + formatFreshness(queueDate);
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', updateFreshnessPills);
 })();
