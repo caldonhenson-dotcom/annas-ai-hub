@@ -139,18 +139,17 @@ class GoogleSheetsClient:
             time.sleep(sleep_time)
         self._request_timestamps.append(time.time())
 
-    def _execute_with_retry(self, request, description: str = "API request"):
+    def _execute_with_retry(self, request, description: str = "API request", _retries: int = 0):
         """Execute a Google API request with rate limiting and retry on 429."""
         self._rate_limit_wait()
         try:
-            return request.execute()
+            return request.execute(num_retries=0)
         except Exception as e:
             error_str = str(e)
-            # Handle rate-limit (429) errors
-            if "429" in error_str or "RATE_LIMIT" in error_str.upper():
-                logger.warning(f"Rate limited on {description}. Waiting 60s")
+            if ("429" in error_str or "RATE_LIMIT" in error_str.upper()) and _retries < 3:
+                logger.warning(f"Rate limited on {description}. Waiting 60s (retry {_retries + 1}/3)")
                 time.sleep(60)
-                return self._execute_with_retry(request, description)
+                return self._execute_with_retry(request, description, _retries + 1)
             logger.error(f"{description} failed: {e}")
             return None
 

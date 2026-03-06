@@ -108,7 +108,9 @@ def run_script(script_name: str) -> Tuple[bool, float, Optional[str]]:
         return False, 0.0, f"Script not found: {script_path}"
 
     start = time.time()
+    saved_argv = sys.argv
     try:
+        sys.argv = [str(script_path)]  # Isolate child script from orchestrator args
         runpy.run_path(str(script_path), run_name="__main__")
         duration = time.time() - start
         return True, duration, None
@@ -120,6 +122,8 @@ def run_script(script_name: str) -> Tuple[bool, float, Optional[str]]:
     except Exception as e:
         duration = time.time() - start
         return False, duration, str(e)
+    finally:
+        sys.argv = saved_argv
 
 
 async def run_scripts_parallel(steps: List[Tuple[str, str]]) -> List[dict]:
@@ -151,7 +155,24 @@ async def run_scripts_parallel(steps: List[Tuple[str, str]]) -> List[dict]:
                 stderr=asyncio.subprocess.PIPE,
                 cwd=str(SCRIPT_DIR),
             )
-            stdout, stderr = await proc.communicate()
+            try:
+                stdout, stderr = await asyncio.wait_for(
+                    proc.communicate(), timeout=900,  # 15 min per script
+                )
+            except asyncio.TimeoutError:
+                proc.kill()
+                await proc.wait()
+                duration = time.time() - start
+                logger.error(
+                    "%s timed out after 900s", step_name,
+                )
+                return {
+                    "name": step_name,
+                    "script": script_name,
+                    "status": "failed",
+                    "duration_ms": round(duration * 1000),
+                    "error": "Timeout after 900s",
+                }
             duration = time.time() - start
 
             if proc.returncode == 0:
