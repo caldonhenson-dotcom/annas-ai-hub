@@ -1,13 +1,83 @@
 /* ============================================================
-   Skills Expanded — detail card, blocks view, skill favourites
+   Skills Expanded — rich detail card, context, blocks, favourites
    ============================================================ */
 (function () {
     'use strict';
 
     var _expandedId = null;
     var _features = {};
+    var HISTORY_KEY = 'ecomplete_skill_history';
+
+    // Persona tags by category (derived from user persona audit)
+    var PERSONA_MAP = {
+        'deal-sourcing': ['BD Team', 'SDRs'],
+        'nda-legal': ['Legal', 'Compliance'],
+        'email-comms': ['MD', 'Sales Team'],
+        'cdd': ['CDD Analysts', 'Investors'],
+        'pipeline': ['Deal Team', 'MD'],
+        'ops': ['COO', 'Ops Team'],
+        'reporting-intel': ['Board', 'Strategy'],
+        'board-reporting': ['Board', 'Investors'],
+        'market-intel': ['Strategy', 'BD Team'],
+        'data-systems': ['Ops Team', 'Data Lead'],
+        'ecommerce': ['eCommerce', 'Strategy']
+    };
 
     function esc(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+    // ------------------------------------------------------------------
+    // Derived metadata helpers (no category file changes needed)
+    // ------------------------------------------------------------------
+    function getOutputType(skill) {
+        var exec = skill.execute || {};
+        if (exec.resultType === 'draft') return 'Draft';
+        if (exec.type === 'api-call' || exec.type === 'client-only') return 'Action';
+        var actions = exec.actions || [];
+        for (var i = 0; i < actions.length; i++) {
+            if (actions[i].handler === 'exportPdf') return 'Report';
+        }
+        return 'Analysis';
+    }
+
+    function getLastRun(skillId) {
+        try {
+            var h = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+            for (var i = h.length - 1; i >= 0; i--) {
+                if (h[i].skillId === skillId) return h[i];
+            }
+        } catch (e) { /* empty */ }
+        return null;
+    }
+
+    function getRunCount(skillId) {
+        try {
+            var h = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+            var monthAgo = Date.now() - 2592000000;
+            return h.filter(function (e) { return e.skillId === skillId && e.timestamp > monthAgo; }).length;
+        } catch (e) { return 0; }
+    }
+
+    function timeAgo(ts) {
+        var d = Date.now() - ts;
+        if (d < 60000) return 'just now';
+        if (d < 3600000) return Math.floor(d / 60000) + 'm ago';
+        if (d < 86400000) return Math.floor(d / 3600000) + 'h ago';
+        return Math.floor(d / 86400000) + 'd ago';
+    }
+
+    function getMissingConnectors(skill) {
+        if (!skill.blocks || !window.Blocks || !window.Connectors) return [];
+        var missing = [];
+        skill.blocks.forEach(function (b) {
+            if (b.role !== 'core') return;
+            var blk = window.Blocks ? window.Blocks.get(b.id) : null;
+            if (!blk || window.Blocks.isAvailable(b.id)) return;
+            (blk.requires || []).forEach(function (cid) {
+                if (!window.Connectors.isAvailable(cid) && missing.indexOf(cid) === -1) missing.push(cid);
+            });
+        });
+        return missing;
+    }
 
     // ------------------------------------------------------------------
     // Open / close expanded card
@@ -21,16 +91,15 @@
         var card = document.querySelector('.skill-card[data-skill-id="' + skillId + '"]');
         if (!card) return;
         card.classList.add('expanded');
-        // Initialise feature toggles from defaults
         if (!_features[skillId] && skill.features) {
             _features[skillId] = {};
             skill.features.forEach(function (f) { _features[skillId][f.id] = f.default !== false; });
         }
         var body = document.createElement('div');
         body.className = 'skill-expanded-body';
-        body.innerHTML = blocksHtml(skill) + featuresHtml(skill) + actionsHtml(skill);
+        body.innerHTML = contextHtml(skill) + warningHtml(skill) + blocksHtml(skill)
+            + featuresHtml(skill) + inputsPreviewHtml(skill) + actionsHtml(skill);
         card.appendChild(body);
-        // Scroll expanded card into view
         card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 
@@ -43,6 +112,48 @@
             if (b) b.remove();
         }
         _expandedId = null;
+    }
+
+    // ------------------------------------------------------------------
+    // Context section (personas, output type, last run, run count)
+    // ------------------------------------------------------------------
+    function contextHtml(skill) {
+        var personas = PERSONA_MAP[skill.category] || PERSONA_MAP[skill.subcategory] || ['All Users'];
+        var outType = getOutputType(skill);
+        var last = getLastRun(skill.id);
+        var runs = getRunCount(skill.id);
+        var personaTags = personas.map(function (p) {
+            return '<span class="exp-persona-tag">' + esc(p) + '</span>';
+        }).join('');
+        var lastHtml = last
+            ? '<span class="exp-last-run' + (last.success ? '' : ' failed') + '">'
+            + (last.success ? '&#10003;' : '&#10007;') + ' ' + timeAgo(last.timestamp) + '</span>'
+            : '<span class="exp-last-run muted">Never run</span>';
+        var runsHtml = runs > 0 ? ' &middot; <span>' + runs + 'x this month</span>' : '';
+        return '<div class="skill-context-section">'
+            + '<div class="skill-context-row">'
+            + '<span class="skill-context-label">&#128100;</span>' + personaTags
+            + '<span class="exp-output-tag tag-' + outType.toLowerCase() + '">' + outType + '</span>'
+            + (skill.estimatedTime ? '<span class="exp-est-tag">&#9201; ' + esc(skill.estimatedTime) + '</span>' : '')
+            + '</div>'
+            + '<div class="skill-context-row">'
+            + '<span class="skill-context-label">&#9889; Last:</span>' + lastHtml + runsHtml
+            + '</div></div>';
+    }
+
+    // ------------------------------------------------------------------
+    // Missing connector warnings
+    // ------------------------------------------------------------------
+    function warningHtml(skill) {
+        var missing = getMissingConnectors(skill);
+        if (missing.length === 0) return '';
+        var names = missing.map(function (cid) {
+            var c = window.Connectors ? window.Connectors.get(cid) : null;
+            return c ? c.name : cid;
+        });
+        return '<div class="skill-warning-bar">&#9888; Required: '
+            + esc(names.join(', '))
+            + ' not connected &mdash; skill may not run</div>';
     }
 
     // ------------------------------------------------------------------
@@ -87,18 +198,42 @@
     }
 
     // ------------------------------------------------------------------
-    // Actions row
+    // Input requirements preview
+    // ------------------------------------------------------------------
+    function inputsPreviewHtml(skill) {
+        var inputs = (skill.execute || {}).inputs || [];
+        if (inputs.length === 0) {
+            return '<div class="skill-inputs-preview"><span class="skill-blocks-label">Inputs</span>'
+                + '<span class="exp-no-inputs">No configuration needed &mdash; runs immediately</span></div>';
+        }
+        return '<div class="skill-inputs-preview"><span class="skill-blocks-label">Required Inputs</span>'
+            + '<div class="exp-inputs-grid">'
+            + inputs.map(function (inp) {
+                var typeBadge = inp.type === 'select' ? 'select' : inp.type === 'textarea' ? 'text area' : inp.type || 'text';
+                return '<span class="exp-input-tag' + (inp.required ? ' required' : '') + '">'
+                    + esc(inp.label) + (inp.required ? ' *' : '')
+                    + '<span class="exp-input-type">' + typeBadge + '</span></span>';
+            }).join('') + '</div></div>';
+    }
+
+    // ------------------------------------------------------------------
+    // Enhanced actions row (skill-specific + standard buttons)
     // ------------------------------------------------------------------
     function actionsHtml(skill) {
         var fav = isFav(skill.id);
         var stars = '';
         for (var i = 1; i <= 5; i++) stars += '<span class="skill-star' + (i <= skill.impact ? ' filled' : '') + '">&#9733;</span>';
+        // Skill-specific actions from execute.actions (disabled until result exists)
+        var skillActions = (skill.execute.actions || []).map(function (a) {
+            var icon = a.handler === 'copyResult' ? '&#128203;' : a.handler === 'exportPdf' ? '&#128196;' : '&#9889;';
+            return '<button class="skill-close-btn" disabled title="Run skill first" '
+                + 'onclick="event.stopPropagation()">' + icon + ' ' + esc(a.label) + '</button>';
+        }).join('');
         return '<div class="skill-expanded-actions">'
             + '<div class="skill-expanded-meta">'
-            + stars
-            + (skill.timeSaved ? ' &middot; Saves ~' + skill.timeSaved + 'min' : '')
-            + (skill.estimatedTime ? ' &middot; Est: ' + esc(skill.estimatedTime) : '')
+            + stars + (skill.timeSaved ? ' &middot; Saves ~' + skill.timeSaved + 'min' : '')
             + '</div>'
+            + skillActions
             + '<button class="skill-fav-btn' + (fav ? ' is-fav' : '') + '" '
             + 'onclick="event.stopPropagation();window.SkillsExpanded.toggleFav(\'' + skill.id + '\')" '
             + 'title="Favourite">&#9733;</button>'
@@ -133,25 +268,18 @@
             favs.splice(idx, 1);
         }
         if (window.savePrefs) window.savePrefs({ skillFavs: favs });
-        // Update star in expanded card
         var expBtn = document.querySelector('.skill-expanded-actions .skill-fav-btn');
         if (expBtn) expBtn.classList.toggle('is-fav', idx === -1);
-        // Update star on collapsed card header
         var cardBtn = document.querySelector('.skill-card[data-skill-id="' + skillId + '"] > .skill-card-header .skill-fav-btn');
         if (cardBtn) cardBtn.classList.toggle('is-fav', idx === -1);
-        // Re-render sidebar
         if (window.renderSkillFavs) window.renderSkillFavs();
     }
 
     function getFeatureState(skillId) { return _features[skillId] || {}; }
 
     window.SkillsExpanded = {
-        open: open,
-        close: close,
-        toggleFeature: toggleFeature,
-        getFeatureState: getFeatureState,
-        toggleFav: toggleFav,
-        isFav: isFav,
-        getFavs: getFavs
+        open: open, close: close,
+        toggleFeature: toggleFeature, getFeatureState: getFeatureState,
+        toggleFav: toggleFav, isFav: isFav, getFavs: getFavs
     };
 })();
