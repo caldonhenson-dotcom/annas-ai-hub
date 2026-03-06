@@ -144,6 +144,6 @@ window.applyFilter = function(period) {
 
 // ---- Initialize on page load ----
 document.addEventListener('DOMContentLoaded', function() {
-    applyFilter('ytd');
+    applyFilter('all');
 });
 })();
