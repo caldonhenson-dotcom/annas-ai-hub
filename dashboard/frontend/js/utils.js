@@ -189,12 +189,32 @@
     function md(text) {
         if (!text) return '';
         var s = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        // Strip ```json blocks (handled by chart-router)
+        s = s.replace(/```json\s*[\s\S]*?```/g, '');
+        // Headings
+        s = s.replace(/^### (.+)$/gm, '<h3>$1</h3>');
+        s = s.replace(/^## (.+)$/gm, '<h2>$1</h2>');
+        s = s.replace(/^# (.+)$/gm, '<h2>$1</h2>');
+        // Horizontal rule
+        s = s.replace(/^---+$/gm, '<hr>');
+        // Tables
+        s = s.replace(/(?:^|\n)(\|.+\|)\n(\|[\-\s|:]+\|)\n((?:\|.+\|\n?)+)/g, function (_, header, sep, body) {
+            var ths = header.split('|').filter(Boolean).map(function (c) { return '<th>' + c.trim() + '</th>'; }).join('');
+            var rows = body.trim().split('\n').map(function (row) {
+                var tds = row.split('|').filter(Boolean).map(function (c) { return '<td>' + c.trim() + '</td>'; }).join('');
+                return '<tr>' + tds + '</tr>';
+            }).join('');
+            return '<table><thead><tr>' + ths + '</tr></thead><tbody>' + rows + '</tbody></table>';
+        });
+        // Inline formatting
         s = s.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
         s = s.replace(/`([^`]+)`/g, '<code>$1</code>');
+        // Lists
         s = s.replace(/^[\-\*] (.+)$/gm, '<li>$1</li>');
         s = s.replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>');
         s = s.replace(/<\/ul>\s*<ul>/g, '');
         s = s.replace(/^\d+\. (.+)$/gm, '<li>$1</li>');
+        // Line breaks
         s = s.replace(/\n/g, '<br>');
         s = s.replace(/(<br>){3,}/g, '<br><br>');
         return s;

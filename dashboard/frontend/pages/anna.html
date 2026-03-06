@@ -1,6 +1,6 @@
 <section class="dashboard-section anna-section">
     <div class="anna-layout">
-        <!-- Conversation sidebar -->
+        <!-- Conversation sidebar (left) -->
         <div class="anna-sidebar" id="anna-sidebar">
             <button class="anna-new-chat" onclick="window.AnnaPage.newChat()">
                 &#43; New Chat
@@ -24,42 +24,39 @@
             <div id="anna-memory-panel"></div>
         </div>
 
-        <!-- Main chat area -->
-        <div class="anna-chat-area">
-            <canvas id="ai-particles-canvas" class="ai-particles-canvas"></canvas>
+        <!-- Response canvas (centre) -->
+        <div class="anna-response-canvas" id="response-canvas">
+            <div class="anna-canvas-welcome" id="canvas-welcome">
+                <div class="anna-welcome-avatar">e</div>
+                <div class="anna-welcome-title">eComplete AI</div>
+                <div class="anna-welcome-sub">Ask a question or choose a quick view to see charts, tables, and insights from your data.</div>
+            </div>
+        </div>
+
+        <!-- Chat panel (right) -->
+        <div class="anna-chat-panel">
             <div class="anna-chat-header">
                 <div class="anna-avatar">e</div>
                 <div class="anna-header-info">
                     <div class="anna-header-name">eComplete AI</div>
-                    <div class="anna-header-status">Sales &amp; M&amp;A Intelligence Assistant</div>
-                </div>
-                <div class="anna-header-actions">
-                    <button class="anna-header-btn" onclick="window.AnnaPage.clearChat()" title="Clear chat">&#128465;</button>
+                    <div class="anna-header-status">Sales &amp; M&amp;A Intelligence</div>
                 </div>
             </div>
-            <div class="anna-messages" id="anna-page-msgs">
-                <div class="anna-welcome" id="anna-welcome">
-                    <div class="anna-welcome-avatar">e</div>
-                    <div class="anna-welcome-title">eComplete AI</div>
-                    <div class="anna-welcome-sub">Your sales &amp; M&amp;A intelligence assistant. Ask me anything about your dashboard data.</div>
-                    <div class="anna-suggestions" id="anna-suggestions">
-                        <button class="anna-suggest-btn" onclick="window.AnnaPage.ask(this.textContent)">Summarise deal flow this month</button>
-                        <button class="anna-suggest-btn" onclick="window.AnnaPage.ask(this.textContent)">Which deals are stale or at risk?</button>
-                        <button class="anna-suggest-btn" onclick="window.AnnaPage.ask(this.textContent)">Pipeline health &amp; coverage</button>
-                        <button class="anna-suggest-btn" onclick="window.AnnaPage.ask(this.textContent)">Lead source effectiveness</button>
-                        <button class="anna-suggest-btn" onclick="window.AnnaPage.ask(this.textContent)">Top performing rep this month</button>
-                        <button class="anna-suggest-btn" onclick="window.AnnaPage.ask(this.textContent)">M&amp;A pipeline status</button>
-                        <button class="anna-suggest-btn" onclick="window.AnnaPage.ask(this.textContent)">Revenue forecast next 90 days</button>
-                        <button class="anna-suggest-btn" onclick="window.AnnaPage.ask(this.textContent)">Weekly summary</button>
-                    </div>
-                </div>
+            <div class="anna-quick-grid" id="anna-quick-grid">
+                <button class="anna-quick-btn" data-query="pipeline">&#128202; Pipeline</button>
+                <button class="anna-quick-btn" data-query="revenue by month">&#128176; Revenue</button>
+                <button class="anna-quick-btn" data-query="deal flow">&#128200; Deal Flow</button>
+                <button class="anna-quick-btn" data-query="win rate">&#127919; Win Rate</button>
+                <button class="anna-quick-btn" data-query="activity breakdown">&#128203; Activity</button>
+                <button class="anna-quick-btn" data-query="lead sources">&#128161; Lead Sources</button>
             </div>
+            <div class="anna-chat-messages" id="anna-page-msgs"></div>
             <div class="anna-input-area">
                 <input class="anna-input" id="anna-page-input" type="text"
-                    placeholder="Ask eComplete AI about your data..."
+                    placeholder="Ask about your data..."
                     onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();window.AnnaPage.send()}" />
                 <button class="anna-send-btn" onclick="window.AnnaPage.send()">&#10148;</button>
             </div>
         </div>
     </div>
-    </section>
+</section>

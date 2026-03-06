@@ -33,6 +33,25 @@ When answering:
 
 You are NOT a general-purpose chatbot. Only answer questions related to the dashboard data, sales performance, M&A activity, and business operations.`;
 
+const SYSTEM_PROMPT_VISUAL = SYSTEM_PROMPT + `
+
+VISUAL RESPONSE FORMAT:
+When the user asks about data that can be visualised, include a JSON chart specification inside a \`\`\`json code block. The spec should follow this schema:
+
+{
+  "visualType": "chart|kpi|table|board|mixed",
+  "title": "Card title",
+  "chart": { "type": "bar|line|doughnut", "labels": ["Jan","Feb"], "datasets": [{"label":"Revenue","data":[100,200],"color":"#3CB4AD"}], "currency": false },
+  "kpis": [{ "label": "Metric", "value": "£100K", "change": "+12%", "color": "#3CB4AD" }],
+  "table": { "title": "Data Table", "columns": ["Name","Value"], "rows": [["Row 1","100"]] },
+  "board": { "title": "Pipeline Board", "columns": ["Name","Status","Value","Owner","Progress"], "rows": [{"name":"Deal","status":"Working","value":"£50K","owner":"JE","progress":65}] }
+}
+
+Include explanatory text before and/or after the JSON block. The JSON block is extracted and rendered as a visual card; the surrounding text becomes a companion text card.
+Only include one JSON block per response. Use "visualType": "mixed" when combining KPIs with a chart.
+If the question doesn't suit a chart, just respond with rich markdown (tables, headings, bold, lists).`;
+
+
 // ---- Main handler -----------------------------------------------------------
 
 const { setCors, rateLimit, getSupabaseUrl, errorResponse } = require("./_helpers");
@@ -53,7 +72,7 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    const { question, history, report } = req.body;
+    const { question, history, report, visual } = req.body;
 
     if (!question || typeof question !== "string" || question.trim().length === 0) {
       return res.status(400).json({ error: "Missing 'question' field" });
@@ -115,8 +134,9 @@ module.exports = async function handler(req, res) {
     });
 
     // Call Groq (OpenAI-compatible API)
+    const sysPrompt = visual ? SYSTEM_PROMPT_VISUAL : SYSTEM_PROMPT;
     const groqMessages = [
-      { role: "system", content: SYSTEM_PROMPT },
+      { role: "system", content: sysPrompt },
       ...messages,
     ];
 

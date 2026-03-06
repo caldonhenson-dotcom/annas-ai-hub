@@ -1,0 +1,181 @@
+/* ============================================================
+   Response Cards — visual cards for the AI response canvas
+   ============================================================ */
+
+/* Base card */
+.rc-card {
+    background: var(--card); border: 1px solid var(--card-border);
+    border-radius: var(--radius-lg); overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.rc-card-header {
+    display: flex; align-items: center; gap: 10px;
+    padding: 14px 18px; border-bottom: 1px solid var(--card-border);
+}
+.rc-card-icon {
+    width: 28px; height: 28px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; flex-shrink: 0;
+    background: rgba(60,180,173,0.08); color: var(--accent);
+}
+.rc-card-title {
+    font-size: var(--text-base); font-weight: 700; color: var(--text);
+    flex: 1; line-height: 1.3;
+}
+.rc-card-subtitle {
+    font-size: var(--text-xs); color: var(--text-muted); margin-top: 2px;
+}
+.rc-card-body { padding: 18px; }
+
+/* Chart container */
+.rc-chart-container {
+    position: relative; height: 260px; padding: 18px;
+}
+.rc-chart-container canvas { max-height: 100%; }
+
+/* KPI row */
+.rc-kpi-row {
+    display: flex; gap: var(--space-3); padding: 18px;
+    flex-wrap: wrap;
+}
+.rc-kpi-card {
+    flex: 1; min-width: 120px; padding: 14px 16px;
+    background: var(--surface2); border-radius: var(--radius-sm);
+    border-left: 3px solid var(--accent);
+}
+.rc-kpi-label {
+    font-size: 11px; font-weight: 600; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 4px;
+}
+.rc-kpi-value {
+    font-size: 22px; font-weight: 800; color: var(--text); line-height: 1.2;
+}
+.rc-kpi-change {
+    font-size: 11px; font-weight: 700; margin-top: 4px;
+}
+.rc-kpi-change.up { color: #22c55e; }
+.rc-kpi-change.down { color: #ef4444; }
+.rc-kpi-change.neutral { color: var(--text-muted); }
+
+/* Table card */
+.rc-table {
+    width: 100%; border-collapse: collapse; font-size: var(--text-sm);
+}
+.rc-table th {
+    text-align: left; padding: 10px 14px;
+    font-size: 11px; font-weight: 700; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.03em;
+    background: var(--surface2); border-bottom: 1px solid var(--card-border);
+    cursor: pointer; user-select: none; white-space: nowrap;
+}
+.rc-table th:hover { color: var(--text); }
+.rc-table th .sort-arrow { font-size: 9px; margin-left: 4px; opacity: 0.5; }
+.rc-table td {
+    padding: 10px 14px; border-bottom: 1px solid var(--card-border);
+    color: var(--text); white-space: nowrap;
+}
+.rc-table tr:last-child td { border-bottom: none; }
+.rc-table tr:hover td { background: rgba(60,180,173,0.02); }
+.rc-table .currency { font-weight: 600; font-variant-numeric: tabular-nums; }
+
+/* Board card (Monday-style) */
+.rc-board { font-size: var(--text-sm); }
+.rc-board-header {
+    display: grid;
+    grid-template-columns: 2fr 120px 100px 100px 100px;
+    gap: 8px; padding: 10px 16px;
+    font-size: 11px; font-weight: 700; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.03em;
+    background: var(--surface2); border-bottom: 1px solid var(--card-border);
+}
+.rc-board-row {
+    display: grid;
+    grid-template-columns: 2fr 120px 100px 100px 100px;
+    gap: 8px; padding: 10px 16px; align-items: center;
+    border-bottom: 1px solid var(--card-border);
+    transition: background 0.1s;
+}
+.rc-board-row:last-child { border-bottom: none; }
+.rc-board-row:hover { background: rgba(60,180,173,0.02); }
+.rc-board-name { font-weight: 600; color: var(--text); }
+.rc-board-value { font-weight: 600; font-variant-numeric: tabular-nums; color: var(--text); }
+
+/* Status pill */
+.rc-status-pill {
+    display: inline-flex; align-items: center; justify-content: center;
+    padding: 3px 10px; border-radius: 12px;
+    font-size: 11px; font-weight: 700; white-space: nowrap;
+    min-width: 72px; text-align: center;
+}
+.rc-status-pill.working { background: #fdba741a; color: #f59e0b; }
+.rc-status-pill.done { background: #22c55e1a; color: #22c55e; }
+.rc-status-pill.stuck { background: #ef44441a; color: #ef4444; }
+.rc-status-pill.review { background: #3b82f61a; color: #3b82f6; }
+.rc-status-pill.new { background: #a78bfa1a; color: #a78bfa; }
+.rc-status-pill.default { background: var(--surface2); color: var(--text-muted); }
+
+/* Progress bar */
+.rc-progress {
+    display: flex; align-items: center; gap: 8px;
+}
+.rc-progress-bar {
+    flex: 1; height: 6px; background: var(--card-border);
+    border-radius: 3px; overflow: hidden;
+}
+.rc-progress-fill {
+    height: 100%; border-radius: 3px;
+    background: linear-gradient(90deg, #3CB4AD, #334FB4);
+    transition: width 0.6s cubic-bezier(.25,.1,.25,1);
+}
+.rc-progress-label {
+    font-size: 11px; font-weight: 700; color: var(--text-muted);
+    min-width: 32px; text-align: right;
+}
+
+/* Avatar (owner initials) */
+.rc-avatar {
+    width: 26px; height: 26px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 800; color: #fff;
+    background: linear-gradient(135deg, #3CB4AD, #334FB4);
+    flex-shrink: 0;
+}
+
+/* Text card */
+.rc-text-card .rc-card-body {
+    font-size: var(--text-sm); line-height: 1.7; color: var(--text);
+}
+.rc-text-card .rc-card-body h2 {
+    font-size: 16px; font-weight: 700; margin: 16px 0 8px; color: var(--text);
+}
+.rc-text-card .rc-card-body h3 {
+    font-size: 14px; font-weight: 700; margin: 12px 0 6px; color: var(--text);
+}
+.rc-text-card .rc-card-body table {
+    width: 100%; border-collapse: collapse; margin: 10px 0;
+}
+.rc-text-card .rc-card-body th,
+.rc-text-card .rc-card-body td {
+    padding: 8px 12px; border: 1px solid var(--card-border);
+    font-size: 13px; text-align: left;
+}
+.rc-text-card .rc-card-body th {
+    background: var(--surface2); font-weight: 700; color: var(--text-muted);
+}
+.rc-text-card .rc-card-body hr {
+    border: none; border-top: 1px solid var(--card-border); margin: 14px 0;
+}
+.rc-text-card .rc-card-body ul,
+.rc-text-card .rc-card-body ol {
+    margin: 6px 0; padding-left: 20px;
+}
+.rc-text-card .rc-card-body li { margin-bottom: 4px; }
+.rc-text-card .rc-card-body code {
+    background: var(--surface2); padding: 1px 5px; border-radius: 3px; font-size: 12px;
+}
+.rc-text-card .rc-card-body strong { font-weight: 700; }
+
+/* Canvas empty state override */
+.anna-response-canvas:empty::after {
+    content: ''; display: block;
+}

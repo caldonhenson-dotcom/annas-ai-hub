@@ -40,23 +40,9 @@
         if (!msgs) return;
         var conv = apGetActive();
         msgs.innerHTML = '';
-        if (!conv || conv.messages.length === 0) {
-            var w = document.getElementById('anna-welcome');
-            if (!w) {
-                var suggests = ['Summarise deal flow this month','Which deals are stale or at risk?',
-                    'Pipeline health &amp; coverage','Lead source effectiveness',
-                    'Top performing rep this month','M&amp;A pipeline status',
-                    'Revenue forecast next 90 days','Weekly summary'];
-                var btns = suggests.map(function(s) {
-                    return '<button class="anna-suggest-btn" onclick="window.AnnaPage.ask(this.textContent)">' + s + '</button>';
-                }).join('');
-                msgs.innerHTML = '<div class="anna-welcome" id="anna-welcome">'
-                    + '<div class="anna-welcome-avatar">e</div><div class="anna-welcome-title">eComplete AI</div>'
-                    + '<div class="anna-welcome-sub">Your sales &amp; M&amp;A intelligence assistant. Ask me anything about your dashboard data.</div>'
-                    + '<div class="anna-suggestions" id="anna-suggestions">' + btns + '</div></div>';
-            }
-            return;
-        }
+        // Show canvas welcome when no conversation
+        apToggleCanvasWelcome(!conv || conv.messages.length === 0);
+        if (!conv || conv.messages.length === 0) return;
         for (var i = 0; i < conv.messages.length; i++) {
             var m = conv.messages[i];
             apAddMsgDOM(m.role, m.content, m.reportTitle || null);
@@ -64,50 +50,35 @@
         msgs.scrollTop = msgs.scrollHeight;
     }
 
+    function apToggleCanvasWelcome(show) {
+        var w = document.getElementById('canvas-welcome');
+        if (w) w.style.display = show ? '' : 'none';
+        if (show && window.ResponseCards) window.ResponseCards.clear();
+    }
+
     function apAddMsgDOM(role, content, reportTitle) {
         var msgs = document.getElementById('anna-page-msgs');
         if (!msgs) return;
-        // Remove welcome
-        var w = msgs.querySelector('.anna-welcome');
-        if (w) w.remove();
-
         if (reportTitle) {
-            // Render as branded report card
-            var now = new Date();
-            var dateStr = now.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
-            var card = document.createElement('div');
-            card.className = 'anna-report-card';
-            card.innerHTML = '<div class="anna-report-card-header">'
-                + '<div class="anna-report-card-dot">e</div>'
-                + '<div class="anna-report-card-title">' + reportTitle + '</div>'
-                + '<div class="anna-report-card-meta">eComplete AI &middot; ' + dateStr + '</div>'
-                + '</div>'
-                + '<div class="anna-report-card-body">' + md(content) + '</div>'
-                + '<div class="anna-report-card-footer">'
-                + '<button class="anna-report-action" onclick="window.AnnaPage.copyReport(this)">&#128203; Copy</button>'
-                + '<button class="anna-report-action" onclick="window.AnnaPage.downloadReport(this)">&#128196; Download PDF</button>'
-                + '</div>';
-            card.setAttribute('data-raw', content);
-            card.setAttribute('data-title', reportTitle);
-            msgs.appendChild(card);
-        } else {
-            var div = document.createElement('div');
-            div.className = 'chat-msg ' + role;
-            if (role === 'assistant') {
-                div.innerHTML = md(content);
-                var actions = document.createElement('div');
-                actions.className = 'chat-msg-actions';
-                actions.style.opacity = '1';
-                actions.innerHTML = '<button class="chat-action-btn" title="Copy" onclick="window.AnnaChat.copyMsg(this)">&#128203; Copy</button>';
-                div.appendChild(actions);
-                div.setAttribute('data-raw', content);
-            } else if (role === 'user') {
-                div.textContent = content;
-            } else {
-                div.innerHTML = content;
+            // Render report card in canvas instead of chat
+            if (window.ResponseCards) {
+                window.ResponseCards.clear();
+                window.ResponseCards.text(content, reportTitle);
             }
-            msgs.appendChild(div);
+            apAddCanvasRef('Report: ' + reportTitle);
+            return;
         }
+        var div = document.createElement('div');
+        div.className = 'chat-msg ' + role;
+        if (role === 'assistant') {
+            div.innerHTML = md(content);
+            div.setAttribute('data-raw', content);
+        } else if (role === 'user') {
+            div.textContent = content;
+        } else {
+            div.innerHTML = content;
+        }
+        msgs.appendChild(div);
         msgs.scrollTop = msgs.scrollHeight;
     }
 
@@ -154,29 +125,40 @@
             apAddMsgDOM('assistant', reply, null);
             return;
         }
+
         apEnsureConv();
         var conv = apGetActive();
         if (!conv) return;
-
         if (!conv.title) {
             conv.title = text.length > 40 ? text.substring(0, 40) + '...' : text;
             apRenderConvList();
         }
-
         conv.messages.push({ role: 'user', content: text });
         apSaveConvs();
         apAddMsgDOM('user', text, null);
+        apToggleCanvasWelcome(false);
 
         var input = document.getElementById('anna-page-input');
         if (input) input.value = '';
 
+        // Quick question — render from local data, no LLM call
+        if (window.ChartRouter && window.ChartRouter.isQuick(text)) {
+            var result = window.ChartRouter.route('', text);
+            var ref = 'Chart rendered in canvas';
+            conv.messages.push({ role: 'assistant', content: ref });
+            apSaveConvs();
+            apAddCanvasRef(ref);
+            return;
+        }
+
+        // LLM query
         apLoading = true;
         apShowTyping();
 
         var endpoint = window.getApiEndpoint ? window.getApiEndpoint() : FUNC_URL;
         var payload = window.buildPayload
-            ? window.buildPayload(text, conv.messages.slice(-6))
-            : { question: text, history: conv.messages.slice(-6) };
+            ? window.buildPayload(text, conv.messages.slice(-6), { visual: true })
+            : { question: text, history: conv.messages.slice(-6), visual: true };
 
         fetch(endpoint, {
             method: 'POST',
@@ -193,7 +175,13 @@
             var answer = data.answer || 'No response received.';
             conv.messages.push({ role: 'assistant', content: answer });
             apSaveConvs();
-            apAddMsgDOM('assistant', answer, null);
+            // Route through chart router for visual rendering
+            if (window.ChartRouter) {
+                window.ChartRouter.route(answer, text);
+                apAddCanvasRef('Response rendered in canvas');
+            } else {
+                apAddMsgDOM('assistant', answer, null);
+            }
             if (data.usage && window.APIConfig) {
                 window.APIConfig.addTokens(data.usage.input_tokens || 0, data.usage.output_tokens || 0);
             }
@@ -205,53 +193,39 @@
         });
     }
 
+    /** Add a compact canvas reference in the chat panel. */
+    function apAddCanvasRef(text) {
+        var msgs = document.getElementById('anna-page-msgs');
+        if (!msgs) return;
+        var div = document.createElement('div');
+        div.className = 'canvas-ref';
+        div.textContent = text;
+        msgs.appendChild(div);
+        msgs.scrollTop = msgs.scrollHeight;
+    }
+
     function apRunReport(reportId) {
         var prompt = REPORT_PROMPTS[reportId];
         if (!prompt || apLoading) return;
         var title = reportId.replace(/-/g, ' ').replace(/\b\w/g, function(c) { return c.toUpperCase(); });
-
         apEnsureConv();
         var conv = apGetActive();
         if (!conv) return;
-
-        if (!conv.title) {
-            conv.title = '📄 ' + title;
-            apRenderConvList();
-        }
-
+        if (!conv.title) { conv.title = title; apRenderConvList(); }
         apLoading = true;
         apShowTyping();
-
-        var rptEndpoint = window.getApiEndpoint ? window.getApiEndpoint() : FUNC_URL;
-        var rptPayload = window.buildPayload
-            ? window.buildPayload(prompt, [], { report: true })
-            : { question: prompt, history: [], report: true };
-
-        fetch(rptEndpoint, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(rptPayload)
-        })
-        .then(function(r) {
-            if (!r.ok) throw new Error('Request failed (' + r.status + ')');
-            return r.json();
-        })
+        var ep = window.getApiEndpoint ? window.getApiEndpoint() : FUNC_URL;
+        var pl = window.buildPayload ? window.buildPayload(prompt, [], { report: true }) : { question: prompt, history: [], report: true };
+        fetch(ep, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(pl) })
+        .then(function(r) { if (!r.ok) throw new Error('Request failed (' + r.status + ')'); return r.json(); })
         .then(function(data) {
-            apLoading = false;
-            apHideTyping();
+            apLoading = false; apHideTyping();
             var answer = data.answer || 'No response received.';
             conv.messages.push({ role: 'assistant', content: answer, reportTitle: title });
-            apSaveConvs();
-            apAddMsgDOM('assistant', answer, title);
-            if (data.usage && window.APIConfig) {
-                window.APIConfig.addTokens(data.usage.input_tokens || 0, data.usage.output_tokens || 0);
-            }
+            apSaveConvs(); apAddMsgDOM('assistant', answer, title);
+            if (data.usage && window.APIConfig) window.APIConfig.addTokens(data.usage.input_tokens || 0, data.usage.output_tokens || 0);
         })
-        .catch(function(err) {
-            apLoading = false;
-            apHideTyping();
-            apAddMsgDOM('system', 'Error generating report: ' + (err.message || String(err)), null);
-        });
+        .catch(function(err) { apLoading = false; apHideTyping(); apAddMsgDOM('system', 'Error: ' + (err.message || String(err)), null); });
     }
 
     document.addEventListener('DOMContentLoaded', function() {
@@ -259,6 +233,16 @@
         if (apConvs.length > 0) apActiveId = apConvs[apConvs.length - 1].id;
         apRenderConvList();
         apRenderMessages();
+        // Wire quick question buttons
+        var grid = document.getElementById('anna-quick-grid');
+        if (grid) {
+            grid.addEventListener('click', function(e) {
+                var btn = e.target.closest('.anna-quick-btn');
+                if (!btn) return;
+                var q = btn.getAttribute('data-query');
+                if (q) apSend(q);
+            });
+        }
     });
 
     function apRefreshUI() { apRenderConvList(); apRenderMessages(); }

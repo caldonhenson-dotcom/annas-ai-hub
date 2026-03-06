@@ -1,9 +1,9 @@
 /* ============================================================
-   Anna AI — Full-page chat interface
+   Anna AI — 3-column layout: sidebar | canvas | chat
    ============================================================ */
 .anna-section { padding: 0 !important; margin: 0; }
 .anna-layout {
-    display: grid; grid-template-columns: 260px 1fr;
+    display: grid; grid-template-columns: 260px 1fr 340px;
     height: calc(100vh - 56px); background: var(--card);
     border-radius: var(--radius-lg); overflow: hidden;
     border: 1px solid var(--card-border);
@@ -62,21 +62,77 @@
 .anna-report-btn:hover { background: rgba(60,180,173,0.07); color: var(--accent); }
 .anna-report-btn span { font-size: 13px; }
 
+/* Response canvas (centre column) */
+.anna-response-canvas {
+    display: flex; flex-direction: column; gap: var(--space-4);
+    padding: var(--space-5); overflow-y: auto; min-width: 0;
+    background: var(--surface2);
+}
+.anna-canvas-welcome {
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; flex: 1; min-height: 300px;
+    text-align: center; padding: var(--space-10) var(--space-5);
+}
+
+/* Chat panel (right column) */
+.anna-chat-panel {
+    display: flex; flex-direction: column; min-width: 0;
+    border-left: 1px solid var(--card-border); background: var(--card);
+}
+.anna-chat-header {
+    display: flex; align-items: center; gap: 10px;
+    padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--card-border);
+    flex-shrink: 0; background: var(--card);
+}
+.anna-chat-messages {
+    flex: 1; overflow-y: auto; padding: var(--space-3) var(--space-4);
+    display: flex; flex-direction: column; gap: var(--space-2);
+}
+.anna-chat-messages .chat-msg {
+    font-size: 12px; line-height: 1.5;
+    padding: 8px 12px; border-radius: 10px; max-width: 95%; word-wrap: break-word;
+}
+.anna-chat-messages .chat-msg.user {
+    background: #3CB4AD; color: #fff;
+    align-self: flex-end; border-bottom-right-radius: 3px;
+}
+.anna-chat-messages .chat-msg.assistant {
+    background: var(--surface2); color: var(--text);
+    align-self: flex-start; border-bottom-left-radius: 3px;
+}
+.anna-chat-messages .chat-msg.system {
+    background: transparent; color: var(--text-muted); font-size: 11px;
+    text-align: center; align-self: center;
+}
+.anna-chat-messages .chat-msg-actions { display: none; }
+.anna-chat-messages .canvas-ref {
+    font-size: 11px; color: var(--accent); font-style: italic;
+    padding: 4px 0;
+}
+
+/* Quick question grid */
+.anna-quick-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
+    padding: var(--space-3) var(--space-4); flex-shrink: 0;
+    border-bottom: 1px solid var(--card-border);
+}
+.anna-quick-btn {
+    padding: 8px 10px; border: 1px solid var(--card-border);
+    border-radius: 8px; background: var(--surface2); color: var(--text);
+    font-size: 11px; font-weight: 600; font-family: var(--font);
+    cursor: pointer; transition: all 0.15s; text-align: left;
+}
+.anna-quick-btn:hover {
+    border-color: var(--accent); color: var(--accent);
+    background: rgba(60,180,173,0.04);
+}
+
 /* Particle canvas */
 .ai-particles-canvas {
     position: absolute; top: 0; left: 0; width: 100%; height: 100%;
     pointer-events: none; z-index: 0; opacity: 0.6;
 }
 @media (prefers-reduced-motion: reduce) { .ai-particles-canvas { opacity: 0.3; } }
-
-/* Chat area */
-.anna-chat-area { display: flex; flex-direction: column; min-width: 0; position: relative; }
-.anna-chat-header {
-    display: flex; align-items: center; gap: 10px;
-    padding: var(--space-3) var(--space-5); border-bottom: 1px solid var(--card-border);
-    flex-shrink: 0; position: relative; z-index: 1;
-    background: var(--card);
-}
 .anna-avatar {
     width: 34px; height: 34px; border-radius: 50%;
     background: linear-gradient(135deg, #3CB4AD, #334FB4);
@@ -92,17 +148,8 @@
     font-size: 13px; color: var(--text-muted); transition: all 0.15s;
 }
 .anna-header-btn:hover { color: var(--text); border-color: var(--text-muted); }
-.anna-messages {
-    flex: 1; overflow-y: auto; padding: var(--space-5) var(--space-6);
-    display: flex; flex-direction: column; gap: var(--space-3);
-}
 
-/* Welcome screen */
-.anna-welcome {
-    display: flex; flex-direction: column; align-items: center;
-    justify-content: center; flex: 1; min-height: 300px;
-    text-align: center; padding: var(--space-10) var(--space-5);
-}
+/* Welcome elements (shared canvas + chat) */
 .anna-welcome-avatar {
     width: 56px; height: 56px; border-radius: 50%;
     background: linear-gradient(135deg, #3CB4AD, #334FB4);
@@ -113,38 +160,6 @@
 .anna-welcome-sub {
     font-size: var(--text-sm); color: var(--text-muted);
     max-width: 400px; margin-bottom: var(--space-6); line-height: 1.5;
-}
-.anna-suggestions {
-    display: flex; flex-wrap: wrap; gap: 6px;
-    justify-content: center; max-width: 500px;
-}
-.anna-suggest-btn {
-    padding: 7px 14px; border: 1px solid var(--card-border);
-    border-radius: 20px; background: var(--card); color: var(--text);
-    font-size: 12px; font-family: var(--font); cursor: pointer;
-    transition: all 0.15s;
-}
-.anna-suggest-btn:hover {
-    border-color: var(--accent); color: var(--accent);
-    background: rgba(60,180,173,0.03);
-}
-
-/* Message bubbles (overrides for full-page) */
-.anna-messages .chat-msg {
-    font-size: var(--text-sm); line-height: 1.6;
-    padding: 10px 14px; border-radius: 12px; max-width: 80%; word-wrap: break-word;
-}
-.anna-messages .chat-msg.user {
-    background: #3CB4AD; color: #fff;
-    align-self: flex-end; border-bottom-right-radius: 4px;
-}
-.anna-messages .chat-msg.assistant {
-    background: var(--surface2); color: var(--text);
-    align-self: flex-start; border-bottom-left-radius: 4px; max-width: 90%;
-}
-.anna-messages .chat-msg.system {
-    background: transparent; color: var(--text-muted); font-size: 12px;
-    text-align: center; align-self: center; max-width: 100%;
 }
 
 /* Inline report card */
@@ -186,7 +201,7 @@
 
 /* Input area */
 .anna-input-area {
-    display: flex; gap: var(--space-2); padding: 14px var(--space-5);
+    display: flex; gap: var(--space-2); padding: 12px var(--space-4);
     border-top: 1px solid var(--card-border); flex-shrink: 0;
 }
 .anna-input {

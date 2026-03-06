@@ -242,6 +242,7 @@
         var q = memoryCtx ? question + memoryCtx : question;
         var payload = { question: q, history: hist || [] };
         if (opts && opts.report) payload.report = true;
+        if (opts && opts.visual) payload.visual = true;
         if (getProvider() === 'claude' && getKey()) payload.apiKey = getKey();
         return payload;
     }
