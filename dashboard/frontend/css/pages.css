@@ -23,11 +23,15 @@
 .exec-pillar {
     background: var(--card); border: 1px solid var(--card-border);
     border-radius: var(--radius); padding: var(--space-4) var(--space-5);
-    transition: var(--transition);
+    transition: var(--transition); cursor: pointer;
 }
 .exec-pillar:hover {
     border-color: rgba(60,180,173,0.35);
     box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    transform: translateY(-2px);
+}
+.exec-pillar:focus-visible {
+    outline: 2px solid var(--accent); outline-offset: 2px;
 }
 .exec-pillar-header { display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-2); }
 .exec-pillar-icon {
@@ -58,7 +62,7 @@
     cursor: pointer; transition: background 0.15s ease;
     user-select: none; background: var(--surface2);
 }
-.board-group-header:hover { background: #eef0f3; }
+.board-group-header:hover { background: var(--surface2); filter: brightness(0.97); }
 .board-group-header .group-color { width: 5px; height: 24px; border-radius: 3px; flex-shrink: 0; }
 .board-group-header .group-title { font-size: var(--text-sm); font-weight: 700; color: var(--text); flex: 1; }
 .board-group-header .group-count { font-size: 12px; color: var(--text-muted); font-weight: 500; }

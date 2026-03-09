@@ -40,8 +40,8 @@ body {
 /* Scrollbar */
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-track { background: var(--bg); }
-::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+::-webkit-scrollbar-thumb { background: var(--text-tertiary); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
 
 /* ============================================================
    Animations & Keyframes
@@ -79,6 +79,17 @@ body {
 }
 @keyframes spin {
     to { transform: rotate(360deg); }
+}
+@keyframes statusPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(60, 180, 173, 0.4); }
+    50% { box-shadow: 0 0 0 6px rgba(60, 180, 173, 0); }
+}
+@keyframes rowSlideIn {
+    from { opacity: 0; transform: translateX(-8px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+@keyframes barGrow {
+    from { width: 0; }
 }
 
 /* ============================================================
@@ -129,6 +140,39 @@ body {
 }
 
 /* Dark mode skeleton */
+
+/* ============================================================
+   Skeleton Table Variant
+   ============================================================ */
+.skeleton-table {
+    display: flex; flex-direction: column; gap: 2px;
+}
+.skeleton-table-row {
+    height: 40px; border-radius: 4px;
+    background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
+    background-size: 200px 100%;
+    animation: skeleton-shimmer 1.4s ease infinite;
+}
+.skeleton-table-row:first-child {
+    height: 36px; background: var(--surface2);
+    animation: none;
+}
+[data-theme="dark"] .skeleton-table-row {
+    background: linear-gradient(90deg, #2a2d3a 25%, #32354a 50%, #2a2d3a 75%);
+    background-size: 200px 100%;
+}
+[data-theme="dark"] .skeleton-table-row:first-child {
+    background: var(--surface2);
+}
+
+/* ============================================================
+   Row Entrance Animation
+   ============================================================ */
+.row-animate {
+    animation: rowSlideIn 0.3s ease-out forwards;
+    opacity: 0;
+}
+
 /* ============================================================
    Card Entry Animation
    ============================================================ */
@@ -144,8 +188,11 @@ body {
 /* Respect reduced motion preference */
 @media (prefers-reduced-motion: reduce) {
     .card-animate,
+    .row-animate,
     .dash-page.active { animation: none !important; opacity: 1 !important; }
-    .progress-fill { transition: none !important; }
+    .progress-fill,
+    .pl-funnel-bar-fill,
+    .pl-source-bar { transition: none !important; }
 }
 
 [data-theme="dark"] .skeleton-line,
@@ -160,5 +207,8 @@ body {
     background: rgba(60, 180, 173, 0.08);
 }
 [data-theme="dark"] .board-group-header:hover {
-    background: #2a2d3a;
+    background: var(--surface2); filter: brightness(1.15);
+}
+[data-theme="dark"] .exec-pillar:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }

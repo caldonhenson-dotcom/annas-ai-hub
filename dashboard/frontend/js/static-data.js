@@ -40,7 +40,7 @@
             },
             {
                 title: 'M&A', icon: '&#128188;', color: '#a78bfa',
-                page: 'monday-pipeline',
+                page: 'ma-hub',
                 points: [
                     '<strong>896</strong> active projects out of 1,312 total',
                     'Top stages: not started: 200, for re-targetting: 183, unknown: 175',

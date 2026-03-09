@@ -110,19 +110,28 @@
         catch (e) { /* empty */ }
     }
 
-    // Restore collapsed state on load
+    // Restore collapsed state on load + set aria-expanded
     var collapsed = getCollapsedGroups();
-    collapsed.forEach(function (groupId) {
-        var el = document.querySelector('.sidebar-group[data-group="' + groupId + '"]');
-        if (el) el.classList.add('collapsed');
+    document.querySelectorAll('.sidebar-group[data-group]').forEach(function (el) {
+        var groupId = el.getAttribute('data-group');
+        var label = el.querySelector('.sidebar-group-label');
+        if (collapsed.indexOf(groupId) !== -1) {
+            el.classList.add('collapsed');
+            if (label) label.setAttribute('aria-expanded', 'false');
+        } else {
+            if (label) label.setAttribute('aria-expanded', 'true');
+        }
     });
 
     window.toggleNavGroup = function (groupEl) {
         if (!groupEl) return;
         var groupId = groupEl.getAttribute('data-group');
         groupEl.classList.toggle('collapsed');
+        var isCollapsed = groupEl.classList.contains('collapsed');
+        var label = groupEl.querySelector('.sidebar-group-label');
+        if (label) label.setAttribute('aria-expanded', isCollapsed ? 'false' : 'true');
         var current = getCollapsedGroups();
-        if (groupEl.classList.contains('collapsed')) {
+        if (isCollapsed) {
             if (current.indexOf(groupId) === -1) current.push(groupId);
         } else {
             current = current.filter(function (g) { return g !== groupId; });

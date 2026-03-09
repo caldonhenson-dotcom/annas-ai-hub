@@ -9,11 +9,13 @@
 
     // Page-specific scripts loaded after fragment HTML injection
     var PAGE_SCRIPTS = {
-        'monday-pipeline': ['js/monday-pipeline.js'],
-        'monday-ic': ['js/monday-ic.js'],
         'ai-roadmap': ['js/ai-roadmap.js'],
         'executive': ['js/pages/render-executive.js'],
         'pipeline': ['js/pages/render-pipeline.js'],
+        'leads': ['js/pages/render-leads.js'],
+        'activities': ['js/pages/render-activities.js'],
+        'insights': ['js/pages/render-insights.js'],
+        'targets': ['js/pages/render-targets.js'],
         'inbound-queue': ['js/pages/render-inbound.js'],
         'skills': [
             'js/skills/connectors-registry.js',
@@ -37,6 +39,10 @@
     var PAGE_RENDERERS = {
         'executive': 'renderExecutive',
         'pipeline': 'renderPipeline',
+        'leads': 'renderLeads',
+        'activities': 'renderActivities',
+        'insights': 'renderInsights',
+        'targets': 'renderTargets',
         'inbound-queue': 'renderInbound',
         'ma-hub': 'renderMAHub',
         'skills': 'renderSkills'
@@ -133,9 +139,15 @@
         var target = document.getElementById('page-' + pageId);
         if (target) target.classList.add('active');
 
-        // Update sidebar active link
+        // Update sidebar active link + aria-current
         document.querySelectorAll('.sidebar-link').forEach(function (link) {
-            link.classList.toggle('active', link.getAttribute('data-page') === pageId);
+            var isActive = link.getAttribute('data-page') === pageId;
+            link.classList.toggle('active', isActive);
+            if (isActive) {
+                link.setAttribute('aria-current', 'page');
+            } else {
+                link.removeAttribute('aria-current');
+            }
         });
 
         // Scroll to top

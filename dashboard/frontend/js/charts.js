@@ -225,7 +225,78 @@
         }
     };
 
+    // ------------------------------------------------------------------
+    // Shared helpers for page renderers (render-pipeline, render-leads, etc.)
+    // ------------------------------------------------------------------
+    function ensureCanvas(containerId, height) {
+        var el = document.getElementById(containerId);
+        if (!el) return null;
+        if (instances[containerId]) {
+            instances[containerId].destroy();
+            delete instances[containerId];
+        }
+        el.innerHTML = '';
+        el.style.position = 'relative';
+        el.style.height = (height || 200) + 'px';
+        var canvas = document.createElement('canvas');
+        el.appendChild(canvas);
+        return canvas;
+    }
+
+    function storeChart(id, chart) { instances[id] = chart; }
+
+    function gridColor() { return isDark() ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'; }
+
+    function chartOpts(isCurrency) {
+        return {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: tooltipBg(),
+                    titleColor: '#fff', bodyColor: '#fff',
+                    titleFont: { weight: '600' }, bodyFont: { size: 13 },
+                    padding: 10, cornerRadius: 8,
+                    callbacks: {
+                        label: function (ctx) {
+                            var v = ctx.raw;
+                            return isCurrency ? '\u00a3' + v.toLocaleString('en-GB') : v.toLocaleString('en-GB');
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: gridColor() },
+                    border: { display: false },
+                    ticks: {
+                        font: { size: 11 }, color: tickColor(),
+                        callback: function (v) {
+                            return isCurrency ? '\u00a3' + fmtNum(v) : fmtNum(v);
+                        }
+                    }
+                },
+                x: {
+                    grid: { display: false },
+                    border: { display: false },
+                    ticks: { font: { size: 11, weight: '600' }, color: tickColor() }
+                }
+            }
+        };
+    }
+
     window.renderMiniBar = renderMiniBar;
     window.renderSparkline = renderSparkline;
     window.renderMonthlyBarChart = renderMonthlyBarChart;
+    window.ensureCanvas = ensureCanvas;
+    window.storeChart = storeChart;
+    window.chartOpts = chartOpts;
+    window.isDark = isDark;
+    window.tickCol = tickColor;
+    window.tipBg = tooltipBg;
+    window.gridCol = gridColor;
+    window.MONTH_SHORT = MONTH_SHORT;
+    window.PALETTE = ['#3CB4AD','#334FB4','#a78bfa','#34d399','#f472b6','#f59e0b','#60a5fa','#ef4444'];
 })();

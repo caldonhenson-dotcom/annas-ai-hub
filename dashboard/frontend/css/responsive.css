@@ -20,6 +20,8 @@
     .kpi-grid-3 { grid-template-columns: repeat(2, 1fr); }
     .grid-2 { grid-template-columns: 1fr; }
     .grid-3 { grid-template-columns: 1fr; }
+    .pl-grid-2 { grid-template-columns: 1fr; }
+    .pl-grid-3 { grid-template-columns: 1fr 1fr; }
 
     /* Content */
     .main-content { padding: var(--space-4) var(--space-5); }
@@ -112,7 +114,7 @@
     body { background: white; color: #1a1a1a; display: block; }
     .sidebar, .sidebar-toggle, .filter-bar, .top-bar { display: none; }
     .layout-main { margin-left: 0; }
-    .glass-card, .stat-card {
+    .glass-card, .stat-card, .pl-card, .pl-act-card {
         background: white; border: 1px solid #ddd;
         box-shadow: none; break-inside: avoid;
     }

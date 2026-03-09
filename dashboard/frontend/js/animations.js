@@ -81,7 +81,7 @@
         if (prefersReduced) return;
         if (!container) return;
 
-        var cards = container.querySelectorAll('.glass-card, .stat-card, .exec-pillar, .exec-kpi');
+        var cards = container.querySelectorAll('.glass-card, .stat-card, .exec-pillar, .exec-kpi, .pl-card, .pl-act-card');
         if (cards.length === 0) return;
 
         cards.forEach(function (card, i) {
@@ -117,7 +117,7 @@
 
     function observeCards(container) {
         if (!observer || prefersReduced) return;
-        var cards = (container || document).querySelectorAll('.glass-card, .stat-card');
+        var cards = (container || document).querySelectorAll('.glass-card, .stat-card, .pl-card, .pl-act-card');
         cards.forEach(function (card) {
             if (card.dataset.observed) return;
             card.dataset.observed = '1';

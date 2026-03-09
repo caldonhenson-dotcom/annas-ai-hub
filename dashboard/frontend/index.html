@@ -37,7 +37,7 @@
 </head>
 <body>
     <a href="#main-content" class="skip-link">Skip to main content</a>
-    <div class="login-overlay" id="login-overlay">
+    <div class="login-overlay" id="login-overlay" role="dialog" aria-label="Login">
         <div class="login-card">
             <div class="login-brand">
                 <span class="brand-dot">e</span>
@@ -45,6 +45,7 @@
             </div>
             <div class="login-title">Welcome</div>
             <p class="login-subtitle">Enter your name to continue</p>
+            <label for="login-name" class="sr-only">Your name</label>
             <input class="login-input" id="login-name" type="text" placeholder="Your name..." autofocus />
             <button class="login-btn" id="login-btn" onclick="window.doLogin()">Continue &#10148;</button>
         </div>
@@ -78,14 +79,14 @@
             </div>
             <div class="sidebar-group" data-group="sales">
                 <div class="sidebar-group-label" onclick="window.toggleNavGroup(this.parentElement)">&#9733; Sales <span class="sidebar-chevron">&#9660;</span></div>
-                <a href="javascript:void(0)" onclick="showPage('leads')" class="sidebar-link" data-page="leads">Leads &amp; Conversion<button class="sidebar-fav" data-fav="leads" onclick="event.preventDefault();event.stopPropagation();toggleFav('leads')" title="Toggle favourite">&#9733;</button></a>
                 <a href="javascript:void(0)" onclick="showPage('pipeline')" class="sidebar-link" data-page="pipeline">Pipeline View<button class="sidebar-fav" data-fav="pipeline" onclick="event.preventDefault();event.stopPropagation();toggleFav('pipeline')" title="Toggle favourite">&#9733;</button></a>
+                <a href="javascript:void(0)" onclick="showPage('leads')" class="sidebar-link" data-page="leads">Leads &amp; Conversion<button class="sidebar-fav" data-fav="leads" onclick="event.preventDefault();event.stopPropagation();toggleFav('leads')" title="Toggle favourite">&#9733;</button></a>
+                <a href="javascript:void(0)" onclick="showPage('insights')" class="sidebar-link" data-page="insights">Insights &amp; Forecast<button class="sidebar-fav" data-fav="insights" onclick="event.preventDefault();event.stopPropagation();toggleFav('insights')" title="Toggle favourite">&#9733;</button></a>
                 <a href="javascript:void(0)" onclick="showPage('targets')" class="sidebar-link" data-page="targets">Targets &amp; Rev Eng<button class="sidebar-fav" data-fav="targets" onclick="event.preventDefault();event.stopPropagation();toggleFav('targets')" title="Toggle favourite">&#9733;</button></a>
             </div>
-            <div class="sidebar-group" data-group="performance">
-                <div class="sidebar-group-label" onclick="window.toggleNavGroup(this.parentElement)">&#9993; Performance <span class="sidebar-chevron">&#9660;</span></div>
-                <a href="javascript:void(0)" onclick="showPage('activities')" class="sidebar-link" data-page="activities">Activity &amp; Contacts<button class="sidebar-fav" data-fav="activities" onclick="event.preventDefault();event.stopPropagation();toggleFav('activities')" title="Toggle favourite">&#9733;</button></a>
-                <a href="javascript:void(0)" onclick="showPage('insights')" class="sidebar-link" data-page="insights">Insights &amp; Forecast<button class="sidebar-fav" data-fav="insights" onclick="event.preventDefault();event.stopPropagation();toggleFav('insights')" title="Toggle favourite">&#9733;</button></a>
+            <div class="sidebar-group" data-group="team">
+                <div class="sidebar-group-label" onclick="window.toggleNavGroup(this.parentElement)">&#9993; Team <span class="sidebar-chevron">&#9660;</span></div>
+                <a href="javascript:void(0)" onclick="showPage('activities')" class="sidebar-link" data-page="activities">Activity Tracking<button class="sidebar-fav" data-fav="activities" onclick="event.preventDefault();event.stopPropagation();toggleFav('activities')" title="Toggle favourite">&#9733;</button></a>
             </div>
             <div class="sidebar-group" data-group="ma">
                 <div class="sidebar-group-label" onclick="window.toggleNavGroup(this.parentElement)">&#128188; M&amp;A <span class="sidebar-chevron">&#9660;</span></div>
@@ -120,7 +121,6 @@
             <div class="top-bar-inner">
                 <div class="top-bar-left">
                     <span class="freshness-pill" title="Last sync">HubSpot: --</span>
-                    <span class="freshness-pill" title="Last sync">Monday: --</span>
                     <span class="freshness-pill" title="Last sync">Queue: --</span>
                 </div>
                 <div class="top-bar-right">
@@ -144,8 +144,6 @@
             <div class="dash-page" id="page-activities" role="region" aria-label="Activity Tracking"></div>
             <div class="dash-page" id="page-insights" role="region" aria-label="Insights and Forecast"></div>
             <div class="dash-page" id="page-ma-hub" role="region" aria-label="M and A Hub"></div>
-            <div class="dash-page" id="page-monday-pipeline" role="region" aria-label="M and A Pipeline"></div>
-            <div class="dash-page" id="page-monday-ic" role="region" aria-label="IC Scorecards"></div>
             <div class="dash-page" id="page-ai-roadmap" role="region" aria-label="AI Roadmap"></div>
             <div class="dash-page" id="page-inbound-queue" role="region" aria-label="Inbound Queue"></div>
             <div class="dash-page" id="page-outreach" role="region" aria-label="Outreach Engine"></div>
@@ -348,9 +346,9 @@
             </div>
             <button class="chat-close" onclick="window.AnnaChat.close()" aria-label="Close">&times;</button>
         </div>
-        <div class="chat-tabs">
-            <button class="chat-tab active" data-tab="chat" onclick="window.AnnaChat.switchTab('chat')">&#9889; Chat</button>
-            <button class="chat-tab" data-tab="reports" onclick="window.AnnaChat.switchTab('reports')">&#128196; Reports</button>
+        <div class="chat-tabs" role="tablist" aria-label="Chat mode">
+            <button class="chat-tab active" data-tab="chat" role="tab" aria-selected="true" onclick="window.AnnaChat.switchTab('chat')">&#9889; Chat</button>
+            <button class="chat-tab" data-tab="reports" role="tab" aria-selected="false" onclick="window.AnnaChat.switchTab('reports')">&#128196; Reports</button>
         </div>
         <div class="chat-messages" id="chat-messages">
             <div class="chat-msg system">Ask me anything about your sales data, pipeline, M&amp;A projects, or team activity.</div>

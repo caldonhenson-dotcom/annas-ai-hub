@@ -15,6 +15,10 @@
 }
 .pl-dept-tab:hover { color: var(--text); }
 .pl-dept-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+.pl-dept-tab:focus-visible {
+    outline: 2px solid var(--accent); outline-offset: -2px;
+    border-radius: var(--radius-sm);
+}
 
 /* ── Activity Totals Row (HubSpot style) ── */
 .pl-activity-totals {
@@ -26,7 +30,11 @@
     border-radius: var(--radius); padding: 16px; text-align: center;
     transition: var(--transition);
 }
-.pl-act-card:hover { border-color: rgba(60, 180, 173, 0.3); }
+.pl-act-card:hover {
+    border-color: rgba(60, 180, 173, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+}
 .pl-act-label {
     font-size: 11px; font-weight: 600; color: var(--text-muted);
     text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px;
@@ -50,7 +58,10 @@
     border-radius: var(--radius); padding: var(--space-4);
     transition: var(--transition);
 }
-.pl-card:hover { border-color: rgba(60, 180, 173, 0.2); }
+.pl-card:hover {
+    border-color: rgba(60, 180, 173, 0.2);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+}
 .pl-card-full { margin-bottom: var(--space-4); }
 .pl-card-alert { border-color: rgba(245, 158, 11, 0.3); }
 .pl-card-header {
@@ -70,6 +81,9 @@
     color: var(--text-muted); cursor: pointer; transition: all 0.2s;
 }
 .pl-filter-pill:hover { border-color: var(--accent); color: var(--accent); }
+.pl-filter-pill:focus-visible {
+    outline: 2px solid var(--accent); outline-offset: 1px;
+}
 .pl-filter-pill.active {
     background: var(--accent); color: #fff; border-color: var(--accent);
 }
@@ -77,6 +91,10 @@
 /* ── Grid Layouts ── */
 .pl-grid-2 {
     display: grid; grid-template-columns: 1fr 1fr;
+    gap: var(--space-4); margin-bottom: var(--space-4);
+}
+.pl-grid-3 {
+    display: grid; grid-template-columns: repeat(3, 1fr);
     gap: var(--space-4); margin-bottom: var(--space-4);
 }
 
@@ -115,7 +133,7 @@
 }
 .pl-funnel-bar-fill {
     height: 100%; border-radius: 4px;
-    background: linear-gradient(90deg, #FF8C7C, #FFB09C);
+    background: linear-gradient(90deg, var(--accent), rgba(60, 180, 173, 0.55));
     transition: width 0.6s cubic-bezier(.25,.1,.25,1);
     display: flex; align-items: center; padding-left: 8px;
     font-size: 12px; font-weight: 700; color: var(--text);
@@ -230,13 +248,49 @@
 
 /* ── Empty state ── */
 .pl-empty {
-    text-align: center; padding: 32px 16px;
+    text-align: center; padding: 48px 24px;
     color: var(--text-muted); font-size: 13px;
+}
+.pl-empty-icon {
+    font-size: 40px; margin-bottom: 12px; opacity: 0.4;
+    line-height: 1;
+}
+.pl-empty-title {
+    font-size: 15px; font-weight: 700; color: var(--text);
+    margin-bottom: 6px;
+}
+.pl-empty-text {
+    font-size: 13px; color: var(--text-muted); max-width: 320px;
+    margin: 0 auto 16px;
+}
+.pl-empty-cta {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 20px; border-radius: 20px;
+    background: var(--accent); color: #fff;
+    font-size: 13px; font-weight: 600; border: none;
+    cursor: pointer; transition: all 0.2s;
+}
+.pl-empty-cta:hover { opacity: 0.88; transform: translateY(-1px); }
+
+/* ── Dark Mode Overrides ── */
+[data-theme="dark"] .pl-card:hover {
+    box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+}
+[data-theme="dark"] .pl-act-card:hover {
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+}
+[data-theme="dark"] .pl-source-table tbody tr:hover,
+[data-theme="dark"] .pl-deals-table tbody tr:hover {
+    background: rgba(60, 180, 173, 0.08);
+}
+[data-theme="dark"] .pl-funnel-bar-track {
+    background: var(--surface2);
 }
 
 /* ── Responsive ── */
 @media (max-width: 900px) {
     .pl-grid-2 { grid-template-columns: 1fr; }
+    .pl-grid-3 { grid-template-columns: 1fr 1fr; }
     .pl-activity-totals { grid-template-columns: repeat(3, 1fr); }
     .pl-funnel-row,
     .pl-funnel-head { grid-template-columns: 140px 1fr 70px 70px; }
@@ -245,6 +299,7 @@
 }
 @media (max-width: 600px) {
     .pl-activity-totals { grid-template-columns: repeat(2, 1fr); }
+    .pl-grid-3 { grid-template-columns: 1fr; }
     .pl-dept-tabs { overflow-x: auto; }
     .pl-funnel-row,
     .pl-funnel-head { grid-template-columns: 120px 1fr 60px; }
