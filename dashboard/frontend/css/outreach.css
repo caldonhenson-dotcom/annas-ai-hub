@@ -4,7 +4,7 @@
 
 /* LinkedIn auth overlay */
 .linkedin-auth-overlay {
-    position: fixed; inset: 0; z-index: 50000;
+    position: fixed; inset: 0; z-index: var(--z-modal);
     background: rgba(0,0,0,0.5); display: flex;
     align-items: center; justify-content: center;
 }
@@ -55,12 +55,12 @@
 /* ============================================================
    Prospect Detail Panel (slide-out)
    ============================================================ */
-.prospect-panel-overlay { position: fixed; inset: 0; z-index: 40000; background: rgba(0,0,0,0.3); display: none; }
+.prospect-panel-overlay { position: fixed; inset: 0; z-index: var(--z-modal-overlay); background: rgba(0,0,0,0.3); display: none; }
 .prospect-panel-overlay.open { display: block; }
 .prospect-panel {
     position: fixed; top: 0; right: -560px; width: 540px; max-width: 95vw; height: 100vh;
     background: var(--card); box-shadow: -8px 0 30px rgba(0,0,0,0.15);
-    transition: right 0.3s ease; z-index: 40001;
+    transition: right 0.3s ease; z-index: var(--z-modal);
     display: flex; flex-direction: column;
 }
 .prospect-panel.open { right: 0; }

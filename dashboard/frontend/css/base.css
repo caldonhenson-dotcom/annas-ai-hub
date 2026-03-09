@@ -15,6 +15,28 @@ body {
     display: flex;
 }
 
+/* ============================================================
+   Focus States — Accessibility
+   ============================================================ */
+:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+/* Suppress outline on mouse click (non-keyboard) */
+:focus:not(:focus-visible) {
+    outline: none;
+}
+/* Skip link (visually hidden until focused) */
+.skip-link {
+    position: absolute; top: -100px; left: 16px;
+    background: var(--accent); color: #fff;
+    padding: var(--space-2) var(--space-4);
+    border-radius: var(--radius-sm);
+    font-weight: 700; font-size: var(--text-sm);
+    z-index: var(--z-login); transition: top 0.2s;
+}
+.skip-link:focus { top: 8px; }
+
 /* Scrollbar */
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-track { background: var(--bg); }

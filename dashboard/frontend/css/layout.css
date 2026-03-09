@@ -6,7 +6,7 @@
     width: 220px;
     background: linear-gradient(180deg, #242833 0%, #1e2230 100%);
     border-right: 1px solid rgba(255, 255, 255, 0.06);
-    z-index: 200;
+    z-index: var(--z-sidebar);
     display: flex; flex-direction: column;
     overflow-y: auto;
     scrollbar-width: thin;
@@ -83,14 +83,14 @@
     opacity: 0; transition: opacity 0.2s, color 0.2s;
 }
 .sidebar-link:hover .sidebar-fav { opacity: 1; }
-.sidebar-fav:hover { color: #f59e0b; }
-.sidebar-fav.is-fav { opacity: 1; color: #f59e0b; }
+.sidebar-fav:hover { color: var(--warning); }
+.sidebar-fav.is-fav { opacity: 1; color: var(--warning); }
 
 .sidebar-favs-group {
     border-bottom: 1px solid rgba(255,255,255,0.06); display: none;
 }
 .sidebar-favs-group.has-favs { display: block; }
-.sidebar-favs-group .sidebar-group-label { color: #f59e0b; opacity: 0.7; }
+.sidebar-favs-group .sidebar-group-label { color: var(--warning); opacity: 0.7; }
 
 /* AI assistant link */
 .sidebar-ai-link {
@@ -99,7 +99,7 @@
     border-radius: var(--radius-sm);
     font-size: var(--text-sm); font-weight: 600;
     color: #fff; text-decoration: none; cursor: pointer;
-    background: linear-gradient(135deg, #3CB4AD, #334FB4);
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
     border: none; transition: opacity 0.2s, transform 0.2s;
 }
 .sidebar-ai-link:hover { opacity: 0.9; transform: translateY(-1px); }
@@ -140,7 +140,7 @@
 /* Sections */
 .dashboard-section { margin-bottom: var(--space-6); }
 .section-header { margin-bottom: var(--space-3); padding-bottom: var(--space-2); border-bottom: 1px solid var(--card-border); }
-.section-title { font-size: var(--text-lg); font-weight: 800; color: var(--text); letter-spacing: -0.02em; }
+.section-title { font-family: var(--font-display); font-size: var(--text-xl); font-weight: 400; color: var(--text); letter-spacing: -0.01em; }
 .section-subtitle { font-size: var(--text-sm); color: var(--text-muted); margin-top: 2px; }
 
 /* Footer */
@@ -155,7 +155,7 @@
    Sidebar Toggle (mobile)
    ============================================================ */
 .sidebar-toggle {
-    display: none; position: fixed; top: 14px; left: 14px; z-index: 250;
+    display: none; position: fixed; top: 14px; left: 14px; z-index: var(--z-sidebar-toggle);
     background: rgba(36, 40, 51, 0.95);
     backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.1);
@@ -172,7 +172,7 @@
 
 .sidebar-overlay {
     display: none; position: fixed; inset: 0;
-    background: rgba(0,0,0,0.3); z-index: 190;
+    background: rgba(0,0,0,0.3); z-index: var(--z-sidebar-overlay);
 }
 .sidebar-overlay.visible { display: block; }
 
@@ -180,7 +180,7 @@
    Filter Bar
    ============================================================ */
 .filter-bar {
-    position: sticky; top: 0; z-index: 99;
+    position: sticky; top: 0; z-index: var(--z-sticky);
     background: rgba(247, 248, 250, 0.92);
     backdrop-filter: blur(20px) saturate(180%);
     -webkit-backdrop-filter: blur(20px) saturate(180%);
@@ -233,8 +233,8 @@
     gap: var(--space-1); padding: 2px var(--space-2);
     border-radius: 10px; font-size: 10px; font-weight: 600; white-space: nowrap;
 }
-.supabase-status.live { background: rgba(34, 197, 94, 0.1); color: #16a34a; }
+.supabase-status.live { background: rgba(34, 197, 94, 0.1); color: var(--success); }
 .supabase-status.offline { background: rgba(107, 114, 128, 0.1); color: var(--text-muted); }
-.supabase-status.error { background: rgba(239, 68, 68, 0.1); color: #dc2626; }
+.supabase-status.error { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
 
 /* Top bar, login, M&A hub tabs, dark mode overrides → css/overlays.css */

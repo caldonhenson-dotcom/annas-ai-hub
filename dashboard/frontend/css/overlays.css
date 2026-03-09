@@ -43,7 +43,7 @@
 }
 .top-bar-status {
     display: inline-flex; align-items: center; gap: 4px;
-    font-size: 10px; font-weight: 600; color: #16a34a;
+    font-size: 10px; font-weight: 600; color: var(--success);
 }
 
 /* ============================================================
@@ -69,7 +69,7 @@
    Login Overlay
    ============================================================ */
 .login-overlay {
-    position: fixed; inset: 0; z-index: 99999;
+    position: fixed; inset: 0; z-index: var(--z-login);
     background: #242833;
     display: flex; align-items: center; justify-content: center;
 }
@@ -90,7 +90,7 @@
     color: #fff; font-weight: 800; font-size: 18px;
 }
 .login-brand span:last-child { font-size: 22px; font-weight: 700; color: var(--text); }
-.login-title { font-size: var(--text-2xl); font-weight: 800; color: var(--text); margin-bottom: 6px; }
+.login-title { font-family: var(--font-display); font-size: var(--text-3xl); font-weight: 400; color: var(--text); margin-bottom: 6px; }
 .login-subtitle { color: var(--text-muted); font-size: var(--text-base); margin: 0 0 var(--space-6) 0; }
 .login-input {
     width: 100%; padding: var(--space-3) var(--space-4);
@@ -101,7 +101,7 @@
 .login-input:focus { border-color: var(--accent); }
 .login-btn {
     width: 100%; margin-top: var(--space-4); padding: var(--space-3);
-    background: linear-gradient(135deg, #3CB4AD, #334FB4);
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
     color: #fff; border: none; border-radius: var(--radius);
     font-size: var(--text-md); font-weight: 700; font-family: var(--font);
     cursor: pointer; transition: opacity 0.2s;
@@ -132,7 +132,7 @@
    API Settings Modal
    ============================================================ */
 .api-settings-overlay {
-    position: fixed; inset: 0; z-index: 99998;
+    position: fixed; inset: 0; z-index: var(--z-modal);
     background: rgba(0, 0, 0, 0.5);
     display: flex; align-items: center; justify-content: center;
     backdrop-filter: blur(4px);
@@ -254,7 +254,7 @@
    Notification Panel
    ============================================================ */
 .notif-panel {
-    position: fixed; top: 52px; right: 16px; z-index: 9999;
+    position: fixed; top: 52px; right: 16px; z-index: var(--z-popover);
     width: 340px; max-height: 420px; overflow-y: auto;
     background: var(--card, #fff); border: 1px solid var(--card-border, #e2e5ea);
     border-radius: var(--radius-lg, 12px);

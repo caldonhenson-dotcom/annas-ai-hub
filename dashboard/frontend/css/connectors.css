@@ -33,7 +33,7 @@
 
 /* Popover */
 .connector-popover {
-    position: fixed; z-index: 1200; background: var(--card, #fff);
+    position: fixed; z-index: var(--z-popover); background: var(--card, #fff);
     border: 1px solid var(--card-border, #e5e7eb); border-radius: 12px;
     padding: 16px; min-width: 240px; max-width: 320px;
     box-shadow: 0 8px 24px rgba(0,0,0,0.14);

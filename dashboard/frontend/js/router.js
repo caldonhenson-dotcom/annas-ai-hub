@@ -13,6 +13,7 @@
         'monday-ic': ['js/monday-ic.js'],
         'ai-roadmap': ['js/ai-roadmap.js'],
         'executive': ['js/pages/render-executive.js'],
+        'pipeline': ['js/pages/render-pipeline.js'],
         'inbound-queue': ['js/pages/render-inbound.js'],
         'skills': [
             'js/skills/connectors-registry.js',
@@ -35,6 +36,7 @@
     // Page renderers called after scripts load
     var PAGE_RENDERERS = {
         'executive': 'renderExecutive',
+        'pipeline': 'renderPipeline',
         'inbound-queue': 'renderInbound',
         'ma-hub': 'renderMAHub',
         'skills': 'renderSkills'
