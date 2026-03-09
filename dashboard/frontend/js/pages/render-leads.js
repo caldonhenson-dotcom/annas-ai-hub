@@ -5,7 +5,6 @@
 (function () {
     'use strict';
 
-    var chartInstances = {};
     var MONTH_SHORT = window.MONTH_SHORT;
     var PALETTE = window.PALETTE;
 
@@ -29,19 +28,6 @@
         var end = new Date(now); end.setDate(end.getDate() - 31);
         var start = new Date(end); start.setDate(start.getDate() - 30);
         return { start: formatDate(start), end: formatDate(end) };
-    }
-
-    // ── Chart helper (uses shared from charts.js) ──
-    function makeCanvas(id, height) {
-        var el = document.getElementById(id);
-        if (!el) return null;
-        if (chartInstances[id]) { chartInstances[id].destroy(); delete chartInstances[id]; }
-        el.innerHTML = '';
-        el.style.position = 'relative';
-        el.style.height = (height || 220) + 'px';
-        var c = document.createElement('canvas');
-        el.appendChild(c);
-        return c;
     }
 
     // ================================================================
@@ -81,7 +67,7 @@
     // 2. Lead Trend — monthly bar chart (Chart.js)
     // ================================================================
     function renderLeadTrend() {
-        var canvas = makeCanvas('ld-trend-chart', 220);
+        var canvas = ensureCanvas('ld-trend-chart', 220);
         if (!canvas) return;
 
         var monthly = filterDailyToMonthly(TS.leads_by_day, null);
@@ -95,7 +81,7 @@
         });
         var values = entries.map(function (e) { return e[1]; });
 
-        chartInstances['ld-trend-chart'] = new Chart(canvas, {
+        storeChart('ld-trend-chart', new Chart(canvas, {
             type: 'bar',
             data: {
                 labels: labels,
@@ -109,7 +95,7 @@
                 }]
             },
             options: chartOpts(false)
-        });
+        }));
     }
 
     // ================================================================
@@ -209,7 +195,7 @@
     // 5. Contacts Trend — monthly bar chart
     // ================================================================
     function renderContactsTrend() {
-        var canvas = makeCanvas('ld-contacts-chart', 220);
+        var canvas = ensureCanvas('ld-contacts-chart', 220);
         if (!canvas) return;
 
         var monthly = filterDailyToMonthly(TS.contacts_created_by_day, null);
@@ -223,7 +209,7 @@
         });
         var values = entries.map(function (e) { return e[1]; });
 
-        chartInstances['ld-contacts-chart'] = new Chart(canvas, {
+        storeChart('ld-contacts-chart', new Chart(canvas, {
             type: 'bar',
             data: {
                 labels: labels,
@@ -237,7 +223,7 @@
                 }]
             },
             options: chartOpts(false)
-        });
+        }));
     }
 
     // ================================================================

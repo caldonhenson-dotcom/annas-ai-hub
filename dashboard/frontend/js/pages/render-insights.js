@@ -5,21 +5,8 @@
 (function () {
     'use strict';
 
-    var chartInstances = {};
     var MONTH_SHORT = window.MONTH_SHORT;
     var PALETTE = window.PALETTE;
-
-    function makeCanvas(id, height) {
-        var el = document.getElementById(id);
-        if (!el) return null;
-        if (chartInstances[id]) { chartInstances[id].destroy(); delete chartInstances[id]; }
-        el.innerHTML = '';
-        el.style.position = 'relative';
-        el.style.height = (height || 260) + 'px';
-        var c = document.createElement('canvas');
-        el.appendChild(c);
-        return c;
-    }
 
     // ================================================================
     // 1. Forecast KPIs (30/60/90 day)
@@ -69,7 +56,7 @@
     // 2. Win/Loss Analysis — doughnut
     // ================================================================
     function renderWinLoss() {
-        var canvas = makeCanvas('ins-winloss-chart', 280);
+        var canvas = ensureCanvas('ins-winloss-chart', 280);
         if (!canvas) return;
 
         var won = sumDaily(TS.deals_won_by_day, null);
@@ -80,7 +67,7 @@
             return;
         }
 
-        chartInstances['ins-winloss-chart'] = new Chart(canvas, {
+        storeChart('ins-winloss-chart', new Chart(canvas, {
             type: 'doughnut',
             data: {
                 labels: ['Won (' + won + ')', 'Lost (' + lost + ')'],
@@ -100,14 +87,14 @@
                     legend: {
                         position: 'bottom',
                         labels: {
-                            color: isDark() ? '#9ca3af' : '#6b7280',
+                            color: tickCol(),
                             font: { size: 12, weight: '600' },
                             padding: 16,
                             usePointStyle: true
                         }
                     },
                     tooltip: {
-                        backgroundColor: isDark() ? '#1a1d27' : '#242833',
+                        backgroundColor: tipBg(),
                         titleColor: '#fff', bodyColor: '#fff',
                         padding: 10, cornerRadius: 8,
                         callbacks: {
@@ -132,20 +119,20 @@
                     ctx.fillStyle = isDark() ? '#e5e7eb' : '#121212';
                     ctx.font = '700 22px Assistant, sans-serif';
                     ctx.fillText((won / total * 100).toFixed(1) + '%', cx, cy);
-                    ctx.fillStyle = isDark() ? '#9ca3af' : '#6b7280';
+                    ctx.fillStyle = tickCol();
                     ctx.font = '600 11px Assistant, sans-serif';
                     ctx.fillText('Win Rate', cx, cy + 18);
                     ctx.restore();
                 }
             }]
-        });
+        }));
     }
 
     // ================================================================
     // 3. Sales Cycle Trend — line chart
     // ================================================================
     function renderCycleTrend() {
-        var canvas = makeCanvas('ins-cycle-chart', 280);
+        var canvas = ensureCanvas('ins-cycle-chart', 280);
         if (!canvas) return;
 
         // Use deals_by_stage_by_month to approximate avg cycle days
@@ -178,7 +165,7 @@
         });
         var values = entries.map(function (e) { return e[1]; });
 
-        chartInstances['ins-cycle-chart'] = new Chart(canvas, {
+        storeChart('ins-cycle-chart', new Chart(canvas, {
             type: 'line',
             data: {
                 labels: labels,
@@ -196,7 +183,7 @@
                 }]
             },
             options: chartOpts(false)
-        });
+        }));
     }
 
     // ================================================================
@@ -248,7 +235,7 @@
     // 5. Revenue Won vs Pipeline — dual bar chart
     // ================================================================
     function renderRevPipeline() {
-        var canvas = makeCanvas('ins-rev-pipeline', 260);
+        var canvas = ensureCanvas('ins-rev-pipeline', 260);
         if (!canvas) return;
 
         var rwm = TS.revenue_won_by_month || {};
@@ -265,7 +252,7 @@
             return MONTH_SHORT[parseInt(p[1], 10) - 1] + ' ' + p[0].slice(2);
         });
 
-        chartInstances['ins-rev-pipeline'] = new Chart(canvas, {
+        storeChart('ins-rev-pipeline', new Chart(canvas, {
             type: 'bar',
             data: {
                 labels: labels,
@@ -295,14 +282,14 @@
                     legend: {
                         position: 'bottom',
                         labels: {
-                            color: isDark() ? '#9ca3af' : '#6b7280',
+                            color: tickCol(),
                             font: { size: 11, weight: '600' },
                             padding: 12,
                             usePointStyle: true
                         }
                     },
                     tooltip: {
-                        backgroundColor: isDark() ? '#1a1d27' : '#242833',
+                        backgroundColor: tipBg(),
                         titleColor: '#fff', bodyColor: '#fff',
                         padding: 10, cornerRadius: 8,
                         callbacks: {
@@ -315,22 +302,22 @@
                 scales: {
                     y: {
                         beginAtZero: true,
-                        grid: { color: isDark() ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' },
+                        grid: { color: gridCol() },
                         border: { display: false },
                         ticks: {
                             font: { size: 11 },
-                            color: isDark() ? '#9ca3af' : '#94a3b8',
+                            color: tickCol(),
                             callback: function (v) { return '\u00a3' + fmtNum(v); }
                         }
                     },
                     x: {
                         grid: { display: false },
                         border: { display: false },
-                        ticks: { font: { size: 11, weight: '600' }, color: isDark() ? '#9ca3af' : '#94a3b8' }
+                        ticks: { font: { size: 11, weight: '600' }, color: tickCol() }
                     }
                 }
             }
-        });
+        }));
     }
 
     // ================================================================

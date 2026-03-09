@@ -203,7 +203,7 @@
     cursor: pointer; transition: all 0.25s cubic-bezier(.25,.1,.25,1);
     white-space: nowrap; font-family: inherit;
 }
-.filter-btn:hover { color: var(--text); background: var(--surface2); border-color: #d1d5db; }
+.filter-btn:hover { color: var(--text); background: var(--surface2); border-color: var(--card-border); }
 .filter-btn.active {
     color: #fff; background: var(--accent); border-color: var(--accent);
     box-shadow: 0 2px 12px rgba(60, 180, 173, 0.25);

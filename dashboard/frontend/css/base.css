@@ -206,9 +206,6 @@ body {
 [data-theme="dark"] .data-table tbody tr:hover {
     background: rgba(60, 180, 173, 0.08);
 }
-[data-theme="dark"] .board-group-header:hover {
-    background: var(--surface2); filter: brightness(1.15);
-}
 [data-theme="dark"] .exec-pillar:hover {
     box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }

@@ -116,6 +116,7 @@
     }
 
     function yoyBadge(metricKey) {
+        if (typeof YOY === 'undefined' || !YOY) return '';
         var yoy = YOY[metricKey];
         if (!yoy || yoy.change_pct === null || yoy.change_pct === undefined) return '';
         var pct = yoy.change_pct;

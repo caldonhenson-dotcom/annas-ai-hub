@@ -49,8 +49,8 @@
 }
 .stat-card:hover {
     border-left-color: var(--accent);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    transform: translateY(-2px);
 }
 
 /* Clickable KPI cards */
@@ -249,7 +249,7 @@
     font-size: var(--text-xs); font-weight: 600;
     color: var(--text-muted); margin-left: 6px; letter-spacing: 0.01em;
 }
-.deal-flow-step .step-arrow { font-size: 14px; color: #d1d5db; margin: 0 var(--space-2); }
+.deal-flow-step .step-arrow { font-size: 14px; color: var(--card-border); margin: 0 var(--space-2); }
 
 /* ============================================================
    Button System

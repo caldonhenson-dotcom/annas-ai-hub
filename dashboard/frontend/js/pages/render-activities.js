@@ -5,7 +5,6 @@
 (function () {
     'use strict';
 
-    var chartInstances = {};
     var MONTH_SHORT = window.MONTH_SHORT;
     var PALETTE = window.PALETTE;
 
@@ -20,19 +19,6 @@
         var end = new Date(now); end.setDate(end.getDate() - 31);
         var start = new Date(end); start.setDate(start.getDate() - 30);
         return { start: formatDate(start), end: formatDate(end) };
-    }
-
-    // ── Chart helper ──
-    function makeCanvas(id, height) {
-        var el = document.getElementById(id);
-        if (!el) return null;
-        if (chartInstances[id]) { chartInstances[id].destroy(); delete chartInstances[id]; }
-        el.innerHTML = '';
-        el.style.position = 'relative';
-        el.style.height = (height || 260) + 'px';
-        var c = document.createElement('canvas');
-        el.appendChild(c);
-        return c;
     }
 
     // ================================================================
@@ -77,7 +63,7 @@
     // 2. Activity Breakdown — Chart.js doughnut
     // ================================================================
     function renderBreakdown() {
-        var canvas = makeCanvas('act-breakdown-chart', 260);
+        var canvas = ensureCanvas('act-breakdown-chart', 260);
         if (!canvas) return;
 
         var cur = getLast30Range();
@@ -89,7 +75,7 @@
 
         var colors = ['#3CB4AD', '#334FB4', '#a78bfa', '#34d399', '#f472b6'];
 
-        chartInstances['act-breakdown-chart'] = new Chart(canvas, {
+        storeChart('act-breakdown-chart', new Chart(canvas, {
             type: 'doughnut',
             data: {
                 labels: labels,
@@ -117,7 +103,7 @@
                         }
                     },
                     tooltip: {
-                        backgroundColor: isDark() ? '#1a1d27' : '#242833',
+                        backgroundColor: tipBg(),
                         titleColor: '#fff', bodyColor: '#fff',
                         padding: 10, cornerRadius: 8,
                         callbacks: {
@@ -130,14 +116,14 @@
                     }
                 }
             }
-        });
+        }));
     }
 
     // ================================================================
     // 3. Activity Trend — Chart.js line (monthly)
     // ================================================================
     function renderTrend() {
-        var canvas = makeCanvas('act-trend-chart', 260);
+        var canvas = ensureCanvas('act-trend-chart', 260);
         if (!canvas) return;
 
         // Aggregate daily activities into monthly buckets
@@ -161,7 +147,7 @@
         });
         var values = entries.map(function (e) { return e[1]; });
 
-        chartInstances['act-trend-chart'] = new Chart(canvas, {
+        storeChart('act-trend-chart', new Chart(canvas, {
             type: 'line',
             data: {
                 labels: labels,
@@ -179,7 +165,7 @@
                 }]
             },
             options: chartOpts(false)
-        });
+        }));
     }
 
     // ================================================================
@@ -297,7 +283,7 @@
     // 6. Monthly Breakdown by Type — stacked bar chart
     // ================================================================
     function renderTypeStacked() {
-        var canvas = makeCanvas('act-type-stacked', 260);
+        var canvas = ensureCanvas('act-type-stacked', 260);
         if (!canvas) return;
 
         var data = TS.activities_by_type_by_day || {};
@@ -333,7 +319,7 @@
             };
         });
 
-        chartInstances['act-type-stacked'] = new Chart(canvas, {
+        storeChart('act-type-stacked', new Chart(canvas, {
             type: 'bar',
             data: { labels: labels, datasets: datasets },
             options: {
@@ -343,7 +329,7 @@
                     legend: {
                         position: 'bottom',
                         labels: {
-                            color: isDark() ? '#9ca3af' : '#6b7280',
+                            color: tickCol(),
                             font: { size: 11, weight: '600' },
                             padding: 12,
                             usePointStyle: true,
@@ -351,7 +337,7 @@
                         }
                     },
                     tooltip: {
-                        backgroundColor: isDark() ? '#1a1d27' : '#242833',
+                        backgroundColor: tipBg(),
                         titleColor: '#fff', bodyColor: '#fff',
                         padding: 10, cornerRadius: 8
                     }
@@ -361,22 +347,22 @@
                         stacked: true,
                         grid: { display: false },
                         border: { display: false },
-                        ticks: { font: { size: 11, weight: '600' }, color: isDark() ? '#9ca3af' : '#94a3b8' }
+                        ticks: { font: { size: 11, weight: '600' }, color: tickCol() }
                     },
                     y: {
                         stacked: true,
                         beginAtZero: true,
-                        grid: { color: isDark() ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' },
+                        grid: { color: gridCol() },
                         border: { display: false },
                         ticks: {
                             font: { size: 11 },
-                            color: isDark() ? '#9ca3af' : '#94a3b8',
+                            color: tickCol(),
                             callback: function (v) { return fmtNum(v); }
                         }
                     }
                 }
             }
-        });
+        }));
     }
 
     // ================================================================

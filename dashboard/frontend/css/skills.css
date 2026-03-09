@@ -76,7 +76,7 @@
 }
 .skill-card-meta { display: flex; justify-content: space-between; align-items: center; }
 .skill-card-stars { font-size: 12px; }
-.skill-star { color: #d1d5db; }
+.skill-star { color: var(--card-border); }
 .skill-star.filled { color: #f59e0b; }
 .skill-card-time { font-size: 11px; color: var(--text-muted, #6b7280); }
 .skill-card-cat { font-size: 11px; font-weight: 600; }
@@ -86,7 +86,7 @@
     font-weight: 700; cursor: pointer; transition: opacity 0.2s;
 }
 .skill-exec-btn:hover { opacity: 0.88; }
-.skill-exec-btn:disabled { background: #d1d5db; color: #9ca3af; cursor: not-allowed; }
+.skill-exec-btn:disabled { background: var(--card-border); color: var(--text-muted); cursor: not-allowed; }
 
 /* Execution modal */
 .skill-exec-overlay {

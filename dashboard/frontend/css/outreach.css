@@ -31,7 +31,7 @@
 }
 .li-bookmarklet-btn:hover { box-shadow: 0 4px 14px rgba(0,119,181,0.4); }
 .li-input {
-    width: 100%; padding: 10px 12px; border: 1px solid #d1d5db;
+    width: 100%; padding: 10px 12px; border: 1px solid var(--card-border);
     border-radius: var(--radius-sm); font-size: var(--text-sm);
     font-family: monospace; margin-bottom: var(--space-2); box-sizing: border-box;
 }
@@ -42,7 +42,7 @@
     font-weight: 700; cursor: pointer; transition: background 0.15s;
 }
 .li-submit-btn:hover { background: #2a9d97; }
-.li-submit-btn:disabled { background: #d1d5db; cursor: not-allowed; }
+.li-submit-btn:disabled { background: var(--card-border); cursor: not-allowed; }
 .li-status-connected {
     display: flex; align-items: center; gap: 10px; padding: 12px 14px;
     background: #ecfdf5; border: 1px solid #10b981; border-radius: var(--radius-sm);
@@ -87,7 +87,7 @@
     font-size: var(--text-xs); font-weight: 700; text-transform: uppercase;
     letter-spacing: 0.05em; color: var(--accent); margin-bottom: 6px;
 }
-.research-card-body { font-size: var(--text-sm); color: #374151; line-height: 1.5; }
+.research-card-body { font-size: var(--text-sm); color: var(--text); line-height: 1.5; }
 .research-people-item { display: flex; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--surface2); }
 .research-people-avatar {
     width: 32px; height: 32px; border-radius: 50%; background: var(--card-border);
@@ -98,7 +98,7 @@
 /* Composer */
 .composer-area {
     width: 100%; min-height: 120px; padding: 12px;
-    border: 1px solid #d1d5db; border-radius: var(--radius-sm);
+    border: 1px solid var(--card-border); border-radius: var(--radius-sm);
     font-size: var(--text-sm); font-family: var(--font);
     line-height: 1.5; resize: vertical; box-sizing: border-box;
 }
@@ -110,7 +110,7 @@
 }
 .composer-btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
 .composer-btn.primary:hover { background: #2a9d97; }
-.composer-btn.secondary { background: var(--card); color: #374151; border-color: #d1d5db; }
+.composer-btn.secondary { background: var(--card); color: var(--text); border-color: var(--card-border); }
 .composer-btn.secondary:hover { background: var(--surface2); }
 .composer-btn.success { background: #10b981; color: #fff; border-color: #10b981; }
 .composer-btn.success:hover { background: #059669; }
@@ -151,7 +151,7 @@
 .funnel-stage-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
 .funnel-stage-value { font-size: 22px; font-weight: 800; color: var(--text); margin: 2px 0; }
 .funnel-stage-rate { font-size: var(--text-xs); color: var(--accent); font-weight: 600; }
-.funnel-arrow { font-size: 18px; color: #d1d5db; margin: 0 4px; }
+.funnel-arrow { font-size: 18px; color: var(--card-border); margin: 0 4px; }
 
 .pillar-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
 .pillar-card {
@@ -195,7 +195,7 @@
 .conversation-name { font-weight: 600; font-size: var(--text-sm); color: var(--text); }
 .conversation-preview { font-size: 12px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .conversation-meta { text-align: right; flex-shrink: 0; }
-.conversation-time { font-size: var(--text-xs); color: #9ca3af; }
+.conversation-time { font-size: var(--text-xs); color: var(--text-muted); }
 .conversation-unread-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); margin-left: auto; margin-top: 4px; }
 
 /* Score bars */
@@ -208,7 +208,7 @@
 
 .message-preview-box {
     background: var(--surface2); border: 1px solid var(--card-border); border-radius: 6px;
-    padding: var(--space-2) 10px; font-size: 12px; color: #374151; line-height: 1.4;
+    padding: var(--space-2) 10px; font-size: 12px; color: var(--text); line-height: 1.4;
     max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .intent-badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: var(--text-xs); font-weight: 600; }

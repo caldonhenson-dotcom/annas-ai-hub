@@ -5,7 +5,6 @@
 (function () {
     'use strict';
 
-    var chartInstances = {};
     var MONTH_SHORT = window.MONTH_SHORT;
     var PALETTE = window.PALETTE;
 
@@ -20,18 +19,6 @@
         win_rate: 0.27,
         avg_deal: 15714
     };
-
-    function makeCanvas(id, height) {
-        var el = document.getElementById(id);
-        if (!el) return null;
-        if (chartInstances[id]) { chartInstances[id].destroy(); delete chartInstances[id]; }
-        el.innerHTML = '';
-        el.style.position = 'relative';
-        el.style.height = (height || 260) + 'px';
-        var c = document.createElement('canvas');
-        el.appendChild(c);
-        return c;
-    }
 
     // ================================================================
     // 1. KPI Cards
@@ -76,7 +63,7 @@
     // 2. Target Progress — line chart (cumulative revenue vs target line)
     // ================================================================
     function renderProgressChart() {
-        var canvas = makeCanvas('tgt-progress-chart', 260);
+        var canvas = ensureCanvas('tgt-progress-chart', 260);
         if (!canvas) return;
 
         var rwm = TS.revenue_won_by_month || {};
@@ -104,7 +91,7 @@
             return TARGETS.monthly * (i + 1);
         });
 
-        chartInstances['tgt-progress-chart'] = new Chart(canvas, {
+        storeChart('tgt-progress-chart', new Chart(canvas, {
             type: 'line',
             data: {
                 labels: labels,
@@ -138,14 +125,14 @@
                     legend: {
                         position: 'bottom',
                         labels: {
-                            color: isDark() ? '#9ca3af' : '#6b7280',
+                            color: tickCol(),
                             font: { size: 11, weight: '600' },
                             padding: 12,
                             usePointStyle: true
                         }
                     },
                     tooltip: {
-                        backgroundColor: isDark() ? '#1a1d27' : '#242833',
+                        backgroundColor: tipBg(),
                         titleColor: '#fff', bodyColor: '#fff',
                         padding: 10, cornerRadius: 8,
                         callbacks: {
@@ -158,21 +145,21 @@
                 scales: {
                     y: {
                         beginAtZero: true,
-                        grid: { color: isDark() ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' },
+                        grid: { color: gridCol() },
                         border: { display: false },
                         ticks: {
-                            font: { size: 11 }, color: isDark() ? '#9ca3af' : '#94a3b8',
+                            font: { size: 11 }, color: tickCol(),
                             callback: function (v) { return '\u00a3' + fmtNum(v); }
                         }
                     },
                     x: {
                         grid: { display: false },
                         border: { display: false },
-                        ticks: { font: { size: 11, weight: '600' }, color: isDark() ? '#9ca3af' : '#94a3b8' }
+                        ticks: { font: { size: 11, weight: '600' }, color: tickCol() }
                     }
                 }
             }
-        });
+        }));
     }
 
     // ================================================================

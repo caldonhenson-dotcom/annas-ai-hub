@@ -59,8 +59,9 @@
     transition: var(--transition);
 }
 .pl-card:hover {
-    border-color: rgba(60, 180, 173, 0.2);
-    box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+    border-color: rgba(60, 180, 173, 0.3);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    transform: translateY(-2px);
 }
 .pl-card-full { margin-bottom: var(--space-4); }
 .pl-card-alert { border-color: rgba(245, 158, 11, 0.3); }
