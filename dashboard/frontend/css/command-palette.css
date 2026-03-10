@@ -1,0 +1,104 @@
+/* ============================================================
+   Command Palette — Ctrl+K quick navigation
+   ============================================================ */
+.cmd-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 99999;
+    display: flex; align-items: flex-start; justify-content: center;
+    padding-top: 18vh;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.15s ease;
+}
+.cmd-overlay.open {
+    opacity: 1; pointer-events: auto;
+}
+
+.cmd-palette {
+    width: 540px; max-width: calc(100vw - 32px);
+    background: var(--card); border: 1px solid var(--card-border);
+    border-radius: var(--radius-xl);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    transform: scale(0.97) translateY(-8px);
+    transition: transform 0.15s cubic-bezier(.25,.1,.25,1);
+}
+.cmd-overlay.open .cmd-palette {
+    transform: scale(1) translateY(0);
+}
+
+/* Search input */
+.cmd-input-wrap {
+    display: flex; align-items: center; gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    border-bottom: 1px solid var(--card-border);
+}
+.cmd-input-icon { color: var(--text-muted); font-size: 16px; flex-shrink: 0; }
+.cmd-input {
+    flex: 1; border: none; outline: none;
+    font-size: var(--text-md); font-family: var(--font);
+    color: var(--text); background: transparent;
+}
+.cmd-input::placeholder { color: var(--text-tertiary); }
+
+/* Results */
+.cmd-results {
+    max-height: 360px; overflow-y: auto; padding: var(--space-1) 0;
+}
+.cmd-section-label {
+    padding: var(--space-2) var(--space-4) var(--space-1);
+    font-size: 10px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.06em;
+    color: var(--text-tertiary);
+}
+.cmd-item {
+    display: flex; align-items: center; gap: var(--space-3);
+    padding: 10px var(--space-4); cursor: pointer;
+    transition: background 0.08s ease;
+}
+.cmd-item:hover, .cmd-item.active {
+    background: rgba(60, 180, 173, 0.08);
+}
+.cmd-item.active {
+    box-shadow: inset 3px 0 0 var(--accent);
+}
+.cmd-item-icon {
+    width: 24px; text-align: center; font-size: 14px;
+    color: var(--text-muted); flex-shrink: 0;
+}
+.cmd-item-label {
+    flex: 1; font-size: var(--text-sm); font-weight: 500;
+    color: var(--text);
+}
+.cmd-item-hint {
+    font-size: var(--text-xs); color: var(--text-tertiary);
+}
+
+/* Footer */
+.cmd-footer {
+    display: flex; align-items: center; gap: var(--space-4);
+    padding: var(--space-2) var(--space-4);
+    border-top: 1px solid var(--card-border);
+    font-size: 10px; color: var(--text-tertiary); font-weight: 600;
+}
+.cmd-footer kbd {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 18px; height: 18px; padding: 0 4px;
+    background: var(--surface2); border: 1px solid var(--card-border);
+    border-radius: 4px; font-size: 10px; font-weight: 700;
+    color: var(--text-muted); font-family: inherit;
+}
+
+/* Empty */
+.cmd-empty {
+    padding: var(--space-8) var(--space-4);
+    text-align: center; color: var(--text-tertiary);
+    font-size: var(--text-sm);
+}
+
+/* Dark mode */
+[data-theme="dark"] .cmd-palette {
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+}

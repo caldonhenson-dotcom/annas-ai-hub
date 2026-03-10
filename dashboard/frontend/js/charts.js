@@ -34,7 +34,10 @@
         if (!canvas) {
             container.innerHTML = '';
             container.style.position = 'relative';
-            container.style.height = container.style.height || '120px';
+            // Only set fallback height if no CSS height/aspect-ratio is driving sizing
+            if (!container.style.height && !container.classList.contains('pl-chart-wrap')) {
+                container.style.height = '120px';
+            }
             canvas = document.createElement('canvas');
             container.appendChild(canvas);
         }

@@ -126,7 +126,7 @@ body {
     height: 20px; width: 40%;
     border-radius: 6px;
     margin-bottom: var(--space-4);
-    background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
+    background: linear-gradient(90deg, var(--card-border) 25%, var(--surface2) 50%, var(--card-border) 75%);
     background-size: 200px 100%;
     animation: skeleton-shimmer 1.4s ease infinite;
 }
@@ -134,7 +134,7 @@ body {
     height: 120px;
     border-radius: var(--radius-md);
     margin-bottom: var(--space-3);
-    background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
+    background: linear-gradient(90deg, var(--card-border) 25%, var(--surface2) 50%, var(--card-border) 75%);
     background-size: 200px 100%;
     animation: skeleton-shimmer 1.4s ease infinite;
 }
@@ -149,7 +149,7 @@ body {
 }
 .skeleton-table-row {
     height: 40px; border-radius: 4px;
-    background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
+    background: linear-gradient(90deg, var(--card-border) 25%, var(--surface2) 50%, var(--card-border) 75%);
     background-size: 200px 100%;
     animation: skeleton-shimmer 1.4s ease infinite;
 }
@@ -157,10 +157,7 @@ body {
     height: 36px; background: var(--surface2);
     animation: none;
 }
-[data-theme="dark"] .skeleton-table-row {
-    background: linear-gradient(90deg, #2a2d3a 25%, #32354a 50%, #2a2d3a 75%);
-    background-size: 200px 100%;
-}
+/* skeleton-table-row inherits token colors automatically in dark mode */
 [data-theme="dark"] .skeleton-table-row:first-child {
     background: var(--surface2);
 }
@@ -195,11 +192,7 @@ body {
     .pl-source-bar { transition: none !important; }
 }
 
-[data-theme="dark"] .skeleton-line,
-[data-theme="dark"] .skeleton-card {
-    background: linear-gradient(90deg, #2a2d3a 25%, #32354a 50%, #2a2d3a 75%);
-    background-size: 200px 100%;
-}
+/* skeleton-line/card inherit token colors automatically in dark mode */
 [data-theme="dark"] .data-table tbody tr:nth-child(even) {
     background: rgba(255,255,255,0.02);
 }

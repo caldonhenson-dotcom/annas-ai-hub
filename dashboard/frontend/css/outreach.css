@@ -65,6 +65,27 @@
 }
 .prospect-panel.open { right: 0; }
 .prospect-panel-header { padding: var(--space-5) var(--space-6); border-bottom: 1px solid var(--card-border); flex-shrink: 0; }
+.pp-header-row { display: flex; justify-content: space-between; align-items: flex-start; }
+.pp-header-main { flex: 1; }
+.pp-header-identity { display: flex; align-items: center; gap: var(--space-3); }
+.pp-name { font-size: var(--text-md); font-weight: 700; }
+.pp-subtitle { font-size: var(--text-sm); color: var(--text-muted); }
+.pp-badges { display: flex; gap: var(--space-2); margin-top: 10px; flex-wrap: wrap; }
+.pp-links { display: flex; gap: var(--space-3); margin-top: var(--space-2); font-size: 12px; color: var(--text-muted); }
+.pp-close-btn { background: none; border: none; font-size: 22px; cursor: pointer; color: var(--text-muted); padding: var(--space-1); }
+.pp-empty-state { text-align: center; padding: 40px 20px; color: var(--text-muted); }
+.pp-empty-icon { font-size: 32px; margin-bottom: var(--space-2); }
+.pp-empty-title { font-size: 14px; font-weight: 600; margin-bottom: var(--space-1); }
+.pp-empty-desc { font-size: 12px; margin-bottom: var(--space-4); }
+.pp-composer-row { display: flex; gap: var(--space-2); margin-bottom: 10px; }
+.pp-composer-select {
+    padding: 6px 10px; border: 1px solid var(--card-border);
+    border-radius: var(--radius-sm); font-size: 12px; flex: 1;
+    background: var(--card); color: var(--text); font-family: var(--font);
+}
+.pp-status-msg { margin-top: var(--space-2); font-size: 12px; padding: var(--space-2); border-radius: var(--radius-sm); }
+.pp-messages-empty { font-size: 13px; color: var(--text-muted); text-align: center; padding: 40px; }
+.pp-scoring-empty { font-size: 13px; color: var(--text-muted); text-align: center; padding: 40px; }
 .prospect-panel-tabs { display: flex; gap: 0; border-bottom: 1px solid var(--card-border); flex-shrink: 0; }
 .prospect-panel-tab {
     flex: 1; padding: 10px; text-align: center; font-size: 12px; font-weight: 600;
@@ -74,6 +95,7 @@
 }
 .prospect-panel-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
 .prospect-panel-tab:hover { color: var(--text); }
+.prospect-panel-tab.pp-tab-disabled { opacity: 0.45; cursor: not-allowed; }
 .prospect-panel-body { flex: 1; overflow-y: auto; padding: var(--space-5) var(--space-6); }
 .prospect-tab-content { display: none; }
 .prospect-tab-content.active { display: block; }

@@ -22,6 +22,8 @@
     <link rel="stylesheet" href="css/skills.css">
     <link rel="stylesheet" href="css/connectors.css">
     <link rel="stylesheet" href="css/pipeline.css">
+    <link rel="stylesheet" href="css/toasts.css">
+    <link rel="stylesheet" href="css/command-palette.css">
     <link rel="stylesheet" href="css/responsive.css">
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
@@ -65,46 +67,47 @@
                 <div class="sidebar-group-label">&#9733; Favourites</div>
                 <div id="sidebar-favs-list"></div>
             </div>
-            <div class="sidebar-skill-favs" id="sidebar-skill-favs" style="display:none">
+            <div class="sidebar-skill-favs hidden" id="sidebar-skill-favs">
                 <div class="sidebar-group-label">&#9889; Quick Skills</div>
                 <div id="sidebar-skill-favs-list"></div>
             </div>
             <div class="sidebar-group" data-group="assistant">
-                <div class="sidebar-group-label" onclick="window.toggleNavGroup(this.parentElement)">&#9889; Assistant <span class="sidebar-chevron">&#9660;</span></div>
-                <a href="javascript:void(0)" onclick="showPage('anna')" class="sidebar-link" data-page="anna">eComplete AI<button class="sidebar-fav" data-fav="anna" onclick="event.preventDefault();event.stopPropagation();toggleFav('anna')" title="Toggle favourite">&#9733;</button></a>
+                <div class="sidebar-group-label" onclick="window.toggleNavGroup(this.parentElement)"><span class="sidebar-group-icon">&#9889;</span> <span class="sidebar-label-text">Assistant</span> <span class="sidebar-chevron">&#9660;</span></div>
+                <a href="javascript:void(0)" onclick="showPage('anna')" class="sidebar-link" data-page="anna"><span class="sidebar-link-icon">&#10024;</span><span class="sidebar-link-text">eComplete AI</span><button class="sidebar-fav" data-fav="anna" onclick="event.preventDefault();event.stopPropagation();toggleFav('anna')" title="Toggle favourite">&#9733;</button></a>
             </div>
             <div class="sidebar-group" data-group="overview">
-                <div class="sidebar-group-label" onclick="window.toggleNavGroup(this.parentElement)">&#9679; Overview <span class="sidebar-chevron">&#9660;</span></div>
-                <a href="javascript:void(0)" onclick="showPage('executive')" class="sidebar-link" data-page="executive">Executive Summary<button class="sidebar-fav" data-fav="executive" onclick="event.preventDefault();event.stopPropagation();toggleFav('executive')" title="Toggle favourite">&#9733;</button></a>
+                <div class="sidebar-group-label" onclick="window.toggleNavGroup(this.parentElement)"><span class="sidebar-group-icon">&#9679;</span> <span class="sidebar-label-text">Overview</span> <span class="sidebar-chevron">&#9660;</span></div>
+                <a href="javascript:void(0)" onclick="showPage('executive')" class="sidebar-link" data-page="executive"><span class="sidebar-link-icon">&#128202;</span><span class="sidebar-link-text">Executive Summary</span><button class="sidebar-fav" data-fav="executive" onclick="event.preventDefault();event.stopPropagation();toggleFav('executive')" title="Toggle favourite">&#9733;</button></a>
             </div>
             <div class="sidebar-group" data-group="sales">
-                <div class="sidebar-group-label" onclick="window.toggleNavGroup(this.parentElement)">&#9733; Sales <span class="sidebar-chevron">&#9660;</span></div>
-                <a href="javascript:void(0)" onclick="showPage('pipeline')" class="sidebar-link" data-page="pipeline">Pipeline View<button class="sidebar-fav" data-fav="pipeline" onclick="event.preventDefault();event.stopPropagation();toggleFav('pipeline')" title="Toggle favourite">&#9733;</button></a>
-                <a href="javascript:void(0)" onclick="showPage('leads')" class="sidebar-link" data-page="leads">Leads &amp; Conversion<button class="sidebar-fav" data-fav="leads" onclick="event.preventDefault();event.stopPropagation();toggleFav('leads')" title="Toggle favourite">&#9733;</button></a>
-                <a href="javascript:void(0)" onclick="showPage('insights')" class="sidebar-link" data-page="insights">Insights &amp; Forecast<button class="sidebar-fav" data-fav="insights" onclick="event.preventDefault();event.stopPropagation();toggleFav('insights')" title="Toggle favourite">&#9733;</button></a>
-                <a href="javascript:void(0)" onclick="showPage('targets')" class="sidebar-link" data-page="targets">Targets &amp; Rev Eng<button class="sidebar-fav" data-fav="targets" onclick="event.preventDefault();event.stopPropagation();toggleFav('targets')" title="Toggle favourite">&#9733;</button></a>
+                <div class="sidebar-group-label" onclick="window.toggleNavGroup(this.parentElement)"><span class="sidebar-group-icon">&#9733;</span> <span class="sidebar-label-text">Sales</span> <span class="sidebar-chevron">&#9660;</span></div>
+                <a href="javascript:void(0)" onclick="showPage('pipeline')" class="sidebar-link" data-page="pipeline"><span class="sidebar-link-icon">&#9881;</span><span class="sidebar-link-text">Pipeline View</span><button class="sidebar-fav" data-fav="pipeline" onclick="event.preventDefault();event.stopPropagation();toggleFav('pipeline')" title="Toggle favourite">&#9733;</button></a>
+                <a href="javascript:void(0)" onclick="showPage('leads')" class="sidebar-link" data-page="leads"><span class="sidebar-link-icon">&#128101;</span><span class="sidebar-link-text">Leads &amp; Conversion</span><button class="sidebar-fav" data-fav="leads" onclick="event.preventDefault();event.stopPropagation();toggleFav('leads')" title="Toggle favourite">&#9733;</button></a>
+                <a href="javascript:void(0)" onclick="showPage('insights')" class="sidebar-link" data-page="insights"><span class="sidebar-link-icon">&#128161;</span><span class="sidebar-link-text">Insights &amp; Forecast</span><button class="sidebar-fav" data-fav="insights" onclick="event.preventDefault();event.stopPropagation();toggleFav('insights')" title="Toggle favourite">&#9733;</button></a>
+                <a href="javascript:void(0)" onclick="showPage('targets')" class="sidebar-link" data-page="targets"><span class="sidebar-link-icon">&#127919;</span><span class="sidebar-link-text">Targets &amp; Rev Eng</span><button class="sidebar-fav" data-fav="targets" onclick="event.preventDefault();event.stopPropagation();toggleFav('targets')" title="Toggle favourite">&#9733;</button></a>
             </div>
             <div class="sidebar-group" data-group="team">
-                <div class="sidebar-group-label" onclick="window.toggleNavGroup(this.parentElement)">&#9993; Team <span class="sidebar-chevron">&#9660;</span></div>
-                <a href="javascript:void(0)" onclick="showPage('activities')" class="sidebar-link" data-page="activities">Activity Tracking<button class="sidebar-fav" data-fav="activities" onclick="event.preventDefault();event.stopPropagation();toggleFav('activities')" title="Toggle favourite">&#9733;</button></a>
+                <div class="sidebar-group-label" onclick="window.toggleNavGroup(this.parentElement)"><span class="sidebar-group-icon">&#9993;</span> <span class="sidebar-label-text">Team</span> <span class="sidebar-chevron">&#9660;</span></div>
+                <a href="javascript:void(0)" onclick="showPage('activities')" class="sidebar-link" data-page="activities"><span class="sidebar-link-icon">&#9889;</span><span class="sidebar-link-text">Activity Tracking</span><button class="sidebar-fav" data-fav="activities" onclick="event.preventDefault();event.stopPropagation();toggleFav('activities')" title="Toggle favourite">&#9733;</button></a>
             </div>
             <div class="sidebar-group" data-group="ma">
-                <div class="sidebar-group-label" onclick="window.toggleNavGroup(this.parentElement)">&#128188; M&amp;A <span class="sidebar-chevron">&#9660;</span></div>
-                <a href="javascript:void(0)" onclick="showPage('ma-hub')" class="sidebar-link" data-page="ma-hub">M&amp;A Hub<button class="sidebar-fav" data-fav="ma-hub" onclick="event.preventDefault();event.stopPropagation();toggleFav('ma-hub')" title="Toggle favourite">&#9733;</button></a>
+                <div class="sidebar-group-label" onclick="window.toggleNavGroup(this.parentElement)"><span class="sidebar-group-icon">&#128188;</span> <span class="sidebar-label-text">M&amp;A</span> <span class="sidebar-chevron">&#9660;</span></div>
+                <a href="javascript:void(0)" onclick="showPage('ma-hub')" class="sidebar-link" data-page="ma-hub"><span class="sidebar-link-icon">&#128188;</span><span class="sidebar-link-text">M&amp;A Hub</span><button class="sidebar-fav" data-fav="ma-hub" onclick="event.preventDefault();event.stopPropagation();toggleFav('ma-hub')" title="Toggle favourite">&#9733;</button></a>
             </div>
             <div class="sidebar-group" data-group="operations">
-                <div class="sidebar-group-label" onclick="window.toggleNavGroup(this.parentElement)">&#129302; Operations <span class="sidebar-chevron">&#9660;</span></div>
-                <a href="javascript:void(0)" onclick="showPage('ai-roadmap')" class="sidebar-link" data-page="ai-roadmap">AI Roadmap<button class="sidebar-fav" data-fav="ai-roadmap" onclick="event.preventDefault();event.stopPropagation();toggleFav('ai-roadmap')" title="Toggle favourite">&#9733;</button></a>
-                <a href="javascript:void(0)" onclick="showPage('inbound-queue')" class="sidebar-link" data-page="inbound-queue">Inbound Queue<button class="sidebar-fav" data-fav="inbound-queue" onclick="event.preventDefault();event.stopPropagation();toggleFav('inbound-queue')" title="Toggle favourite">&#9733;</button></a>
-                <a href="javascript:void(0)" onclick="showPage('skills')" class="sidebar-link" data-page="skills">&#9889; Skills Engine<button class="sidebar-fav" data-fav="skills" onclick="event.preventDefault();event.stopPropagation();toggleFav('skills')" title="Toggle favourite">&#9733;</button></a>
+                <div class="sidebar-group-label" onclick="window.toggleNavGroup(this.parentElement)"><span class="sidebar-group-icon">&#129302;</span> <span class="sidebar-label-text">Operations</span> <span class="sidebar-chevron">&#9660;</span></div>
+                <a href="javascript:void(0)" onclick="showPage('ai-roadmap')" class="sidebar-link" data-page="ai-roadmap"><span class="sidebar-link-icon">&#128736;</span><span class="sidebar-link-text">AI Roadmap</span><button class="sidebar-fav" data-fav="ai-roadmap" onclick="event.preventDefault();event.stopPropagation();toggleFav('ai-roadmap')" title="Toggle favourite">&#9733;</button></a>
+                <a href="javascript:void(0)" onclick="showPage('inbound-queue')" class="sidebar-link" data-page="inbound-queue"><span class="sidebar-link-icon">&#128229;</span><span class="sidebar-link-text">Inbound Queue</span><button class="sidebar-fav" data-fav="inbound-queue" onclick="event.preventDefault();event.stopPropagation();toggleFav('inbound-queue')" title="Toggle favourite">&#9733;</button></a>
+                <a href="javascript:void(0)" onclick="showPage('skills')" class="sidebar-link" data-page="skills"><span class="sidebar-link-icon">&#9889;</span><span class="sidebar-link-text">Skills Engine</span><button class="sidebar-fav" data-fav="skills" onclick="event.preventDefault();event.stopPropagation();toggleFav('skills')" title="Toggle favourite">&#9733;</button></a>
             </div>
             <div class="sidebar-group" data-group="outreach">
-                <div class="sidebar-group-label" onclick="window.toggleNavGroup(this.parentElement)">&#128640; Outreach <span class="sidebar-chevron">&#9660;</span></div>
-                <a href="javascript:void(0)" onclick="showPage('outreach')" class="sidebar-link" data-page="outreach">Outreach Engine<button class="sidebar-fav" data-fav="outreach" onclick="event.preventDefault();event.stopPropagation();toggleFav('outreach')" title="Toggle favourite">&#9733;</button></a>
+                <div class="sidebar-group-label" onclick="window.toggleNavGroup(this.parentElement)"><span class="sidebar-group-icon">&#128640;</span> <span class="sidebar-label-text">Outreach</span> <span class="sidebar-chevron">&#9660;</span></div>
+                <a href="javascript:void(0)" onclick="showPage('outreach')" class="sidebar-link" data-page="outreach"><span class="sidebar-link-icon">&#128640;</span><span class="sidebar-link-text">Outreach Engine</span><button class="sidebar-fav" data-fav="outreach" onclick="event.preventDefault();event.stopPropagation();toggleFav('outreach')" title="Toggle favourite">&#9733;</button></a>
             </div>
         </nav>
-        <div class="sidebar-footer" style="display:flex;align-items:center;justify-content:space-between">
-            <span>Sales &amp; M&amp;A &amp; AI Intelligence</span>
+        <button class="sidebar-collapse-btn" id="sidebar-collapse-btn" title="Collapse sidebar" aria-label="Collapse sidebar">&#8249;</button>
+        <div class="sidebar-footer">
+            <span class="sidebar-footer-text">Sales &amp; M&amp;A &amp; AI Intelligence</span>
             <button class="theme-toggle" id="theme-toggle" onclick="window.toggleTheme()" title="Toggle dark mode" aria-label="Toggle dark mode">
                 <span id="theme-icon">&#9790;</span>
             </button>
@@ -196,50 +199,50 @@
     <!-- ═══ LinkedIn Auth Modal ═══ -->
     <div class="linkedin-auth-overlay hidden" id="linkedin-auth-overlay" onclick="if(event.target===this)window.LinkedInAuth.close()">
         <div class="linkedin-auth-card">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-                <h3 style="margin:0;font-size:18px;font-weight:700">
-                    <span style="color:#0077B5">&#9679;</span> Connect LinkedIn
+            <div class="li-modal-header">
+                <h3 class="li-modal-title">
+                    <span class="li-dot">&#9679;</span> Connect LinkedIn
                 </h3>
-                <button onclick="window.LinkedInAuth.close()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#6b7280;padding:4px">&times;</button>
+                <button onclick="window.LinkedInAuth.close()" class="li-modal-close">&times;</button>
             </div>
-            <div id="li-session-status" style="margin-bottom:16px">
+            <div class="li-session-status" id="li-session-status">
                 <div class="li-status-disconnected" id="li-status-box">
-                    <span style="font-size:18px">&#128274;</span>
+                    <span class="li-status-icon">&#128274;</span>
                     <div>
-                        <div style="font-weight:600;font-size:13px" id="li-status-text">Not connected</div>
+                        <div class="li-status-label" id="li-status-text">Not connected</div>
                         <div class="text-muted-sm" id="li-status-detail">Connect your LinkedIn to enable outreach</div>
                     </div>
                 </div>
             </div>
             <div id="li-auth-methods">
-                <div id="li-oneclick-area" style="text-align:center;padding:16px 0">
-                    <button class="li-submit-btn" id="li-oneclick-btn" style="background:linear-gradient(135deg,#0077B5,#005885);font-size:15px;padding:14px 20px;border-radius:12px;letter-spacing:0.3px" onclick="window.LinkedInAuth.oneClick()">
+                <div class="li-oneclick-area" id="li-oneclick-area">
+                    <button class="li-submit-btn li-oneclick-btn" id="li-oneclick-btn" onclick="window.LinkedInAuth.oneClick()">
                         <span id="li-oneclick-label">&#128279; Connect My LinkedIn</span>
                     </button>
-                    <div id="li-oneclick-status" style="margin-top:12px;font-size:12px;color:#6b7280"></div>
+                    <div class="li-oneclick-status" id="li-oneclick-status"></div>
                 </div>
-                <div id="li-ext-install" style="display:none;margin-top:12px">
-                    <div style="background:#fffbeb;border:1px solid #fcd34d;border-radius:10px;padding:14px">
-                        <div style="font-size:12px;font-weight:700;color:#92400e;margin-bottom:6px">One-time setup needed</div>
-                        <div style="font-size:13px;color:#374151;line-height:1.6;margin-bottom:10px">
+                <div id="li-ext-install" style="display:none">
+                    <div class="li-ext-warning">
+                        <div class="li-ext-title">One-time setup needed</div>
+                        <div class="li-ext-desc">
                             Install the <strong>Annas AI Hub LinkedIn Connector</strong> Chrome extension for single-click login:
                         </div>
-                        <ol style="font-size:12px;color:#4b5563;line-height:1.8;margin:0 0 10px 16px;padding:0">
+                        <ol class="li-ext-steps">
                             <li>Open <strong>chrome://extensions</strong> in a new tab</li>
                             <li>Enable <strong>Developer mode</strong> (top-right toggle)</li>
                             <li>Click <strong>Load unpacked</strong></li>
-                            <li>Select the <code style="background:#f3f4f6;padding:1px 4px;border-radius:3px">chrome-extension</code> folder from your project</li>
+                            <li>Select the <code class="li-ext-code">chrome-extension</code> folder from your project</li>
                         </ol>
-                        <button class="li-submit-btn" style="background:#0077B5;font-size:12px;padding:8px 14px" onclick="window.LinkedInAuth.retryExtension()">
+                        <button class="li-submit-btn btn-sm" onclick="window.LinkedInAuth.retryExtension()">
                             I've installed it &mdash; try again
                         </button>
                     </div>
                 </div>
-                <details style="margin-top:12px">
-                    <summary style="font-size:12px;color:#6b7280;cursor:pointer;padding:6px 0">Manual connection (without extension)</summary>
-                    <div style="padding-top:10px">
-                        <div style="font-size:12px;color:#374151;line-height:1.6;margin-bottom:10px">
-                            In Chrome DevTools (<kbd style="background:#e5e7eb;padding:2px 6px;border-radius:3px;font-size:11px">F12</kbd>) &rarr; <strong>Application</strong> &rarr; <strong>Cookies</strong> &rarr; <strong>linkedin.com</strong>:
+                <details class="li-manual-section">
+                    <summary class="li-manual-summary">Manual connection (without extension)</summary>
+                    <div class="li-manual-body">
+                        <div class="li-manual-desc">
+                            In Chrome DevTools (<kbd class="li-manual-kbd">F12</kbd>) &rarr; <strong>Application</strong> &rarr; <strong>Cookies</strong> &rarr; <strong>linkedin.com</strong>:
                         </div>
                         <input class="li-input" id="li-input-li_at" placeholder="li_at cookie value..." autocomplete="off" />
                         <input class="li-input" id="li-input-csrf" placeholder="JSESSIONID value (without quotes)..." autocomplete="off" />
@@ -249,10 +252,10 @@
                     </div>
                 </details>
             </div>
-            <div id="li-disconnect-section" style="display:none;margin-top:12px">
-                <button class="li-submit-btn" style="background:#ef4444" onclick="window.LinkedInAuth.disconnect()">Disconnect LinkedIn</button>
+            <div id="li-disconnect-section" class="li-disconnect-section" style="display:none">
+                <button class="li-submit-btn btn-danger" onclick="window.LinkedInAuth.disconnect()">Disconnect LinkedIn</button>
             </div>
-            <div id="li-auth-message" style="display:none;margin-top:12px;padding:10px;border-radius:8px;font-size:13px"></div>
+            <div id="li-auth-message" class="li-auth-message" style="display:none"></div>
         </div>
     </div>
 
@@ -260,34 +263,34 @@
     <div class="prospect-panel-overlay" id="prospect-panel-overlay" onclick="window.ProspectPanel.close()"></div>
     <div class="prospect-panel" id="prospect-panel">
         <div class="prospect-panel-header">
-            <div style="display:flex;justify-content:space-between;align-items:flex-start">
-                <div style="flex:1">
-                    <div style="display:flex;align-items:center;gap:12px">
-                        <div class="score-circle" id="pp-score-circle" style="background:var(--accent)">—</div>
+            <div class="pp-header-row">
+                <div class="pp-header-main">
+                    <div class="pp-header-identity">
+                        <div class="score-circle" id="pp-score-circle">—</div>
                         <div>
-                            <div style="font-size:16px;font-weight:700" id="pp-name">—</div>
-                            <div style="font-size:13px;color:#6b7280" id="pp-title-company">—</div>
+                            <div class="pp-name" id="pp-name">—</div>
+                            <div class="pp-subtitle" id="pp-title-company">—</div>
                         </div>
                     </div>
-                    <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap" id="pp-badges"></div>
-                    <div style="display:flex;gap:12px;margin-top:8px;font-size:12px;color:#6b7280" id="pp-links"></div>
+                    <div class="pp-badges" id="pp-badges"></div>
+                    <div class="pp-links" id="pp-links"></div>
                 </div>
-                <button onclick="window.ProspectPanel.close()" style="background:none;border:none;font-size:22px;cursor:pointer;color:#6b7280;padding:4px">&times;</button>
+                <button onclick="window.ProspectPanel.close()" class="pp-close-btn">&times;</button>
             </div>
         </div>
         <div class="prospect-panel-tabs">
             <button class="prospect-panel-tab active" data-ptab="pp-research">Research</button>
-            <button class="prospect-panel-tab" data-ptab="pp-messages">Messages</button>
+            <button class="prospect-panel-tab pp-tab-disabled" data-ptab="pp-messages">Messages <span class="coming-soon-badge">Soon</span></button>
             <button class="prospect-panel-tab" data-ptab="pp-composer">Compose</button>
             <button class="prospect-panel-tab" data-ptab="pp-scoring">Scoring</button>
         </div>
         <div class="prospect-panel-body">
             <div class="prospect-tab-content active" id="pp-research">
                 <div id="pp-research-content">
-                    <div style="text-align:center;padding:40px 20px;color:#6b7280">
-                        <div style="font-size:32px;margin-bottom:8px">&#128269;</div>
-                        <div style="font-size:14px;font-weight:600;margin-bottom:4px">No research yet</div>
-                        <div style="font-size:12px;margin-bottom:16px">Click below to run AI-powered deep research on this prospect</div>
+                    <div class="pp-empty-state">
+                        <div class="pp-empty-icon">&#128269;</div>
+                        <div class="pp-empty-title">No research yet</div>
+                        <div class="pp-empty-desc">Click below to run AI-powered deep research on this prospect</div>
                         <button class="composer-btn primary" id="pp-run-research-btn" onclick="window.ProspectPanel.runResearch()">
                             &#9889; Run AI Research
                         </button>
@@ -295,20 +298,20 @@
                 </div>
             </div>
             <div class="prospect-tab-content" id="pp-messages">
-                <div id="pp-messages-content" style="font-size:13px;color:#6b7280;text-align:center;padding:40px">
+                <div id="pp-messages-content" class="pp-messages-empty">
                     No messages yet
                 </div>
             </div>
             <div class="prospect-tab-content" id="pp-composer">
-                <div style="margin-bottom:12px">
-                    <div style="display:flex;gap:8px;margin-bottom:10px">
-                        <select id="pp-step-select" style="padding:6px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:12px;flex:1">
+                <div class="mb-3">
+                    <div class="pp-composer-row">
+                        <select id="pp-step-select" class="pp-composer-select">
                             <option value="1">Step 1: Introduction</option>
                             <option value="2">Step 2: Value-add follow-up</option>
                             <option value="3">Step 3: Social proof</option>
                             <option value="4">Step 4: Soft close</option>
                         </select>
-                        <select id="pp-channel-select" style="padding:6px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:12px;">
+                        <select id="pp-channel-select" class="pp-composer-select">
                             <option value="linkedin">LinkedIn</option>
                             <option value="email">Email</option>
                         </select>
@@ -323,12 +326,30 @@
                     <button class="composer-btn success" onclick="window.ProspectPanel.approveAndQueue()" id="pp-approve-btn">&#10003; Approve &amp; Queue</button>
                     <button class="composer-btn primary hidden" onclick="window.ProspectPanel.sendNow()" id="pp-send-btn">&#9993; Send Now</button>
                 </div>
-                <div id="pp-composer-status" style="display:none;margin-top:8px;font-size:12px;padding:8px;border-radius:6px"></div>
+                <div id="pp-composer-status" class="pp-status-msg" style="display:none"></div>
             </div>
             <div class="prospect-tab-content" id="pp-scoring">
-                <div id="pp-scoring-content" style="font-size:13px;color:#6b7280;text-align:center;padding:40px">
+                <div id="pp-scoring-content" class="pp-scoring-empty">
                     Select a prospect to view scoring
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ Command Palette ═══ -->
+    <div class="cmd-overlay" id="cmd-overlay">
+        <div class="cmd-palette">
+            <div class="cmd-input-wrap">
+                <span class="cmd-input-icon">&#128269;</span>
+                <input class="cmd-input" id="cmd-input" type="text" placeholder="Search pages, actions..." autocomplete="off" />
+                <kbd>Esc</kbd>
+            </div>
+            <div class="cmd-results" id="cmd-results"></div>
+            <div class="cmd-footer">
+                <span><kbd>&#8593;</kbd><kbd>&#8595;</kbd> Navigate</span>
+                <span><kbd>&#9166;</kbd> Select</span>
+                <span><kbd>Esc</kbd> Close</span>
+                <span style="margin-left:auto"><kbd>Ctrl</kbd>+<kbd>K</kbd></span>
             </div>
         </div>
     </div>
@@ -492,5 +513,8 @@
     <script src="js/outreach-actions.js"></script>
     <script src="js/outreach-panel.js"></script>
     <script src="js/outreach-bot.js"></script>
+    <!-- UX enhancements -->
+    <script src="js/toast.js"></script>
+    <script src="js/command-palette.js"></script>
 </body>
 </html>

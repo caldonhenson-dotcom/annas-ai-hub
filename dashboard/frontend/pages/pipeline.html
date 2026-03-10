@@ -9,9 +9,9 @@
     <!-- ── Department Tabs ── -->
     <div class="pl-dept-tabs">
         <button class="pl-dept-tab active" data-dept="all">All Departments</button>
-        <button class="pl-dept-tab" data-dept="delivery">Delivery</button>
-        <button class="pl-dept-tab" data-dept="supply-chain">Supply Chain</button>
-        <button class="pl-dept-tab" data-dept="cdd">CDD</button>
+        <button class="pl-dept-tab pl-dept-disabled" data-dept="delivery" disabled>Delivery <span class="coming-soon-badge">Soon</span></button>
+        <button class="pl-dept-tab pl-dept-disabled" data-dept="supply-chain" disabled>Supply Chain <span class="coming-soon-badge">Soon</span></button>
+        <button class="pl-dept-tab pl-dept-disabled" data-dept="cdd" disabled>CDD <span class="coming-soon-badge">Soon</span></button>
     </div>
 
     <!-- ── Row 1: Activity Totals (HubSpot-style) ── -->
@@ -31,7 +31,7 @@
                     <span class="pl-filter-pill" data-range="all">All Time</span>
                 </div>
             </div>
-            <div class="pl-chart-wrap" id="pl-leads-chart" style="height:200px"></div>
+            <div class="pl-chart-wrap" id="pl-leads-chart" ></div>
         </div>
 
         <!-- Pipeline Value — monthly bar chart -->
@@ -43,7 +43,7 @@
                     <span class="pl-filter-pill" data-range="all">All Time</span>
                 </div>
             </div>
-            <div class="pl-chart-wrap" id="pl-pipeline-chart" style="height:200px"></div>
+            <div class="pl-chart-wrap" id="pl-pipeline-chart" ></div>
         </div>
     </div>
 
@@ -87,7 +87,7 @@
                     <span class="pl-filter-pill active" data-range="all">All Time</span>
                 </div>
             </div>
-            <div class="pl-chart-wrap" id="pl-revenue-chart" style="height:200px"></div>
+            <div class="pl-chart-wrap" id="pl-revenue-chart" ></div>
         </div>
     </div>
 

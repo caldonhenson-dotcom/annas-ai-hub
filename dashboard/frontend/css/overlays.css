@@ -124,8 +124,8 @@
     border-color: var(--card-border);
 }
 [data-theme="dark"] ::-webkit-scrollbar-track { background: var(--bg); }
-[data-theme="dark"] ::-webkit-scrollbar-thumb { background: #3a3d4a; }
-[data-theme="dark"] ::-webkit-scrollbar-thumb:hover { background: #4a4d5a; }
+[data-theme="dark"] ::-webkit-scrollbar-thumb { background: var(--card-border); }
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover { background: var(--text-tertiary); }
 [data-theme="dark"] .top-bar-btn:hover { background: rgba(255,255,255,0.06); }
 
 /* ============================================================
@@ -232,6 +232,40 @@
     background: rgba(146, 64, 14, 0.15); border-color: rgba(252, 211, 77, 0.3);
     color: #fcd34d;
 }
+
+/* LinkedIn modal structured classes */
+.li-modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-4); }
+.li-modal-title { margin: 0; font-size: 18px; font-weight: 700; }
+.li-modal-title .li-dot { color: #0077B5; }
+.li-modal-close { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text-muted); padding: var(--space-1); }
+.li-session-status { margin-bottom: var(--space-4); }
+.li-oneclick-area { text-align: center; padding: var(--space-4) 0; }
+.li-oneclick-btn {
+    background: linear-gradient(135deg, #0077B5, #005885);
+    font-size: 15px; padding: 14px 20px;
+    border-radius: var(--radius-lg); letter-spacing: 0.3px;
+}
+.li-oneclick-status { margin-top: var(--space-3); font-size: 12px; color: var(--text-muted); }
+.li-ext-warning {
+    background: #fffbeb; border: 1px solid #fcd34d;
+    border-radius: var(--radius); padding: 14px; margin-top: var(--space-3);
+}
+.li-ext-title { font-size: 12px; font-weight: 700; color: #92400e; margin-bottom: 6px; }
+.li-ext-desc { font-size: 13px; color: var(--text); line-height: 1.6; margin-bottom: 10px; }
+.li-ext-steps { font-size: 12px; color: var(--text-muted); line-height: 1.8; margin: 0 0 10px 16px; padding: 0; }
+.li-ext-code { background: var(--surface2); padding: 1px 4px; border-radius: 3px; }
+.li-manual-section { margin-top: var(--space-3); }
+.li-manual-summary { font-size: 12px; color: var(--text-muted); cursor: pointer; padding: 6px 0; }
+.li-manual-body { padding-top: 10px; }
+.li-manual-desc { font-size: 12px; color: var(--text); line-height: 1.6; margin-bottom: 10px; }
+.li-manual-kbd { background: var(--card-border); padding: 2px 6px; border-radius: 3px; font-size: 11px; }
+.li-disconnect-section { margin-top: var(--space-3); }
+.li-auth-message { margin-top: var(--space-3); padding: 10px; border-radius: var(--radius-sm); font-size: 13px; }
+
+[data-theme="dark"] .li-ext-warning {
+    background: rgba(146, 64, 14, 0.15); border-color: rgba(252, 211, 77, 0.3);
+}
+[data-theme="dark"] .li-ext-title { color: #fcd34d; }
 
 /* Theme toggle button */
 .theme-toggle {

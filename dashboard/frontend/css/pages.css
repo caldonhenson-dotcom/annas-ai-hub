@@ -50,6 +50,59 @@
 .exec-pillar-points li:last-child { border-bottom: none; }
 .exec-pillar-points li strong { color: var(--text); }
 
+/* KPI value color variants */
+.exec-kpi-val--teal    { color: var(--accent); }
+.exec-kpi-val--blue    { color: var(--accent2); }
+.exec-kpi-val--green   { color: #34d399; }
+.exec-kpi-val--purple  { color: var(--accent3); }
+.exec-kpi-val--amber   { color: var(--accent6); }
+.exec-kpi-val--info    { color: var(--info); }
+.exec-kpi-val--pink    { color: var(--accent5); }
+
+/* Pillar icon background variants */
+.exec-pillar-icon--teal   { background: rgba(60,180,173,0.08); color: var(--accent); }
+.exec-pillar-icon--blue   { background: rgba(51,79,180,0.08); color: var(--accent2); }
+.exec-pillar-icon--purple { background: rgba(139,92,246,0.08); color: var(--accent3); }
+.exec-pillar-icon--pink   { background: rgba(244,114,182,0.08); color: var(--accent5); }
+
+/* Pillar arrow color variants */
+.exec-pillar-arrow--teal   { color: var(--accent); }
+.exec-pillar-arrow--blue   { color: var(--accent2); }
+.exec-pillar-arrow--purple { color: var(--accent3); }
+.exec-pillar-arrow--pink   { color: var(--accent5); }
+
+/* Sparkline grid — replaces inline grid on executive page */
+.exec-spark-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-2); margin-top: var(--space-2);
+}
+.exec-spark-card { padding: 10px 12px; }
+.exec-spark-title { font-size: 10px; margin-bottom: var(--space-1); }
+
+/* Revenue target bar */
+.exec-target-card { margin-top: var(--space-2); padding: 10px 14px; }
+.exec-target-label {
+    font-size: 10px; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.04em;
+    margin-bottom: var(--space-1);
+}
+.exec-target-values {
+    display: flex; justify-content: space-between;
+    margin-bottom: var(--space-1); font-size: 13px;
+}
+.exec-target-hint { color: var(--text-muted); }
+.exec-target-track {
+    height: 10px; background: var(--card-border);
+    border-radius: 5px; overflow: hidden;
+}
+.exec-target-fill {
+    height: 100%; border-radius: 5px;
+    background: linear-gradient(90deg, #34d399, #34d399cc);
+}
+
+/* Warning inline text */
+.exec-warn { color: var(--warning); }
+
 /* ============================================================
    Board & Detail Panels (used by AI Roadmap)
    ============================================================ */

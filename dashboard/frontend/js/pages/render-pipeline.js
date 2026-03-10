@@ -5,11 +5,8 @@
 (function () {
     'use strict';
 
-    var chartInstances = {};
-    var MONTH_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-
-    // Palette for sources / reps
-    var PALETTE = ['#3CB4AD','#334FB4','#a78bfa','#34d399','#f472b6','#f59e0b','#60a5fa','#ef4444'];
+    var MONTH_SHORT = window.MONTH_SHORT;
+    var PALETTE = window.PALETTE;
 
     // Stage display config
     var STAGE_ORDER = [
@@ -55,26 +52,24 @@
         'Rose Galbally', 'Skye Whitton'
     ];
 
-    // ── Theme helpers ──
-    function isDark() { return document.documentElement.getAttribute('data-theme') === 'dark'; }
-    function tickCol() { return isDark() ? '#9ca3af' : '#94a3b8'; }
-    function tipBg() { return isDark() ? '#1a1d27' : '#242833'; }
-    function gridCol() { return isDark() ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'; }
+    // ── Filter pill range helpers ──
+    function getDateRange(rangeKey) {
+        if (!rangeKey || rangeKey === 'all') return null;
+        var now = new Date();
+        var y = now.getFullYear();
+        var m = ('0' + (now.getMonth() + 1)).slice(-2);
+        if (rangeKey === 'ytd') return { start: y + '-01-01', end: formatDate(now), monthStart: y + '-01' };
+        if (rangeKey === 'mtd') return { start: y + '-' + m + '-01', end: formatDate(now), monthStart: y + '-' + m };
+        return null;
+    }
 
-    // ── Chart helper ──
-    function ensureCanvas(containerId, height) {
-        var el = document.getElementById(containerId);
-        if (!el) return null;
-        if (chartInstances[containerId]) {
-            chartInstances[containerId].destroy();
-            delete chartInstances[containerId];
+    function filterMonthlyRange(data, range) {
+        if (!range) return data;
+        var filtered = {};
+        for (var m in data) {
+            if (m >= range.monthStart) filtered[m] = data[m];
         }
-        el.innerHTML = '';
-        el.style.position = 'relative';
-        el.style.height = (height || 200) + 'px';
-        var canvas = document.createElement('canvas');
-        el.appendChild(canvas);
-        return canvas;
+        return filtered;
     }
 
     // ── Date range for "last 30 days" ──
@@ -135,11 +130,11 @@
     // ================================================================
     // 2. Total Leads — monthly bar chart (Chart.js)
     // ================================================================
-    function renderLeadsChart() {
+    function renderLeadsChart(range) {
         var canvas = ensureCanvas('pl-leads-chart', 200);
         if (!canvas) return;
 
-        var monthly = filterDailyToMonthly(TS.leads_by_day, null);
+        var monthly = filterDailyToMonthly(TS.leads_by_day, range || null);
         var entries = Object.entries(monthly).sort();
         if (entries.length > 12) entries = entries.slice(-12);
         if (!entries.length) return;
@@ -150,7 +145,7 @@
         });
         var values = entries.map(function (e) { return e[1]; });
 
-        chartInstances['pl-leads-chart'] = new Chart(canvas, {
+        storeChart('pl-leads-chart', new Chart(canvas, {
             type: 'bar',
             data: {
                 labels: labels,
@@ -164,17 +159,17 @@
                 }]
             },
             options: chartOpts(false)
-        });
+        }));
     }
 
     // ================================================================
     // 3. Pipeline Value — monthly bar chart
     // ================================================================
-    function renderPipelineChart() {
+    function renderPipelineChart(range) {
         var canvas = ensureCanvas('pl-pipeline-chart', 200);
         if (!canvas) return;
 
-        var data = TS.pipeline_value_by_month || {};
+        var data = filterMonthlyRange(TS.pipeline_value_by_month || {}, range);
         var entries = Object.entries(data).sort();
         if (!entries.length) return;
 
@@ -184,7 +179,7 @@
         });
         var values = entries.map(function (e) { return e[1]; });
 
-        chartInstances['pl-pipeline-chart'] = new Chart(canvas, {
+        storeChart('pl-pipeline-chart', new Chart(canvas, {
             type: 'bar',
             data: {
                 labels: labels,
@@ -198,17 +193,17 @@
                 }]
             },
             options: chartOpts(true)
-        });
+        }));
     }
 
     // ================================================================
     // 4. Revenue Won — line chart with trend
     // ================================================================
-    function renderRevenueChart() {
+    function renderRevenueChart(range) {
         var canvas = ensureCanvas('pl-revenue-chart', 200);
         if (!canvas) return;
 
-        var data = TS.revenue_won_by_month || {};
+        var data = filterMonthlyRange(TS.revenue_won_by_month || {}, range);
         var entries = Object.entries(data).sort();
         if (!entries.length) return;
 
@@ -218,7 +213,7 @@
         });
         var values = entries.map(function (e) { return e[1]; });
 
-        chartInstances['pl-revenue-chart'] = new Chart(canvas, {
+        storeChart('pl-revenue-chart', new Chart(canvas, {
             type: 'line',
             data: {
                 labels: labels,
@@ -236,48 +231,7 @@
                 }]
             },
             options: chartOpts(true)
-        });
-    }
-
-    // Shared Chart.js options
-    function chartOpts(isCurrency) {
-        return {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    backgroundColor: tipBg(),
-                    titleColor: '#fff', bodyColor: '#fff',
-                    titleFont: { weight: '600' }, bodyFont: { size: 13 },
-                    padding: 10, cornerRadius: 8,
-                    callbacks: {
-                        label: function (ctx) {
-                            var v = ctx.raw;
-                            return isCurrency ? '\u00a3' + v.toLocaleString('en-GB') : v.toLocaleString('en-GB');
-                        }
-                    }
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    grid: { color: gridCol() },
-                    border: { display: false },
-                    ticks: {
-                        font: { size: 11 }, color: tickCol(),
-                        callback: function (v) {
-                            return isCurrency ? '\u00a3' + fmtNum(v) : fmtNum(v);
-                        }
-                    }
-                },
-                x: {
-                    grid: { display: false },
-                    border: { display: false },
-                    ticks: { font: { size: 11, weight: '600' }, color: tickCol() }
-                }
-            }
-        };
+        }));
     }
 
     // ================================================================
@@ -554,6 +508,39 @@
     }
 
     // ================================================================
+    // Filter Pills — re-render chart for a specific time range
+    // ================================================================
+    function rerenderChart(chartId, rangeKey) {
+        var range = getDateRange(rangeKey);
+        switch (chartId) {
+            case 'pl-leads-chart': renderLeadsChart(range); break;
+            case 'pl-pipeline-chart': renderPipelineChart(range); break;
+            case 'pl-revenue-chart': renderRevenueChart(range); break;
+        }
+    }
+
+    var _pillsInited = false;
+    function initFilterPills() {
+        if (_pillsInited) return;
+        var section = document.getElementById('pipeline');
+        if (!section) return;
+        _pillsInited = true;
+        section.addEventListener('click', function (e) {
+            var pill = e.target.closest('.pl-filter-pill');
+            if (!pill) return;
+            // Toggle active within same card
+            var card = pill.closest('.pl-card');
+            if (card) {
+                card.querySelectorAll('.pl-filter-pill').forEach(function (p) { p.classList.remove('active'); });
+                pill.classList.add('active');
+            }
+            // Re-render the chart in this card
+            var chartWrap = card && card.querySelector('.pl-chart-wrap');
+            if (chartWrap) rerenderChart(chartWrap.id, pill.getAttribute('data-range'));
+        });
+    }
+
+    // ================================================================
     // Master render
     // ================================================================
     window.renderPipeline = function () {
@@ -566,5 +553,6 @@
         renderActivityLeaderboard();
         renderDealTable();
         renderStaleDealsList();
+        initFilterPills();
     };
 })();

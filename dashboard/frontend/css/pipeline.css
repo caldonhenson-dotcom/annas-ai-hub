@@ -12,12 +12,22 @@
     color: var(--text-muted); background: none; border: none;
     cursor: pointer; border-bottom: 2px solid transparent;
     margin-bottom: -2px; transition: all 0.2s; font-family: var(--font);
+    min-height: var(--touch-min);
 }
 .pl-dept-tab:hover { color: var(--text); }
 .pl-dept-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
 .pl-dept-tab:focus-visible {
     outline: 2px solid var(--accent); outline-offset: -2px;
     border-radius: var(--radius-sm);
+}
+.pl-dept-tab.pl-dept-disabled {
+    opacity: 0.45; cursor: not-allowed; pointer-events: none;
+}
+.coming-soon-badge {
+    font-size: 9px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.5px; background: var(--card-border);
+    color: var(--text-muted); padding: 1px 6px; border-radius: 8px;
+    margin-left: 4px; vertical-align: middle;
 }
 
 /* ── Activity Totals Row (HubSpot style) ── */
@@ -59,9 +69,8 @@
     transition: var(--transition);
 }
 .pl-card:hover {
-    border-color: rgba(60, 180, 173, 0.3);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    transform: translateY(-2px);
+    border-color: rgba(60, 180, 173, 0.2);
+    box-shadow: var(--shadow);
 }
 .pl-card-full { margin-bottom: var(--space-4); }
 .pl-card-alert { border-color: rgba(245, 158, 11, 0.3); }
@@ -77,9 +86,10 @@
 }
 .pl-card-filters { display: flex; gap: 4px; }
 .pl-filter-pill {
-    padding: 4px 12px; border-radius: 14px; font-size: 11px; font-weight: 600;
+    padding: 6px 14px; border-radius: 14px; font-size: 11px; font-weight: 600;
     border: 1px solid var(--card-border); background: var(--card);
     color: var(--text-muted); cursor: pointer; transition: all 0.2s;
+    min-height: var(--touch-compact);
 }
 .pl-filter-pill:hover { border-color: var(--accent); color: var(--accent); }
 .pl-filter-pill:focus-visible {
@@ -102,6 +112,8 @@
 /* ── Chart Container ── */
 .pl-chart-wrap {
     position: relative; width: 100%;
+    min-height: 180px;
+    aspect-ratio: 2 / 1;
 }
 
 /* ── Deal Stage Funnel ── */

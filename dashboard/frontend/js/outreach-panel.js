@@ -313,6 +313,7 @@
     // Panel tab switching
     document.querySelectorAll('.prospect-panel-tab').forEach(function(tab) {
         tab.addEventListener('click', function() {
+            if (this.classList.contains('pp-tab-disabled')) return;
             window.ProspectPanel._switchTab(this.getAttribute('data-ptab'));
         });
     });

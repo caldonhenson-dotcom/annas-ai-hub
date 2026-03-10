@@ -10,10 +10,21 @@
 /* ---- 1024px: Tablet ---- */
 @media (max-width: 1024px) {
     /* Sidebar */
-    .sidebar { transform: translateX(-100%); }
+    .sidebar { transform: translateX(-100%); width: 220px !important; }
     .sidebar.open { transform: translateX(0); }
-    .layout-main { margin-left: 0; }
+    .sidebar.collapsed { width: 220px !important; }
+    .sidebar.collapsed .sidebar-brand-text,
+    .sidebar.collapsed .sidebar-label-text,
+    .sidebar.collapsed .sidebar-link-text,
+    .sidebar.collapsed .sidebar-user-name,
+    .sidebar.collapsed .sidebar-chevron,
+    .sidebar.collapsed .sidebar-fav,
+    .sidebar.collapsed .sidebar-footer-text { display: revert !important; }
+    .sidebar.collapsed .sidebar-link { padding: 7px 18px 7px 28px !important; justify-content: flex-start !important; }
+    .sidebar.collapsed .sidebar-group-label { padding: var(--space-2) 18px var(--space-1) !important; justify-content: space-between !important; }
+    .layout-main { margin-left: 0 !important; }
     .sidebar-toggle { display: flex; }
+    .sidebar-collapse-btn { display: none !important; }
 
     /* Grids */
     .kpi-grid { grid-template-columns: repeat(2, 1fr); }
@@ -105,6 +116,12 @@
     .exec-kpi-strip { flex-wrap: wrap; }
     .exec-kpi { min-width: 70px; }
     .exec-pillars { grid-template-columns: 1fr; }
+    .exec-spark-grid { grid-template-columns: 1fr; }
+}
+
+/* ---- 900px: Executive sparkline grid ---- */
+@media (max-width: 900px) {
+    .exec-spark-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
 /* ============================================================

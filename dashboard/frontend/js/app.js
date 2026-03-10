@@ -56,6 +56,44 @@
     };
 
     // ------------------------------------------------------------------
+    // Sidebar collapse (desktop)
+    // ------------------------------------------------------------------
+    var SIDEBAR_COLLAPSED_KEY = 'ecomplete_sidebar_collapsed';
+    var sidebar = document.getElementById('sidebar');
+    var collapseBtn = document.getElementById('sidebar-collapse-btn');
+
+    function isSidebarCollapsed() {
+        try { return localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === '1'; } catch (e) { return false; }
+    }
+
+    function applySidebarState(collapsed) {
+        if (!sidebar) return;
+        if (collapsed) {
+            sidebar.classList.add('collapsed');
+            if (collapseBtn) collapseBtn.innerHTML = '&#8250;';
+            if (collapseBtn) collapseBtn.title = 'Expand sidebar';
+        } else {
+            sidebar.classList.remove('collapsed');
+            if (collapseBtn) collapseBtn.innerHTML = '&#8249;';
+            if (collapseBtn) collapseBtn.title = 'Collapse sidebar';
+        }
+    }
+
+    // Restore on load (desktop only)
+    if (window.innerWidth > 1024) {
+        applySidebarState(isSidebarCollapsed());
+    }
+
+    if (collapseBtn) {
+        collapseBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            var nowCollapsed = !sidebar.classList.contains('collapsed');
+            applySidebarState(nowCollapsed);
+            try { localStorage.setItem(SIDEBAR_COLLAPSED_KEY, nowCollapsed ? '1' : '0'); } catch (ex) { /* empty */ }
+        });
+    }
+
+    // ------------------------------------------------------------------
     // Dark mode toggle
     // ------------------------------------------------------------------
     function updateThemeIcon() {
