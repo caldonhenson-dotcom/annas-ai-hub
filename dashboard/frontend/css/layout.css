@@ -124,9 +124,6 @@
     font-size: 14px; min-width: 20px; display: inline-block; text-align: center;
     margin-right: 8px; flex-shrink: 0;
 }
-.sidebar-link {
-    display: flex; align-items: center;
-}
 .sidebar-link-text { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .sidebar-group-icon { font-size: 12px; min-width: 16px; display: inline-block; }
 
@@ -136,7 +133,7 @@
     width: 24px; height: 24px; border-radius: 50%;
     background: var(--card); border: 1px solid var(--card-border);
     display: flex; align-items: center; justify-content: center;
-    cursor: pointer; z-index: 101; font-size: 14px; font-weight: 700;
+    cursor: pointer; z-index: var(--z-sidebar-toggle); font-size: 14px; font-weight: 700;
     color: var(--text-muted); box-shadow: var(--shadow);
     opacity: 0; transition: opacity 0.2s;
     line-height: 1; padding: 0;
@@ -185,7 +182,7 @@
     font-size: 12px; font-weight: 600; white-space: nowrap;
     border-radius: 6px; pointer-events: none;
     box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    text-transform: capitalize; z-index: 200;
+    text-transform: capitalize; z-index: var(--z-popover);
 }
 
 /* Layout main transition */
@@ -225,6 +222,7 @@
     border-top: 1px solid var(--card-border); margin-top: var(--space-4);
 }
 .dashboard-footer .brand { color: var(--accent); font-weight: 700; }
+.footer-stats { margin-top: 4px; }
 
 /* ============================================================
    Sidebar Toggle (mobile)

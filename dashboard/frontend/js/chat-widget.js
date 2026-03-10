@@ -274,9 +274,9 @@
         }
     };
 
-    // Keyboard shortcut: Ctrl+K or Cmd+K to toggle chat
+    // Keyboard shortcut: Ctrl+J or Cmd+J to toggle chat
     document.addEventListener('keydown', function(e) {
-        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'j') {
             e.preventDefault();
             if (isOpen) window.AnnaChat.close();
             else window.AnnaChat.open();

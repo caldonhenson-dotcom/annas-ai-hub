@@ -40,11 +40,11 @@
     .chain-item { min-width: 80px; padding: var(--space-3); }
 
     /* Monday boards */
-    .board-row, .board-header-row {
+    .rc-board-row, .rc-board-header {
         grid-template-columns: 1.5fr 100px 80px 100px;
     }
-    .board-row > :nth-child(n+5),
-    .board-header-row > :nth-child(n+5) { display: none; }
+    .rc-board-row > :nth-child(n+5),
+    .rc-board-header > :nth-child(n+5) { display: none; }
 
     /* Deal flow */
     .deal-flow-nav { padding: var(--space-3) 0; }
@@ -56,10 +56,11 @@
     .ai-item-row > :nth-child(n+3) { display: none; }
 }
 
-/* ---- 900px: Anna AI layout ---- */
+/* ---- 900px: Anna AI layout + Executive sparkline ---- */
 @media (max-width: 900px) {
     .anna-layout { grid-template-columns: 1fr; height: auto; min-height: calc(100vh - 56px); }
     .anna-sidebar { display: none; }
+    .exec-spark-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
 /* ---- 768px: Outreach ---- */
@@ -88,9 +89,9 @@
     .chain-arrow { transform: rotate(90deg); }
 
     /* Monday boards */
-    .board-row, .board-header-row { grid-template-columns: 1fr 90px; }
-    .board-row > :nth-child(n+3),
-    .board-header-row > :nth-child(n+3) { display: none; }
+    .rc-board-row, .rc-board-header { grid-template-columns: 1fr 90px; }
+    .rc-board-row > :nth-child(n+3),
+    .rc-board-header > :nth-child(n+3) { display: none; }
 
     /* Deal flow */
     .deal-flow-step .step-label { display: none; }
@@ -117,11 +118,6 @@
     .exec-kpi { min-width: 70px; }
     .exec-pillars { grid-template-columns: 1fr; }
     .exec-spark-grid { grid-template-columns: 1fr; }
-}
-
-/* ---- 900px: Executive sparkline grid ---- */
-@media (max-width: 900px) {
-    .exec-spark-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
 /* ============================================================

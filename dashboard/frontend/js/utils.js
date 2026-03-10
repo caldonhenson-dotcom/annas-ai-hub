@@ -128,18 +128,21 @@
 
 
     // ------------------------------------------------------------------
-    // Toast notification
+    // Toast notification — delegates to window.Toast (toast.js)
     // ------------------------------------------------------------------
     function showToast(msg, type) {
-        var t = document.createElement('div');
-        t.className = 'toast-msg ' + (type || 'info');
-        t.textContent = msg;
-        t.style.cssText = 'position:fixed;top:20px;right:20px;z-index:99999;padding:12px 20px;border-radius:8px;'
-            + 'font-size:13px;font-weight:600;color:#fff;box-shadow:0 4px 12px rgba(0,0,0,0.15);'
-            + 'animation:chatSlideIn 0.25s ease;'
-            + 'background:' + (type === 'error' ? '#ef4444' : type === 'success' ? '#10b981' : '#3CB4AD');
-        document.body.appendChild(t);
-        setTimeout(function () { t.remove(); }, 3500);
+        if (window.Toast && window.Toast.show) {
+            window.Toast.show(msg, type || 'info');
+        } else {
+            // Fallback if toast.js hasn't loaded yet
+            var t = document.createElement('div');
+            t.textContent = msg;
+            t.style.cssText = 'position:fixed;top:20px;right:20px;z-index:700;padding:12px 20px;border-radius:8px;'
+                + 'font-size:13px;font-weight:600;color:#fff;box-shadow:0 4px 12px rgba(0,0,0,0.15);'
+                + 'background:' + (type === 'error' ? 'var(--danger)' : type === 'success' ? 'var(--accent4)' : 'var(--accent)');
+            document.body.appendChild(t);
+            setTimeout(function () { t.remove(); }, 3500);
+        }
     }
 
     // ------------------------------------------------------------------

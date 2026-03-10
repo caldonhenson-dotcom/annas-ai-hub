@@ -29,7 +29,7 @@
 
 /* Chart container */
 .rc-chart-container {
-    position: relative; height: 260px; padding: 18px;
+    position: relative; min-height: 260px; padding: 18px; overflow: hidden;
 }
 .rc-chart-container canvas { max-height: 100%; }
 
@@ -72,7 +72,8 @@
 .rc-table th .sort-arrow { font-size: 9px; margin-left: 4px; opacity: 0.5; }
 .rc-table td {
     padding: 10px 14px; border-bottom: 1px solid var(--card-border);
-    color: var(--text); white-space: nowrap;
+    color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    max-width: 300px;
 }
 .rc-table tr:last-child td { border-bottom: none; }
 .rc-table tr:hover td { background: rgba(60,180,173,0.02); }
@@ -97,7 +98,7 @@
 }
 .rc-board-row:last-child { border-bottom: none; }
 .rc-board-row:hover { background: rgba(60,180,173,0.02); }
-.rc-board-name { font-weight: 600; color: var(--text); }
+.rc-board-name { font-weight: 600; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .rc-board-value { font-weight: 600; font-variant-numeric: tabular-nums; color: var(--text); }
 
 /* Status pill */

@@ -39,7 +39,7 @@
 </head>
 <body>
     <a href="#main-content" class="skip-link">Skip to main content</a>
-    <div class="login-overlay" id="login-overlay" role="dialog" aria-label="Login">
+    <div class="login-overlay" id="login-overlay" role="dialog" aria-modal="true" aria-label="Login">
         <div class="login-card">
             <div class="login-brand">
                 <span class="brand-dot">e</span>
@@ -155,13 +155,12 @@
 
         <footer class="dashboard-footer">
             <p><span class="brand">eComplete</span> &mdash; Sales &amp; M&amp;A Intelligence Dashboard</p>
-            <p style="margin-top:4px">Contacts: 46,231 | Companies: 18,193 | Deals: 97</p>
-            <p style="margin-top:4px" id="generated-ts"></p>
+            <p class="footer-stats" id="footer-stats"></p>
         </footer>
     </div>
 
     <!-- ═══ API Settings Modal ═══ -->
-    <div class="api-settings-overlay hidden" id="api-settings-overlay" onclick="if(event.target===this)window.APIConfig.closeSettings()">
+    <div class="api-settings-overlay hidden" id="api-settings-overlay" role="dialog" aria-modal="true" aria-label="AI Provider Settings" onclick="if(event.target===this)window.APIConfig.closeSettings()">
         <div class="api-settings-card">
             <div class="api-settings-header">
                 <h3 class="api-settings-title">&#9881; AI Provider Settings</h3>
@@ -180,7 +179,7 @@
                 </button>
             </div>
             <div class="api-settings-key-section">
-                <label class="api-settings-label">Claude API Key</label>
+                <label class="api-settings-label" for="api-key-input">Claude API Key</label>
                 <div class="api-settings-key-row">
                     <input type="password" class="api-settings-input" id="api-key-input" placeholder="sk-ant-api03-..." autocomplete="off" />
                     <button class="api-settings-btn primary" onclick="window.APIConfig.saveApiKey()">Save</button>
@@ -197,7 +196,7 @@
     </div>
 
     <!-- ═══ LinkedIn Auth Modal ═══ -->
-    <div class="linkedin-auth-overlay hidden" id="linkedin-auth-overlay" onclick="if(event.target===this)window.LinkedInAuth.close()">
+    <div class="linkedin-auth-overlay hidden" id="linkedin-auth-overlay" role="dialog" aria-modal="true" aria-label="Connect LinkedIn" onclick="if(event.target===this)window.LinkedInAuth.close()">
         <div class="linkedin-auth-card">
             <div class="li-modal-header">
                 <h3 class="li-modal-title">
@@ -244,8 +243,8 @@
                         <div class="li-manual-desc">
                             In Chrome DevTools (<kbd class="li-manual-kbd">F12</kbd>) &rarr; <strong>Application</strong> &rarr; <strong>Cookies</strong> &rarr; <strong>linkedin.com</strong>:
                         </div>
-                        <input class="li-input" id="li-input-li_at" placeholder="li_at cookie value..." autocomplete="off" />
-                        <input class="li-input" id="li-input-csrf" placeholder="JSESSIONID value (without quotes)..." autocomplete="off" />
+                        <input class="li-input" id="li-input-li_at" placeholder="li_at cookie value..." autocomplete="off" aria-label="LinkedIn li_at cookie" />
+                        <input class="li-input" id="li-input-csrf" placeholder="JSESSIONID value (without quotes)..." autocomplete="off" aria-label="LinkedIn JSESSIONID cookie" />
                         <button class="li-submit-btn" id="li-submit-btn" onclick="window.LinkedInAuth.submit()">
                             Connect &amp; Validate
                         </button>
@@ -261,7 +260,7 @@
 
     <!-- ═══ Prospect Detail Panel ═══ -->
     <div class="prospect-panel-overlay" id="prospect-panel-overlay" onclick="window.ProspectPanel.close()"></div>
-    <div class="prospect-panel" id="prospect-panel">
+    <div class="prospect-panel" id="prospect-panel" role="dialog" aria-modal="true" aria-label="Prospect Details">
         <div class="prospect-panel-header">
             <div class="pp-header-row">
                 <div class="pp-header-main">
@@ -280,7 +279,7 @@
         </div>
         <div class="prospect-panel-tabs">
             <button class="prospect-panel-tab active" data-ptab="pp-research">Research</button>
-            <button class="prospect-panel-tab pp-tab-disabled" data-ptab="pp-messages">Messages <span class="coming-soon-badge">Soon</span></button>
+            <button class="prospect-panel-tab pp-tab-disabled" data-ptab="pp-messages" aria-disabled="true">Messages <span class="coming-soon-badge">Soon</span></button>
             <button class="prospect-panel-tab" data-ptab="pp-composer">Compose</button>
             <button class="prospect-panel-tab" data-ptab="pp-scoring">Scoring</button>
         </div>
@@ -305,13 +304,13 @@
             <div class="prospect-tab-content" id="pp-composer">
                 <div class="mb-3">
                     <div class="pp-composer-row">
-                        <select id="pp-step-select" class="pp-composer-select">
+                        <select id="pp-step-select" class="pp-composer-select" aria-label="Outreach step">
                             <option value="1">Step 1: Introduction</option>
                             <option value="2">Step 2: Value-add follow-up</option>
                             <option value="3">Step 3: Social proof</option>
                             <option value="4">Step 4: Soft close</option>
                         </select>
-                        <select id="pp-channel-select" class="pp-composer-select">
+                        <select id="pp-channel-select" class="pp-composer-select" aria-label="Message channel">
                             <option value="linkedin">LinkedIn</option>
                             <option value="email">Email</option>
                         </select>
@@ -320,7 +319,7 @@
                         &#9889; Generate AI Draft
                     </button>
                 </div>
-                <textarea class="composer-area" id="pp-draft-area" placeholder="AI-generated message will appear here... You can also write directly."></textarea>
+                <textarea class="composer-area" id="pp-draft-area" placeholder="AI-generated message will appear here... You can also write directly." aria-label="Message draft"></textarea>
                 <div class="composer-toolbar">
                     <button class="composer-btn secondary" onclick="window.ProspectPanel.generateDraft()" id="pp-regen-btn">&#8635; Regenerate</button>
                     <button class="composer-btn success" onclick="window.ProspectPanel.approveAndQueue()" id="pp-approve-btn">&#10003; Approve &amp; Queue</button>
@@ -341,7 +340,7 @@
         <div class="cmd-palette">
             <div class="cmd-input-wrap">
                 <span class="cmd-input-icon">&#128269;</span>
-                <input class="cmd-input" id="cmd-input" type="text" placeholder="Search pages, actions..." autocomplete="off" />
+                <input class="cmd-input" id="cmd-input" type="text" placeholder="Search pages, actions..." autocomplete="off" aria-label="Search pages and actions" />
                 <kbd>Esc</kbd>
             </div>
             <div class="cmd-results" id="cmd-results"></div>
@@ -355,7 +354,7 @@
     </div>
 
     <!-- AI Chat Assistant FAB -->
-    <button class="chat-fab" id="chat-fab" onclick="window.AnnaChat.open()" aria-label="Ask eComplete AI" title="eComplete AI (Ctrl+K)">
+    <button class="chat-fab" id="chat-fab" onclick="window.AnnaChat.open()" aria-label="Ask eComplete AI" title="eComplete AI (Ctrl+J)">
         &#9889;
     </button>
     <div class="chat-panel" id="chat-panel">
@@ -479,7 +478,7 @@
         </div>
         <div class="chat-input-area" id="chat-input-area">
             <input class="chat-input" id="chat-input" type="text"
-                   placeholder="Ask about your data..."
+                   placeholder="Ask about your data..." aria-label="Ask eComplete AI"
                    onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();window.AnnaChat.send()}" />
             <button class="chat-send" id="chat-send" onclick="window.AnnaChat.send()" aria-label="Send">&#10148;</button>
         </div>

@@ -58,6 +58,7 @@
     /* Radii */
     --radius:     10px;
     --radius-sm:  6px;
+    --radius-md:  8px;
     --radius-lg:  12px;
     --radius-xl:  16px;
 
@@ -78,6 +79,8 @@
     --z-modal-overlay:   490;
     --z-modal:           500;
     --z-login:           600;
+    --z-toast:           700;
+    --z-cmd-palette:     800;
 
     /* Touch targets */
     --touch-min:     44px;

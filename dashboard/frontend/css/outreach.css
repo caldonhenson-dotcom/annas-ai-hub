@@ -214,7 +214,7 @@
     color: #fff; font-weight: 700; font-size: var(--text-sm); flex-shrink: 0;
 }
 .conversation-body { flex: 1; min-width: 0; }
-.conversation-name { font-weight: 600; font-size: var(--text-sm); color: var(--text); }
+.conversation-name { font-weight: 600; font-size: var(--text-sm); color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .conversation-preview { font-size: 12px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .conversation-meta { text-align: right; flex-shrink: 0; }
 .conversation-time { font-size: var(--text-xs); color: var(--text-muted); }
@@ -255,3 +255,15 @@
 .bot-status-dot.idle { background: #9ca3af; }
 .bot-status-dot.running { background: #10b981; animation: botPulse 1.5s infinite; }
 .bot-status-dot.paused { background: #f59e0b; }
+
+/* ── Dark Mode Overrides ── */
+[data-theme="dark"] .li-status-connected { background: rgba(16,185,129,0.1); border-color: rgba(16,185,129,0.4); }
+[data-theme="dark"] .li-status-disconnected { background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.4); }
+[data-theme="dark"] .approval-btn.approve { background: rgba(16,185,129,0.1); border-color: rgba(16,185,129,0.4); color: #34d399; }
+[data-theme="dark"] .approval-btn.reject { background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.4); color: #fca5a5; }
+[data-theme="dark"] .approval-btn.edit { background: rgba(59,130,246,0.1); border-color: rgba(59,130,246,0.4); color: #93c5fd; }
+[data-theme="dark"] .conversation-item.unread { background: rgba(60,180,173,0.06); }
+[data-theme="dark"] .intent-badge.interested { background: rgba(16,185,129,0.15); color: #34d399; }
+[data-theme="dark"] .intent-badge.question { background: rgba(59,130,246,0.15); color: #93c5fd; }
+[data-theme="dark"] .intent-badge.objection { background: rgba(245,158,11,0.15); color: #fcd34d; }
+[data-theme="dark"] .intent-badge.not-interested { background: rgba(239,68,68,0.15); color: #fca5a5; }

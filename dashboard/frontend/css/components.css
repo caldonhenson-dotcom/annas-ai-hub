@@ -10,6 +10,7 @@
     padding: var(--space-4) var(--space-5);
     box-shadow: var(--shadow);
     transition: var(--transition);
+    overflow: hidden;
 }
 .glass-card:hover {
     border-color: rgba(60, 180, 173, 0.15);
@@ -33,6 +34,7 @@
     margin-bottom: var(--space-2);
     text-transform: uppercase;
     letter-spacing: 0.04em;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .alert-card { border-left: 3px solid var(--warning); }
 

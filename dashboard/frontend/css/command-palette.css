@@ -6,7 +6,7 @@
     background: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
-    z-index: 99999;
+    z-index: var(--z-cmd-palette);
     display: flex; align-items: flex-start; justify-content: center;
     padding-top: 18vh;
     opacity: 0; pointer-events: none;

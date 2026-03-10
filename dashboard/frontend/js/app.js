@@ -211,5 +211,22 @@
         });
     }
 
-    document.addEventListener('DOMContentLoaded', updateFreshnessPills);
+    // ------------------------------------------------------------------
+    // Footer stats — populate from STATIC data
+    // ------------------------------------------------------------------
+    function updateFooterStats() {
+        var el = document.getElementById('footer-stats');
+        if (!el) return;
+        if (typeof STATIC === 'undefined') { el.textContent = ''; return; }
+        var parts = [];
+        if (STATIC.total_contacts) parts.push('Contacts: ' + Number(STATIC.total_contacts).toLocaleString('en-GB'));
+        if (STATIC.total_companies) parts.push('Companies: ' + Number(STATIC.total_companies).toLocaleString('en-GB'));
+        if (STATIC.total_deals) parts.push('Deals: ' + Number(STATIC.total_deals).toLocaleString('en-GB'));
+        el.textContent = parts.join(' | ');
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        updateFreshnessPills();
+        updateFooterStats();
+    });
 })();
