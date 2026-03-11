@@ -6,24 +6,34 @@
         </div>
     </div>
 
-    <!-- ── View Tabs (Table / Report / Gantt) ── -->
+    <!-- ── View Tabs + Period + Export ── -->
     <div class="pl-view-bar">
         <div class="pl-view-tabs" role="tablist">
             <button class="pl-view-tab active" data-view="table" role="tab" aria-selected="true">Table</button>
             <button class="pl-view-tab" data-view="report" role="tab" aria-selected="false">Report</button>
             <button class="pl-view-tab" data-view="gantt" role="tab" aria-selected="false">Gantt</button>
+            <button class="pl-view-tab" data-view="export" role="tab" aria-selected="false">Export</button>
         </div>
-        <div class="pl-period-pills">
-            <button class="pl-period-pill" data-period="30d">Past 30 Days</button>
-            <button class="pl-period-pill" data-period="mtd">This Month</button>
-            <button class="pl-period-pill active" data-period="ytd">YTD</button>
-            <button class="pl-period-pill" data-period="all">All Time</button>
+        <div class="pl-bar-right">
+            <div class="pl-period-pills">
+                <button class="pl-period-pill" data-period="30d">Past 30 Days</button>
+                <button class="pl-period-pill" data-period="mtd">This Month</button>
+                <button class="pl-period-pill active" data-period="ytd">YTD</button>
+                <button class="pl-period-pill" data-period="all">All Time</button>
+            </div>
         </div>
     </div>
 
-    <!-- ── Summary Cards ── -->
-    <div class="pl-summary-row" id="pl-summary-row">
-        <!-- Rendered by JS -->
+    <!-- ── Rolled-Up Summary Cards (with YoY) ── -->
+    <div class="pl-summary-row" id="pl-summary-row"></div>
+
+    <!-- ── Department Breakdown ── -->
+    <div class="pl-dept-section" id="pl-dept-section">
+        <div class="pl-dept-header">
+            <span class="pl-dept-header-title">Department Breakdown</span>
+            <button class="pl-dept-toggle" id="pl-dept-toggle" aria-expanded="true">&#9660;</button>
+        </div>
+        <div class="pl-dept-grid" id="pl-dept-grid"></div>
     </div>
 
     <!-- ── Filters Row ── -->
@@ -82,51 +92,7 @@
 
     <!-- ── REPORT VIEW ── -->
     <div class="pl-view-panel" id="pl-view-report" role="tabpanel">
-        <!-- Row 1: Stage Funnel + Source Breakdown -->
-        <div class="pl-grid-2">
-            <div class="pl-card">
-                <div class="pl-card-header">
-                    <div class="pl-card-title">Deal Stage Funnel</div>
-                </div>
-                <div id="pl-rpt-funnel"></div>
-            </div>
-            <div class="pl-card">
-                <div class="pl-card-header">
-                    <div class="pl-card-title">Deals by Source</div>
-                </div>
-                <div id="pl-rpt-source"></div>
-            </div>
-        </div>
-        <!-- Row 2: Product Mix + Owner Performance -->
-        <div class="pl-grid-2">
-            <div class="pl-card">
-                <div class="pl-card-header">
-                    <div class="pl-card-title">Deals by Product</div>
-                </div>
-                <div id="pl-rpt-product"></div>
-            </div>
-            <div class="pl-card">
-                <div class="pl-card-header">
-                    <div class="pl-card-title">Owner Performance</div>
-                </div>
-                <div id="pl-rpt-owner"></div>
-            </div>
-        </div>
-        <!-- Row 3: Monthly Trend + Win/Loss -->
-        <div class="pl-grid-2">
-            <div class="pl-card">
-                <div class="pl-card-header">
-                    <div class="pl-card-title">Monthly Deal Creation</div>
-                </div>
-                <div class="pl-chart-wrap" id="pl-rpt-monthly"></div>
-            </div>
-            <div class="pl-card">
-                <div class="pl-card-header">
-                    <div class="pl-card-title">Win / Loss Rate</div>
-                </div>
-                <div id="pl-rpt-winloss"></div>
-            </div>
-        </div>
+        <div id="pl-reports-container"></div>
     </div>
 
     <!-- ── GANTT VIEW ── -->
@@ -140,5 +106,10 @@
                 <div id="pl-gantt-chart"></div>
             </div>
         </div>
+    </div>
+
+    <!-- ── EXPORT VIEW ── -->
+    <div class="pl-view-panel" id="pl-view-export" role="tabpanel">
+        <div id="pl-export-container"></div>
     </div>
 </section>

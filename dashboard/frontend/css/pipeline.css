@@ -329,6 +329,95 @@
     background: var(--danger); z-index: 1; opacity: 0.6;
 }
 
+/* ── Department Breakdown ── */
+.pl-dept-section {
+    margin-bottom: var(--space-4);
+    border: 1px solid var(--card-border); border-radius: var(--radius);
+    background: var(--card); overflow: hidden;
+}
+.pl-dept-header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 12px 16px; cursor: pointer;
+}
+.pl-dept-header-title {
+    font-size: 13px; font-weight: 700; color: var(--text);
+    text-transform: uppercase; letter-spacing: 0.04em;
+}
+.pl-dept-toggle {
+    background: none; border: none; cursor: pointer;
+    font-size: 12px; color: var(--text-muted); transition: transform 0.2s;
+}
+.pl-dept-toggle.collapsed { transform: rotate(-90deg); }
+.pl-dept-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1px; background: var(--card-border);
+    border-top: 1px solid var(--card-border);
+}
+.pl-dept-grid.collapsed { display: none; }
+.pl-dept-card {
+    background: var(--card); padding: 14px 16px;
+}
+.pl-dept-name {
+    font-size: 12px; font-weight: 700; color: var(--text);
+    margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.03em;
+}
+.pl-dept-stats {
+    display: flex; flex-direction: column; gap: 4px;
+}
+.pl-dept-stat {
+    display: flex; justify-content: space-between; font-size: 12px;
+}
+.pl-dept-stat-label { color: var(--text-muted); }
+.pl-dept-stat-value { font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums; }
+
+/* ── YoY Badge ── */
+.pl-yoy {
+    display: inline-flex; align-items: center; gap: 2px;
+    font-size: 10px; font-weight: 700; padding: 2px 6px;
+    border-radius: 8px; margin-top: 2px;
+}
+.pl-yoy.up { background: rgba(34, 197, 94, 0.1); color: var(--success); }
+.pl-yoy.down { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+.pl-yoy.flat { background: rgba(107, 114, 128, 0.1); color: var(--text-muted); }
+
+/* ── Report Grid ── */
+.pl-report-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: var(--space-4); margin-bottom: var(--space-4);
+}
+.pl-report-full { grid-column: 1 / -1; }
+
+/* ── Export View ── */
+.pl-export-options {
+    display: flex; gap: 12px; margin-bottom: var(--space-4); flex-wrap: wrap;
+}
+.pl-export-btn {
+    display: flex; align-items: center; gap: 8px;
+    padding: 14px 24px; border-radius: var(--radius);
+    border: 2px solid var(--card-border); background: var(--card);
+    cursor: pointer; transition: all 0.2s; font-family: var(--font);
+    font-size: 14px; font-weight: 600; color: var(--text);
+    min-height: var(--touch-min);
+}
+.pl-export-btn:hover {
+    border-color: var(--accent); background: rgba(60, 180, 173, 0.04);
+}
+.pl-export-btn:active { transform: scale(0.98); }
+.pl-export-btn .pl-export-icon { font-size: 20px; }
+.pl-export-btn-desc {
+    font-size: 11px; font-weight: 500; color: var(--text-muted);
+}
+.pl-export-preview {
+    border: 1px solid var(--card-border); border-radius: var(--radius);
+    background: var(--card); padding: var(--space-4);
+    max-height: 500px; overflow: auto;
+}
+.pl-export-preview-title {
+    font-size: 13px; font-weight: 700; color: var(--text);
+    margin-bottom: var(--space-3); text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
 /* ── Empty State ── */
 .pl-empty {
     text-align: center; padding: 48px 24px;
@@ -355,11 +444,14 @@
 /* ── Responsive ── */
 @media (max-width: 900px) {
     .pl-summary-row { grid-template-columns: repeat(3, 1fr); }
-    .pl-grid-2 { grid-template-columns: 1fr; }
+    .pl-grid-2, .pl-report-grid { grid-template-columns: 1fr; }
+    .pl-report-full { grid-column: 1; }
     .pl-view-bar { flex-direction: column; align-items: flex-start; }
     .pl-funnel-row,
     .pl-funnel-head { grid-template-columns: 140px 1fr 60px 60px; }
     .pl-gantt-label { width: 120px; min-width: 120px; }
+    .pl-dept-grid { grid-template-columns: repeat(2, 1fr); }
+    .pl-export-options { flex-direction: column; }
 }
 @media (max-width: 600px) {
     .pl-summary-row { grid-template-columns: repeat(2, 1fr); }
@@ -370,4 +462,5 @@
     .pl-funnel-head { grid-template-columns: 120px 1fr 50px; }
     .pl-funnel-head > :nth-child(4),
     .pl-funnel-row > :nth-child(4) { display: none; }
+    .pl-dept-grid { grid-template-columns: 1fr; }
 }

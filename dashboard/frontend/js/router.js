@@ -11,7 +11,7 @@
     var PAGE_SCRIPTS = {
         'ai-roadmap': ['js/ai-roadmap.js'],
         'executive': ['js/pages/render-executive.js'],
-        'pipeline': ['js/pages/render-pipeline.js'],
+        'pipeline': ['js/pages/render-pipeline.js', 'js/pages/pipeline-reports.js', 'js/pages/pipeline-export.js'],
         'leads': ['js/pages/render-leads.js'],
         'activities': ['js/pages/render-activities.js'],
         'insights': ['js/pages/render-insights.js'],

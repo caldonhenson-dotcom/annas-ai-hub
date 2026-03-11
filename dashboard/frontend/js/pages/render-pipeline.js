@@ -127,38 +127,80 @@
     }
 
     // ================================================================
-    // Summary Cards
+    // YoY Helpers
+    // ================================================================
+    function getYoYPeriod(period) {
+        var now = new Date();
+        var y = now.getFullYear() - 1;
+        var m = now.getMonth();
+        if (period === '30d') {
+            var s = new Date(now); s.setDate(s.getDate() - 30);
+            var ps = new Date(s); ps.setFullYear(ps.getFullYear() - 1);
+            var pe = new Date(now); pe.setFullYear(pe.getFullYear() - 1);
+            return { start: ps, end: pe };
+        }
+        if (period === 'mtd') return { start: new Date(y, m, 1), end: new Date(y, m, now.getDate()) };
+        if (period === 'ytd') return { start: new Date(y, 0, 1), end: new Date(y, m, now.getDate()) };
+        return null;
+    }
+
+    function calcYoY(current, previous) {
+        if (!previous || previous === 0) return current > 0 ? { pct: 100, cls: 'up', arrow: '&#9650;' } : { pct: 0, cls: 'flat', arrow: '&#9644;' };
+        var pct = ((current - previous) / previous * 100);
+        var cls = pct > 0 ? 'up' : pct < 0 ? 'down' : 'flat';
+        var arrow = pct > 0 ? '&#9650;' : pct < 0 ? '&#9660;' : '&#9644;';
+        return { pct: Math.abs(pct).toFixed(1), cls: cls, arrow: arrow };
+    }
+
+    function yoyBadge(yoy) {
+        if (!yoy) return '';
+        return '<span class="pl-yoy ' + yoy.cls + '">' + yoy.arrow + ' ' + yoy.pct + '% YoY</span>';
+    }
+
+    function calcPeriodMetrics(deals) {
+        var now = new Date();
+        var r = { total: 0, weighted: 0, open: 0, won: 0, lost: 0, count: deals.length, wonCount: 0, lostCount: 0, openCount: 0, age: 0 };
+        deals.forEach(function (d) {
+            r.total += d.amount; r.weighted += d.weighted;
+            if (d.isWon) { r.won += d.amount; r.wonCount++; }
+            else if (d.isLost) { r.lost += d.amount; r.lostCount++; }
+            else { r.open += d.amount; r.openCount++; r.age += daysBetween(d.created, now); }
+        });
+        r.avgAge = r.openCount > 0 ? (r.age / r.openCount / 30).toFixed(1) : '0';
+        return r;
+    }
+
+    // ================================================================
+    // Summary Cards (with YoY)
     // ================================================================
     function renderSummary() {
         var el = document.getElementById('pl-summary-row');
         if (!el) return;
 
-        var totalAmt = 0, weightedAmt = 0, openAmt = 0, wonAmt = 0, lostAmt = 0;
-        var totalAge = 0, ageCount = 0;
-        var now = new Date();
+        var cur = calcPeriodMetrics(FILTERED);
+        var yoyRange = getYoYPeriod(ACTIVE_PERIOD);
+        var prevDeals = yoyRange ? DEALS.filter(function (d) {
+            var c = new Date(d.created);
+            return c >= yoyRange.start && c <= yoyRange.end;
+        }) : [];
+        var prev = calcPeriodMetrics(prevDeals);
+        var hasYoY = prevDeals.length > 0 && ACTIVE_PERIOD !== 'all';
 
-        FILTERED.forEach(function (d) {
-            totalAmt += d.amount;
-            weightedAmt += d.weighted;
-            if (d.isWon) wonAmt += d.amount;
-            else if (d.isLost) lostAmt += d.amount;
-            else {
-                openAmt += d.amount;
-                totalAge += daysBetween(d.created, now);
-                ageCount++;
-            }
-        });
-
-        var avgAge = ageCount > 0 ? (totalAge / ageCount / 30).toFixed(1) : '0';
-        var avgDeal = FILTERED.length > 0 ? totalAmt / FILTERED.length : 0;
+        var avgDeal = cur.count > 0 ? cur.total / cur.count : 0;
+        var yTotal = hasYoY ? calcYoY(cur.total, prev.total) : null;
+        var yWeighted = hasYoY ? calcYoY(cur.weighted, prev.weighted) : null;
+        var yOpen = hasYoY ? calcYoY(cur.open, prev.open) : null;
+        var yWon = hasYoY ? calcYoY(cur.won, prev.won) : null;
+        var yLost = hasYoY ? calcYoY(cur.lost, prev.lost) : null;
+        var yCount = hasYoY ? calcYoY(cur.count, prev.count) : null;
 
         var cards = [
-            { label: 'Total Deal Amount', value: fmtCurrencyK(totalAmt), sub: 'Average per deal<br>' + fmtCurrencyK(avgDeal) },
-            { label: 'Weighted Amount', value: fmtCurrencyK(weightedAmt), sub: FILTERED.length + ' deals' },
-            { label: 'Open Deal Amount', value: fmtCurrencyK(openAmt), sub: FILTERED.filter(function(d){return !d.isWon && !d.isLost;}).length + ' open deals' },
-            { label: 'Closed Won', value: fmtCurrencyK(wonAmt), sub: FILTERED.filter(function(d){return d.isWon;}).length + ' won', cls: 'color:var(--success)' },
-            { label: 'Closed Lost', value: fmtCurrencyK(lostAmt), sub: FILTERED.filter(function(d){return d.isLost;}).length + ' lost', cls: 'color:var(--danger)' },
-            { label: 'Avg Deal Age', value: avgAge + ' mo', sub: 'Open deals' }
+            { label: 'Total Deal Amount', value: fmtCurrencyK(cur.total), sub: 'Avg ' + fmtCurrencyK(avgDeal) + ' per deal', yoy: yTotal },
+            { label: 'Weighted Amount', value: fmtCurrencyK(cur.weighted), sub: cur.count + ' deals' + (hasYoY ? ' (was ' + prev.count + ')' : ''), yoy: yWeighted },
+            { label: 'Open Deal Amount', value: fmtCurrencyK(cur.open), sub: cur.openCount + ' open deals', yoy: yOpen },
+            { label: 'Closed Won', value: fmtCurrencyK(cur.won), sub: cur.wonCount + ' won', cls: 'color:var(--success)', yoy: yWon },
+            { label: 'Closed Lost', value: fmtCurrencyK(cur.lost), sub: cur.lostCount + ' lost', cls: 'color:var(--danger)', yoy: yLost },
+            { label: 'Avg Deal Age', value: cur.avgAge + ' mo', sub: 'Open deals', yoy: null }
         ];
 
         var html = '';
@@ -167,9 +209,64 @@
                 + '<div class="pl-sum-label">' + c.label + '</div>'
                 + '<div class="pl-sum-value"' + (c.cls ? ' style="' + c.cls + '"' : '') + '>' + c.value + '</div>'
                 + '<div class="pl-sum-sub">' + c.sub + '</div>'
+                + (c.yoy ? yoyBadge(c.yoy) : '')
                 + '</div>';
         });
         el.innerHTML = html;
+    }
+
+    // ================================================================
+    // Department Breakdown
+    // ================================================================
+    function renderDeptBreakdown() {
+        var grid = document.getElementById('pl-dept-grid');
+        if (!grid) return;
+
+        var depts = {};
+        FILTERED.forEach(function (d) {
+            var prods = d.product ? d.product.split(';') : ['Unassigned'];
+            prods.forEach(function (p) {
+                p = p.trim() || 'Unassigned';
+                if (!depts[p]) depts[p] = { count: 0, amount: 0, won: 0, lost: 0, open: 0, wonCount: 0 };
+                depts[p].count++;
+                depts[p].amount += d.amount;
+                if (d.isWon) { depts[p].won += d.amount; depts[p].wonCount++; }
+                else if (d.isLost) depts[p].lost += d.amount;
+                else depts[p].open += d.amount;
+            });
+        });
+
+        var order = ['CDD', 'DIS', 'DIS Lite', 'Supply Chain', 'Delivery', 'M&A', 'Unassigned'];
+        var sorted = order.filter(function (k) { return depts[k]; });
+        // Add any not in order
+        Object.keys(depts).forEach(function (k) { if (sorted.indexOf(k) === -1) sorted.push(k); });
+
+        var html = '';
+        sorted.forEach(function (name) {
+            var d = depts[name];
+            var winRate = (d.wonCount + (d.count - d.wonCount - (d.count - d.wonCount))) > 0
+                ? (d.wonCount / d.count * 100).toFixed(0) : '0';
+            html += '<div class="pl-dept-card">'
+                + '<div class="pl-dept-name">' + esc(name) + '</div>'
+                + '<div class="pl-dept-stats">'
+                + '<div class="pl-dept-stat"><span class="pl-dept-stat-label">Deals</span><span class="pl-dept-stat-value">' + d.count + '</span></div>'
+                + '<div class="pl-dept-stat"><span class="pl-dept-stat-label">Value</span><span class="pl-dept-stat-value">' + fmtCurrencyK(d.amount) + '</span></div>'
+                + '<div class="pl-dept-stat"><span class="pl-dept-stat-label">Open</span><span class="pl-dept-stat-value">' + fmtCurrencyK(d.open) + '</span></div>'
+                + '<div class="pl-dept-stat"><span class="pl-dept-stat-label">Won</span><span class="pl-dept-stat-value" style="color:var(--success)">' + fmtCurrencyK(d.won) + '</span></div>'
+                + '</div></div>';
+        });
+        grid.innerHTML = html;
+
+        // Toggle handler
+        var toggle = document.getElementById('pl-dept-toggle');
+        var header = document.querySelector('.pl-dept-header');
+        if (toggle && header && !toggle._wired) {
+            toggle._wired = true;
+            header.addEventListener('click', function () {
+                toggle.classList.toggle('collapsed');
+                grid.classList.toggle('collapsed');
+            });
+        }
     }
 
     // ================================================================
@@ -564,12 +661,14 @@
     // ================================================================
     function renderActiveView() {
         if (ACTIVE_VIEW === 'table') renderTable();
-        else if (ACTIVE_VIEW === 'report') renderReport();
+        else if (ACTIVE_VIEW === 'report' && window.renderPipelineReports) window.renderPipelineReports(FILTERED, DEALS, ACTIVE_PERIOD);
         else if (ACTIVE_VIEW === 'gantt') renderGantt();
+        else if (ACTIVE_VIEW === 'export' && window.renderPipelineExport) window.renderPipelineExport(FILTERED, DEALS, ACTIVE_PERIOD);
     }
 
     function renderAll() {
         renderSummary();
+        renderDeptBreakdown();
         renderFilterCount();
         renderActiveView();
     }
