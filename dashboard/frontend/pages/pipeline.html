@@ -1,111 +1,144 @@
 <section id="pipeline" class="dashboard-section">
     <div class="section-header">
         <div>
-            <h2 class="section-title">Pipeline & Sales Intelligence</h2>
-            <p class="section-subtitle">Marketing leads, deal pipeline, activity and conversion by department</p>
+            <h2 class="section-title">Deals</h2>
+            <p class="section-subtitle">HubSpot deal pipeline — real-time sync</p>
         </div>
     </div>
 
-    <!-- ── Department Tabs ── -->
-    <div class="pl-dept-tabs">
-        <button class="pl-dept-tab active" data-dept="all">All Departments</button>
-        <button class="pl-dept-tab pl-dept-disabled" data-dept="delivery" disabled>Delivery <span class="coming-soon-badge">Soon</span></button>
-        <button class="pl-dept-tab pl-dept-disabled" data-dept="supply-chain" disabled>Supply Chain <span class="coming-soon-badge">Soon</span></button>
-        <button class="pl-dept-tab pl-dept-disabled" data-dept="cdd" disabled>CDD <span class="coming-soon-badge">Soon</span></button>
+    <!-- ── View Tabs (Table / Report / Gantt) ── -->
+    <div class="pl-view-bar">
+        <div class="pl-view-tabs" role="tablist">
+            <button class="pl-view-tab active" data-view="table" role="tab" aria-selected="true">Table</button>
+            <button class="pl-view-tab" data-view="report" role="tab" aria-selected="false">Report</button>
+            <button class="pl-view-tab" data-view="gantt" role="tab" aria-selected="false">Gantt</button>
+        </div>
+        <div class="pl-period-pills">
+            <button class="pl-period-pill" data-period="30d">Past 30 Days</button>
+            <button class="pl-period-pill" data-period="mtd">This Month</button>
+            <button class="pl-period-pill active" data-period="ytd">YTD</button>
+            <button class="pl-period-pill" data-period="all">All Time</button>
+        </div>
     </div>
 
-    <!-- ── Row 1: Activity Totals (HubSpot-style) ── -->
-    <div class="pl-activity-totals" id="pl-activity-totals">
+    <!-- ── Summary Cards ── -->
+    <div class="pl-summary-row" id="pl-summary-row">
         <!-- Rendered by JS -->
     </div>
 
-    <!-- ── Row 2: Charts Grid (2-col) ── -->
-    <div class="pl-grid-2">
-        <!-- Total Leads — monthly bar chart -->
-        <div class="pl-card">
-            <div class="pl-card-header">
-                <div class="pl-card-title">Total Leads</div>
-                <div class="pl-card-filters">
-                    <span class="pl-filter-pill active" data-range="ytd">This Year</span>
-                    <span class="pl-filter-pill" data-range="mtd">This Month</span>
-                    <span class="pl-filter-pill" data-range="all">All Time</span>
+    <!-- ── Filters Row ── -->
+    <div class="pl-filters-row" id="pl-filters-row">
+        <div class="pl-filter-group">
+            <label class="pl-filter-label">Owner</label>
+            <select id="pl-filter-owner" class="pl-filter-select" aria-label="Filter by deal owner">
+                <option value="">All Owners</option>
+            </select>
+        </div>
+        <div class="pl-filter-group">
+            <label class="pl-filter-label">Product</label>
+            <select id="pl-filter-product" class="pl-filter-select" aria-label="Filter by product">
+                <option value="">All Products</option>
+            </select>
+        </div>
+        <div class="pl-filter-group">
+            <label class="pl-filter-label">Source</label>
+            <select id="pl-filter-source" class="pl-filter-select" aria-label="Filter by source">
+                <option value="">All Sources</option>
+            </select>
+        </div>
+        <div class="pl-filter-group">
+            <label class="pl-filter-label">Stage</label>
+            <select id="pl-filter-stage" class="pl-filter-select" aria-label="Filter by deal stage">
+                <option value="">All Stages</option>
+            </select>
+        </div>
+        <div class="pl-filter-count" id="pl-filter-count"></div>
+    </div>
+
+    <!-- ── TABLE VIEW ── -->
+    <div class="pl-view-panel active" id="pl-view-table" role="tabpanel">
+        <div class="pl-card pl-card-full">
+            <div class="pl-table-scroll">
+                <table class="pl-deals-table" id="pl-deals-tbl">
+                    <thead>
+                        <tr>
+                            <th data-sort="name">Deal Name</th>
+                            <th data-sort="stage">Deal Stage</th>
+                            <th data-sort="created">Create Date</th>
+                            <th data-sort="product">Product</th>
+                            <th data-sort="source">eComplete Source</th>
+                            <th data-sort="amount" class="num">Amount</th>
+                            <th data-sort="owner">Deal Owner</th>
+                            <th data-sort="lostReason">Closed Lost Reason</th>
+                            <th data-sort="wonReason">Closed Won Reason</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pl-deals-body"></tbody>
+                </table>
+            </div>
+            <div class="pl-table-footer" id="pl-table-footer"></div>
+        </div>
+    </div>
+
+    <!-- ── REPORT VIEW ── -->
+    <div class="pl-view-panel" id="pl-view-report" role="tabpanel">
+        <!-- Row 1: Stage Funnel + Source Breakdown -->
+        <div class="pl-grid-2">
+            <div class="pl-card">
+                <div class="pl-card-header">
+                    <div class="pl-card-title">Deal Stage Funnel</div>
                 </div>
+                <div id="pl-rpt-funnel"></div>
             </div>
-            <div class="pl-chart-wrap" id="pl-leads-chart" ></div>
-        </div>
-
-        <!-- Pipeline Value — monthly bar chart -->
-        <div class="pl-card">
-            <div class="pl-card-header">
-                <div class="pl-card-title">Pipeline Value</div>
-                <div class="pl-card-filters">
-                    <span class="pl-filter-pill active" data-range="ytd">This Year</span>
-                    <span class="pl-filter-pill" data-range="all">All Time</span>
+            <div class="pl-card">
+                <div class="pl-card-header">
+                    <div class="pl-card-title">Deals by Source</div>
                 </div>
+                <div id="pl-rpt-source"></div>
             </div>
-            <div class="pl-chart-wrap" id="pl-pipeline-chart" ></div>
         </div>
-    </div>
-
-    <!-- ── Row 3: Deal Stage Funnel + Lead Source ── -->
-    <div class="pl-grid-2">
-        <!-- Deal Stage Funnel -->
-        <div class="pl-card">
-            <div class="pl-card-header">
-                <div class="pl-card-title">Deal Stage Funnel</div>
-                <div class="pl-card-meta" id="pl-funnel-period">Last 30 days</div>
-            </div>
-            <div id="pl-funnel"></div>
-        </div>
-
-        <!-- Lead Source Report -->
-        <div class="pl-card">
-            <div class="pl-card-header">
-                <div class="pl-card-title">Leads by Source</div>
-                <div class="pl-card-meta" id="pl-source-period">This Year</div>
-            </div>
-            <div id="pl-lead-source"></div>
-        </div>
-    </div>
-
-    <!-- ── Row 4: Activity Leaderboard + Revenue Trend ── -->
-    <div class="pl-grid-2">
-        <!-- Activity Leaderboard by Rep -->
-        <div class="pl-card">
-            <div class="pl-card-header">
-                <div class="pl-card-title">Activity Leaderboard by Rep</div>
-                <div class="pl-card-meta">Current period</div>
-            </div>
-            <div id="pl-activity-leaderboard"></div>
-        </div>
-
-        <!-- Revenue Won — trend line -->
-        <div class="pl-card">
-            <div class="pl-card-header">
-                <div class="pl-card-title">Revenue Won</div>
-                <div class="pl-card-filters">
-                    <span class="pl-filter-pill active" data-range="all">All Time</span>
+        <!-- Row 2: Product Mix + Owner Performance -->
+        <div class="pl-grid-2">
+            <div class="pl-card">
+                <div class="pl-card-header">
+                    <div class="pl-card-title">Deals by Product</div>
                 </div>
+                <div id="pl-rpt-product"></div>
             </div>
-            <div class="pl-chart-wrap" id="pl-revenue-chart" ></div>
+            <div class="pl-card">
+                <div class="pl-card-header">
+                    <div class="pl-card-title">Owner Performance</div>
+                </div>
+                <div id="pl-rpt-owner"></div>
+            </div>
+        </div>
+        <!-- Row 3: Monthly Trend + Win/Loss -->
+        <div class="pl-grid-2">
+            <div class="pl-card">
+                <div class="pl-card-header">
+                    <div class="pl-card-title">Monthly Deal Creation</div>
+                </div>
+                <div class="pl-chart-wrap" id="pl-rpt-monthly"></div>
+            </div>
+            <div class="pl-card">
+                <div class="pl-card-header">
+                    <div class="pl-card-title">Win / Loss Rate</div>
+                </div>
+                <div id="pl-rpt-winloss"></div>
+            </div>
         </div>
     </div>
 
-    <!-- ── Row 5: Deal Pipeline Table ── -->
-    <div class="pl-card pl-card-full">
-        <div class="pl-card-header">
-            <div class="pl-card-title">Deal Pipeline</div>
-            <div class="pl-card-meta" id="pl-deals-period">This fiscal year</div>
+    <!-- ── GANTT VIEW ── -->
+    <div class="pl-view-panel" id="pl-view-gantt" role="tabpanel">
+        <div class="pl-card pl-card-full">
+            <div class="pl-card-header">
+                <div class="pl-card-title">Deal Timeline</div>
+                <div class="pl-card-meta">Created → Close date</div>
+            </div>
+            <div class="pl-gantt-scroll">
+                <div id="pl-gantt-chart"></div>
+            </div>
         </div>
-        <div id="pl-deal-table"></div>
-    </div>
-
-    <!-- ── Row 6: Stale Deals Alert ── -->
-    <div class="pl-card pl-card-full pl-card-alert">
-        <div class="pl-card-header">
-            <div class="pl-card-title" style="color:var(--warning)">Stale Deals</div>
-            <div class="pl-card-meta">Deals with no activity beyond threshold</div>
-        </div>
-        <div id="pl-stale-deals"></div>
     </div>
 </section>

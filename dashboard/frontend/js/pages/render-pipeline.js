@@ -1,558 +1,652 @@
 /* ============================================================
-   Pipeline & Sales Intelligence — renderer
-   Drives all charts, funnels, tables, and leaderboards
+   Pipeline — Deals renderer (Table / Report / Gantt)
+   Loads real HubSpot deal data from hubspot-deals.json
    ============================================================ */
 (function () {
     'use strict';
 
-    var MONTH_SHORT = window.MONTH_SHORT;
-    var PALETTE = window.PALETTE;
+    var DEALS = [];
+    var FILTERED = [];
+    var SORT_KEY = 'created';
+    var SORT_DIR = 'desc';
+    var ACTIVE_PERIOD = 'ytd';
+    var ACTIVE_VIEW = 'table';
+    var HUB_DOMAIN = 'app-eu1.hubspot.com';
+    var HUB_ID = '26931451';
 
-    // Stage display config
     var STAGE_ORDER = [
-        'Inbound Lead',
-        'Engaged',
-        'First Meeting Booked',
-        'Second Meeting Booked',
-        'Proposal Shared',
-        'Decision Maker Bought-In',
-        'Contract Sent',
-        'Closed Won',
-        'Closed Lost',
-        'Disqualified'
+        'Qualified Lead', 'Engaged', 'First Meeting Booked',
+        'Second Meeting Booked', 'Proposal Shared',
+        'Decision Maker Bought-In', 'Contract Sent',
+        'Closed Won', 'Closed Lost', 'Disqualified', 'Re-engage'
     ];
 
     var STAGE_CSS = {
-        'Inbound Lead': 'inbound',
-        'Engaged': 'engaged',
-        'First Meeting Booked': 'meeting',
-        'Second Meeting Booked': 'meeting',
-        'Proposal Shared': 'proposal',
-        'Decision Maker Bought-In': 'decision',
-        'Contract Sent': 'contract',
-        'Closed Won': 'won',
-        'Closed Lost': 'lost',
-        'Disqualified': 'disqualified'
+        'Qualified Lead': 'qualified', 'Engaged': 'engaged',
+        'First Meeting Booked': 'meeting', 'Second Meeting Booked': 'meeting',
+        'Proposal Shared': 'proposal', 'Decision Maker Bought-In': 'decision',
+        'Contract Sent': 'contract', 'Closed Won': 'won',
+        'Closed Lost': 'lost', 'Disqualified': 'disqualified',
+        'Re-engage': 'reengage'
     };
 
-    // Friendly source names
-    var SOURCE_LABELS = {
-        'OFFLINE': 'Offline / Import',
-        'DIRECT_TRAFFIC': 'Direct Traffic',
-        'ORGANIC_SEARCH': 'Organic Search',
-        'PAID_SEARCH': 'Paid Search',
-        'REFERRALS': 'Referrals',
-        'SOCIAL_MEDIA': 'Social Media'
+    var STAGE_COLOURS = {
+        'Qualified Lead': '#6b7280', 'Engaged': '#3CB4AD',
+        'First Meeting Booked': '#3b82f6', 'Second Meeting Booked': '#3b82f6',
+        'Proposal Shared': '#8b5cf6', 'Decision Maker Bought-In': '#f59e0b',
+        'Contract Sent': '#10b981', 'Closed Won': '#22c55e',
+        'Closed Lost': '#ef4444', 'Disqualified': '#6b7280',
+        'Re-engage': '#f59e0b'
     };
 
-    // Known reps (filter out numeric IDs from HubSpot)
-    var KNOWN_REPS = [
-        'Anna Younger', 'Caldon Henson', 'Jake Heath',
-        'James Carberry', 'Josh Elliott', 'Kirill Kopica',
-        'Rose Galbally', 'Skye Whitton'
-    ];
+    var MONTH_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
-    // ── Filter pill range helpers ──
-    function getDateRange(rangeKey) {
-        if (!rangeKey || rangeKey === 'all') return null;
+    // ── Helpers ──
+    function fmtCurrency(v) {
+        if (v === null || v === undefined) return '—';
+        return '£' + Number(v).toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+    }
+    function fmtCurrencyK(v) {
+        if (v >= 1000000) return '£' + (v / 1000000).toFixed(2) + 'M';
+        if (v >= 1000) return '£' + (v / 1000).toFixed(2) + 'K';
+        return fmtCurrency(v);
+    }
+    function fmtDate(iso) {
+        if (!iso) return '—';
+        var d = new Date(iso);
+        return d.getDate() + ' ' + MONTH_SHORT[d.getMonth()] + ' ' + d.getFullYear();
+    }
+    function fmtDateShort(iso) {
+        if (!iso) return '—';
+        var d = new Date(iso);
+        return d.getDate() + ' ' + MONTH_SHORT[d.getMonth()] + ' ' + String(d.getFullYear()).slice(2);
+    }
+    function daysBetween(a, b) {
+        return Math.round(Math.abs(new Date(b) - new Date(a)) / 86400000);
+    }
+    function initials(name) {
+        if (!name) return '?';
+        return name.split(' ').map(function (w) { return w[0] || ''; }).join('').toUpperCase();
+    }
+
+    // ── Period Filter ──
+    function getPeriodRange(period) {
         var now = new Date();
         var y = now.getFullYear();
-        var m = ('0' + (now.getMonth() + 1)).slice(-2);
-        if (rangeKey === 'ytd') return { start: y + '-01-01', end: formatDate(now), monthStart: y + '-01' };
-        if (rangeKey === 'mtd') return { start: y + '-' + m + '-01', end: formatDate(now), monthStart: y + '-' + m };
-        return null;
-    }
-
-    function filterMonthlyRange(data, range) {
-        if (!range) return data;
-        var filtered = {};
-        for (var m in data) {
-            if (m >= range.monthStart) filtered[m] = data[m];
+        var m = now.getMonth();
+        if (period === '30d') {
+            var start = new Date(now); start.setDate(start.getDate() - 30);
+            return { start: start, end: now };
         }
-        return filtered;
+        if (period === 'mtd') return { start: new Date(y, m, 1), end: now };
+        if (period === 'ytd') return { start: new Date(y, 0, 1), end: now };
+        return null; // all
     }
 
-    // ── Date range for "last 30 days" ──
-    function getLast30Range() {
-        var now = new Date();
-        var start = new Date(now);
-        start.setDate(start.getDate() - 30);
-        return { start: formatDate(start), end: formatDate(now) };
+    function filterByPeriod(deals, period) {
+        var range = getPeriodRange(period);
+        if (!range) return deals;
+        return deals.filter(function (d) {
+            var created = new Date(d.created);
+            return created >= range.start && created <= range.end;
+        });
     }
 
-    // ── Comparison period (previous 30 days before the last 30) ──
-    function getPrev30Range() {
-        var now = new Date();
-        var end = new Date(now);
-        end.setDate(end.getDate() - 31);
-        var start = new Date(end);
-        start.setDate(start.getDate() - 30);
-        return { start: formatDate(start), end: formatDate(end) };
+    // ── Apply All Filters ──
+    function applyFilters() {
+        var owner = document.getElementById('pl-filter-owner');
+        var product = document.getElementById('pl-filter-product');
+        var source = document.getElementById('pl-filter-source');
+        var stage = document.getElementById('pl-filter-stage');
+        var ov = owner ? owner.value : '';
+        var pv = product ? product.value : '';
+        var sv = source ? source.value : '';
+        var stv = stage ? stage.value : '';
+
+        FILTERED = filterByPeriod(DEALS, ACTIVE_PERIOD);
+        if (ov) FILTERED = FILTERED.filter(function (d) { return d.owner === ov; });
+        if (pv) FILTERED = FILTERED.filter(function (d) { return d.product.indexOf(pv) !== -1; });
+        if (sv) FILTERED = FILTERED.filter(function (d) { return d.source === sv; });
+        if (stv) FILTERED = FILTERED.filter(function (d) { return d.stage === stv; });
+
+        sortDeals();
+        renderAll();
+    }
+
+    function sortDeals() {
+        FILTERED.sort(function (a, b) {
+            var va = a[SORT_KEY] || '';
+            var vb = b[SORT_KEY] || '';
+            if (SORT_KEY === 'amount' || SORT_KEY === 'weighted') {
+                va = Number(va) || 0; vb = Number(vb) || 0;
+            }
+            if (va < vb) return SORT_DIR === 'asc' ? -1 : 1;
+            if (va > vb) return SORT_DIR === 'asc' ? 1 : -1;
+            return 0;
+        });
     }
 
     // ================================================================
-    // 1. Activity Totals (HubSpot-style comparison cards)
+    // Summary Cards
     // ================================================================
-    function renderActivityTotals() {
-        var el = document.getElementById('pl-activity-totals');
+    function renderSummary() {
+        var el = document.getElementById('pl-summary-row');
         if (!el) return;
 
-        var current = getLast30Range();
-        var previous = getPrev30Range();
-        var curAct = getActivityBreakdown(TS.activities_by_type_by_day, current);
-        var prevAct = getActivityBreakdown(TS.activities_by_type_by_day, previous);
+        var totalAmt = 0, weightedAmt = 0, openAmt = 0, wonAmt = 0, lostAmt = 0;
+        var totalAge = 0, ageCount = 0;
+        var now = new Date();
 
-        var types = [
-            { key: 'calls', label: 'Calls', icon: '' },
-            { key: 'emails', label: 'Emails', icon: '' },
-            { key: 'meetings', label: 'Meetings', icon: '' },
-            { key: 'notes', label: 'Notes', icon: '' },
-            { key: 'tasks', label: 'Tasks', icon: '' }
+        FILTERED.forEach(function (d) {
+            totalAmt += d.amount;
+            weightedAmt += d.weighted;
+            if (d.isWon) wonAmt += d.amount;
+            else if (d.isLost) lostAmt += d.amount;
+            else {
+                openAmt += d.amount;
+                totalAge += daysBetween(d.created, now);
+                ageCount++;
+            }
+        });
+
+        var avgAge = ageCount > 0 ? (totalAge / ageCount / 30).toFixed(1) : '0';
+        var avgDeal = FILTERED.length > 0 ? totalAmt / FILTERED.length : 0;
+
+        var cards = [
+            { label: 'Total Deal Amount', value: fmtCurrencyK(totalAmt), sub: 'Average per deal<br>' + fmtCurrencyK(avgDeal) },
+            { label: 'Weighted Amount', value: fmtCurrencyK(weightedAmt), sub: FILTERED.length + ' deals' },
+            { label: 'Open Deal Amount', value: fmtCurrencyK(openAmt), sub: FILTERED.filter(function(d){return !d.isWon && !d.isLost;}).length + ' open deals' },
+            { label: 'Closed Won', value: fmtCurrencyK(wonAmt), sub: FILTERED.filter(function(d){return d.isWon;}).length + ' won', cls: 'color:var(--success)' },
+            { label: 'Closed Lost', value: fmtCurrencyK(lostAmt), sub: FILTERED.filter(function(d){return d.isLost;}).length + ' lost', cls: 'color:var(--danger)' },
+            { label: 'Avg Deal Age', value: avgAge + ' mo', sub: 'Open deals' }
         ];
 
         var html = '';
-        types.forEach(function (t) {
-            var cur = curAct[t.key] || 0;
-            var prev = prevAct[t.key] || 0;
-            var pct = prev > 0 ? ((cur - prev) / prev * 100) : (cur > 0 ? 100 : 0);
-            var cls = pct > 0 ? 'up' : pct < 0 ? 'down' : 'neutral';
-            var arrow = pct > 0 ? '&#9650;' : pct < 0 ? '&#9660;' : '&#9644;';
-            html += '<div class="pl-act-card">'
-                + '<div class="pl-act-label">' + t.label + '</div>'
-                + '<div class="pl-act-value">' + fmtNum(cur) + '</div>'
-                + '<span class="pl-act-change ' + cls + '">'
-                + arrow + ' ' + Math.abs(pct).toFixed(1) + '%</span>'
+        cards.forEach(function (c) {
+            html += '<div class="pl-sum-card">'
+                + '<div class="pl-sum-label">' + c.label + '</div>'
+                + '<div class="pl-sum-value"' + (c.cls ? ' style="' + c.cls + '"' : '') + '>' + c.value + '</div>'
+                + '<div class="pl-sum-sub">' + c.sub + '</div>'
                 + '</div>';
         });
         el.innerHTML = html;
     }
 
     // ================================================================
-    // 2. Total Leads — monthly bar chart (Chart.js)
+    // Filter Count
     // ================================================================
-    function renderLeadsChart(range) {
-        var canvas = ensureCanvas('pl-leads-chart', 200);
-        if (!canvas) return;
-
-        var monthly = filterDailyToMonthly(TS.leads_by_day, range || null);
-        var entries = Object.entries(monthly).sort();
-        if (entries.length > 12) entries = entries.slice(-12);
-        if (!entries.length) return;
-
-        var labels = entries.map(function (e) {
-            var p = e[0].split('-');
-            return MONTH_SHORT[parseInt(p[1], 10) - 1] + ' ' + p[0].slice(2);
-        });
-        var values = entries.map(function (e) { return e[1]; });
-
-        storeChart('pl-leads-chart', new Chart(canvas, {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Leads',
-                    data: values,
-                    backgroundColor: '#3CB4ADCC',
-                    hoverBackgroundColor: '#3CB4AD',
-                    borderRadius: 4,
-                    barPercentage: 0.7
-                }]
-            },
-            options: chartOpts(false)
-        }));
+    function renderFilterCount() {
+        var el = document.getElementById('pl-filter-count');
+        if (el) el.textContent = 'Showing ' + FILTERED.length + ' of ' + DEALS.length + ' deals';
     }
 
     // ================================================================
-    // 3. Pipeline Value — monthly bar chart
+    // TABLE VIEW
     // ================================================================
-    function renderPipelineChart(range) {
-        var canvas = ensureCanvas('pl-pipeline-chart', 200);
-        if (!canvas) return;
+    function renderTable() {
+        var tbody = document.getElementById('pl-deals-body');
+        if (!tbody) return;
 
-        var data = filterMonthlyRange(TS.pipeline_value_by_month || {}, range);
-        var entries = Object.entries(data).sort();
-        if (!entries.length) return;
+        if (!FILTERED.length) {
+            tbody.innerHTML = '<tr><td colspan="9" class="pl-empty">No deals match the current filters</td></tr>';
+            return;
+        }
 
-        var labels = entries.map(function (e) {
-            var p = e[0].split('-');
-            return MONTH_SHORT[parseInt(p[1], 10) - 1] + ' ' + p[0].slice(2);
+        var html = '';
+        FILTERED.forEach(function (d) {
+            var cssClass = STAGE_CSS[d.stage] || 'qualified';
+            var dealUrl = 'https://' + HUB_DOMAIN + '/contacts/' + HUB_ID + '/record/0-3/' + d.id;
+            html += '<tr>'
+                + '<td class="pl-deal-name"><a href="' + dealUrl + '" target="_blank" rel="noopener">' + esc(d.name) + '</a></td>'
+                + '<td><span class="pl-deal-stage pl-stage-' + cssClass + '">' + esc(d.stage) + '</span></td>'
+                + '<td>' + fmtDateShort(d.created) + '</td>'
+                + '<td>' + esc(d.product || '—') + '</td>'
+                + '<td>' + esc(d.source || '—') + '</td>'
+                + '<td class="pl-deal-amt">' + fmtCurrency(d.amount) + '</td>'
+                + '<td>' + esc(d.owner) + '</td>'
+                + '<td class="pl-deal-muted">' + esc(d.lostReason || '—') + '</td>'
+                + '<td class="pl-deal-muted">' + esc(d.wonReason || '—') + '</td>'
+                + '</tr>';
         });
-        var values = entries.map(function (e) { return e[1]; });
+        tbody.innerHTML = html;
 
-        storeChart('pl-pipeline-chart', new Chart(canvas, {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Pipeline',
-                    data: values,
-                    backgroundColor: '#334FB4CC',
-                    hoverBackgroundColor: '#334FB4',
-                    borderRadius: 4,
-                    barPercentage: 0.7
-                }]
-            },
-            options: chartOpts(true)
-        }));
+        var footer = document.getElementById('pl-table-footer');
+        if (footer) {
+            var totalAmt = FILTERED.reduce(function (s, d) { return s + d.amount; }, 0);
+            footer.innerHTML = '<span>' + FILTERED.length + ' deals</span>'
+                + '<span>Total: <strong>' + fmtCurrencyK(totalAmt) + '</strong></span>';
+        }
+    }
+
+    function esc(s) {
+        if (!s) return '';
+        var d = document.createElement('div');
+        d.textContent = s;
+        return d.innerHTML;
     }
 
     // ================================================================
-    // 4. Revenue Won — line chart with trend
+    // REPORT VIEW
     // ================================================================
-    function renderRevenueChart(range) {
-        var canvas = ensureCanvas('pl-revenue-chart', 200);
-        if (!canvas) return;
-
-        var data = filterMonthlyRange(TS.revenue_won_by_month || {}, range);
-        var entries = Object.entries(data).sort();
-        if (!entries.length) return;
-
-        var labels = entries.map(function (e) {
-            var p = e[0].split('-');
-            return MONTH_SHORT[parseInt(p[1], 10) - 1] + ' ' + p[0].slice(2);
-        });
-        var values = entries.map(function (e) { return e[1]; });
-
-        storeChart('pl-revenue-chart', new Chart(canvas, {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Revenue Won',
-                    data: values,
-                    borderColor: '#34d399',
-                    backgroundColor: 'rgba(52, 211, 153, 0.15)',
-                    fill: true,
-                    tension: 0.3,
-                    pointRadius: 4,
-                    pointBackgroundColor: '#34d399',
-                    pointHoverRadius: 6,
-                    borderWidth: 2
-                }]
-            },
-            options: chartOpts(true)
-        }));
+    function renderReport() {
+        renderFunnel();
+        renderSourceBreakdown();
+        renderProductBreakdown();
+        renderOwnerBreakdown();
+        renderMonthlyChart();
+        renderWinLoss();
     }
 
-    // ================================================================
-    // 5. Deal Stage Funnel
-    // ================================================================
     function renderFunnel() {
-        var el = document.getElementById('pl-funnel');
+        var el = document.getElementById('pl-rpt-funnel');
         if (!el) return;
 
-        // Aggregate deals by stage over last 30 days
-        var range = getLast30Range();
         var stageCounts = {};
-        var dsm = TS.deals_by_stage_by_month || {};
-        for (var month in dsm) {
-            if (range === null || (month + '-01' >= range.start && month + '-28' <= range.end)
-                || (month + '-01' <= range.end && month + '-28' >= range.start)) {
-                var stages = dsm[month];
-                for (var stage in stages) {
-                    if (!stageCounts[stage]) stageCounts[stage] = 0;
-                    stageCounts[stage] += stages[stage].count || 0;
-                }
-            }
-        }
+        FILTERED.forEach(function (d) {
+            stageCounts[d.stage] = (stageCounts[d.stage] || 0) + 1;
+        });
 
         var maxCount = 0;
         STAGE_ORDER.forEach(function (s) {
-            var c = stageCounts[s] || 0;
-            if (c > maxCount) maxCount = c;
+            if ((stageCounts[s] || 0) > maxCount) maxCount = stageCounts[s];
         });
         if (maxCount === 0) maxCount = 1;
 
-        // Calculate conversion rates
+        var total = FILTERED.length || 1;
         var html = '<div class="pl-funnel-head">'
-            + '<div>Deal Stage</div><div>(Count) Deals</div>'
-            + '<div style="text-align:center">Next Step</div>'
-            + '<div style="text-align:center">Cumulative</div></div>';
+            + '<div>Stage</div><div>Deals</div><div style="text-align:center">Count</div>'
+            + '<div style="text-align:center">% Share</div></div>';
 
-        var totalCreated = 0;
-        STAGE_ORDER.forEach(function (s) { totalCreated += (stageCounts[s] || 0); });
-
-        var prevCount = totalCreated;
         STAGE_ORDER.forEach(function (stage) {
             var count = stageCounts[stage] || 0;
+            if (count === 0) return;
             var barPct = Math.max(2, (count / maxCount) * 100);
-            var nextPct = prevCount > 0 ? ((count / prevCount) * 100) : 0;
-            var cumPct = totalCreated > 0 ? ((count / totalCreated) * 100) : 0;
-            var hasPct = count > 0;
-
+            var sharePct = (count / total * 100).toFixed(1);
             html += '<div class="pl-funnel-row">'
                 + '<div class="pl-funnel-stage">' + stage + '</div>'
                 + '<div class="pl-funnel-bar-wrap">'
                 + '<div class="pl-funnel-bar-track">'
-                + '<div class="pl-funnel-bar-fill" style="width:' + barPct.toFixed(1) + '%">'
-                + (count > 0 ? count : '') + '</div></div>'
-                + '<span class="pl-funnel-bar-label">' + (count > 0 ? count : '0') + '</span></div>'
-                + '<div class="pl-funnel-pct' + (hasPct ? '' : ' muted') + '">'
-                + (hasPct ? nextPct.toFixed(1) + '%' : '0%') + '</div>'
-                + '<div class="pl-funnel-pct' + (hasPct ? '' : ' muted') + '">'
-                + (hasPct ? cumPct.toFixed(1) + '%' : '0%') + '</div>'
-                + '</div>';
-
-            if (count > 0) prevCount = count;
-        });
-
-        el.innerHTML = html;
-    }
-
-    // ================================================================
-    // 6. Lead Source Report (table with visual bars)
-    // ================================================================
-    function renderLeadSource() {
-        var el = document.getElementById('pl-lead-source');
-        if (!el) return;
-
-        // Aggregate all sources (YTD)
-        var sources = {};
-        var lsm = TS.leads_by_source_by_month || {};
-        var ytdStart = new Date().getFullYear() + '-01';
-        for (var month in lsm) {
-            if (month >= ytdStart) {
-                var srcs = lsm[month];
-                for (var src in srcs) {
-                    sources[src] = (sources[src] || 0) + srcs[src];
-                }
-            }
-        }
-
-        var sorted = Object.entries(sources).sort(function (a, b) { return b[1] - a[1]; });
-        var total = sorted.reduce(function (sum, e) { return sum + e[1]; }, 0);
-        if (!total) { el.innerHTML = '<div class="pl-empty">No lead data available</div>'; return; }
-
-        var html = '<table class="pl-source-table"><thead><tr>'
-            + '<th>Source</th><th>Count</th><th>Share</th><th>Distribution</th>'
-            + '</tr></thead><tbody>';
-
-        sorted.forEach(function (entry, i) {
-            var name = SOURCE_LABELS[entry[0]] || entry[0];
-            var count = entry[1];
-            var pct = (count / total * 100);
-            var color = PALETTE[i % PALETTE.length];
-            html += '<tr>'
-                + '<td><span class="pl-source-name">'
-                + '<span class="pl-source-dot" style="background:' + color + '"></span>'
-                + name + '</span></td>'
-                + '<td>' + fmtNum(count) + '</td>'
-                + '<td class="pl-source-pct">' + pct.toFixed(1) + '%</td>'
-                + '<td><div class="pl-source-bar" style="width:' + pct.toFixed(1)
-                + '%;background:' + color + '"></div></td>'
-                + '</tr>';
-        });
-
-        // Total row
-        html += '<tr class="pl-source-total">'
-            + '<td><strong>Total</strong></td>'
-            + '<td><strong>' + fmtNum(total) + '</strong></td>'
-            + '<td></td><td></td></tr>';
-
-        html += '</tbody></table>';
-        el.innerHTML = html;
-    }
-
-    // ================================================================
-    // 7. Activity Leaderboard by Rep
-    // ================================================================
-    function renderActivityLeaderboard() {
-        var el = document.getElementById('pl-activity-leaderboard');
-        if (!el) return;
-
-        // Aggregate rep activities (YTD)
-        var reps = {};
-        var arm = TS.activities_by_rep_by_month || {};
-        var ytdStart = new Date().getFullYear() + '-01';
-        for (var month in arm) {
-            if (month >= ytdStart) {
-                var repData = arm[month];
-                for (var rep in repData) {
-                    // Skip numeric IDs
-                    if (/^\d+$/.test(rep) || rep === 'unassigned') continue;
-                    if (!reps[rep]) reps[rep] = { calls: 0, emails: 0, meetings: 0, tasks: 0, notes: 0 };
-                    var acts = repData[rep];
-                    for (var t in acts) {
-                        if (reps[rep].hasOwnProperty(t)) reps[rep][t] += acts[t];
-                    }
-                }
-            }
-        }
-
-        var sorted = Object.entries(reps).map(function (e) {
-            var total = e[1].calls + e[1].emails + e[1].meetings + e[1].tasks + e[1].notes;
-            return { name: e[0], acts: e[1], total: total };
-        }).sort(function (a, b) { return b.total - a.total; });
-
-        if (!sorted.length) {
-            el.innerHTML = '<div class="pl-empty">No activity data</div>';
-            return;
-        }
-
-        var html = '<div class="pl-leader-head">'
-            + '<div>Rep</div><div style="text-align:center">Calls</div>'
-            + '<div style="text-align:center">Emails</div>'
-            + '<div style="text-align:center">Meetings</div>'
-            + '<div style="text-align:center">Tasks</div>'
-            + '<div style="text-align:center">Notes</div>'
-            + '<div style="text-align:center">Total</div></div>';
-
-        sorted.forEach(function (rep) {
-            var initials = rep.name.split(' ').map(function (w) { return w[0]; }).join('');
-            html += '<div class="pl-leader-row">'
-                + '<div class="pl-leader-name">'
-                + '<span class="pl-leader-avatar">' + initials + '</span>'
-                + rep.name + '</div>'
-                + '<div class="pl-leader-val">' + (rep.acts.calls || 0) + '</div>'
-                + '<div class="pl-leader-val">' + (rep.acts.emails || 0) + '</div>'
-                + '<div class="pl-leader-val">' + (rep.acts.meetings || 0) + '</div>'
-                + '<div class="pl-leader-val">' + (rep.acts.tasks || 0) + '</div>'
-                + '<div class="pl-leader-val">' + (rep.acts.notes || 0) + '</div>'
-                + '<div class="pl-leader-total">' + rep.total + '</div>'
+                + '<div class="pl-funnel-bar-fill" style="width:' + barPct.toFixed(1) + '%;background:' + (STAGE_COLOURS[stage] || 'var(--accent)') + '">'
+                + '</div></div>'
+                + '<span class="pl-funnel-bar-label">' + count + '</span></div>'
+                + '<div class="pl-funnel-pct">' + count + '</div>'
+                + '<div class="pl-funnel-pct">' + sharePct + '%</div>'
                 + '</div>';
         });
 
         el.innerHTML = html;
     }
 
-    // ================================================================
-    // 8. Deal Pipeline Table
-    // ================================================================
-    function renderDealTable() {
-        var el = document.getElementById('pl-deal-table');
+    function renderBreakdownTable(elId, groups, labelKey) {
+        var el = document.getElementById(elId);
         if (!el) return;
 
-        // Build deal list from deals_by_stage_by_month (aggregate view)
-        var dsm = TS.deals_by_stage_by_month || {};
-        var stageData = [];
-        for (var month in dsm) {
-            var stages = dsm[month];
-            for (var stage in stages) {
-                var d = stages[stage];
-                stageData.push({
-                    month: month,
-                    stage: stage,
-                    count: d.count || 0,
-                    value: d.value || 0
-                });
-            }
-        }
+        var sorted = Object.keys(groups).map(function (k) {
+            return { label: k, count: groups[k].count, amount: groups[k].amount };
+        }).sort(function (a, b) { return b.amount - a.amount; });
 
-        // Sort by month desc, then stage
-        stageData.sort(function (a, b) {
-            if (b.month !== a.month) return b.month > a.month ? 1 : -1;
-            return (STAGE_ORDER.indexOf(a.stage) - STAGE_ORDER.indexOf(b.stage));
-        });
+        if (!sorted.length) { el.innerHTML = '<div class="pl-empty">No data</div>'; return; }
 
-        if (!stageData.length) {
-            el.innerHTML = '<div class="pl-empty">No deal data</div>';
-            return;
-        }
-
-        var html = '<table class="pl-deals-table"><thead><tr>'
-            + '<th>Month</th><th>Stage</th><th>Deals</th><th>Value</th>'
+        var maxAmt = sorted[0].amount || 1;
+        var html = '<table class="pl-breakdown-table"><thead><tr>'
+            + '<th>' + (labelKey || 'Name') + '</th><th class="num">Deals</th>'
+            + '<th class="num">Value</th><th>Distribution</th>'
             + '</tr></thead><tbody>';
 
-        stageData.forEach(function (d) {
-            var p = d.month.split('-');
-            var monthLabel = MONTH_SHORT[parseInt(p[1], 10) - 1] + ' ' + p[0];
-            var cssClass = STAGE_CSS[d.stage] || 'inbound';
+        sorted.forEach(function (row) {
+            var barPct = Math.max(2, (row.amount / maxAmt) * 100);
             html += '<tr>'
-                + '<td>' + monthLabel + '</td>'
-                + '<td><span class="pl-deal-stage pl-stage-' + cssClass + '">' + d.stage + '</span></td>'
-                + '<td>' + d.count + '</td>'
-                + '<td>' + fmtCurrency(d.value) + '</td>'
-                + '</tr>';
+                + '<td style="font-weight:600">' + esc(row.label || 'Unknown') + '</td>'
+                + '<td class="num">' + row.count + '</td>'
+                + '<td class="num" style="font-weight:600">' + fmtCurrencyK(row.amount) + '</td>'
+                + '<td><div class="pl-breakdown-bar-wrap">'
+                + '<div class="pl-breakdown-bar" style="width:' + barPct.toFixed(1) + '%"></div>'
+                + '</div></td></tr>';
         });
 
         html += '</tbody></table>';
         el.innerHTML = html;
     }
 
-    // ================================================================
-    // 9. Stale Deals (kept from original — uses STATIC if available)
-    // ================================================================
-    function renderStaleDealsList() {
-        var el = document.getElementById('pl-stale-deals');
+    function renderSourceBreakdown() {
+        var groups = {};
+        FILTERED.forEach(function (d) {
+            var key = d.source || 'Unknown';
+            if (!groups[key]) groups[key] = { count: 0, amount: 0 };
+            groups[key].count++;
+            groups[key].amount += d.amount;
+        });
+        renderBreakdownTable('pl-rpt-source', groups, 'Source');
+    }
+
+    function renderProductBreakdown() {
+        var groups = {};
+        FILTERED.forEach(function (d) {
+            var prods = d.product ? d.product.split(';') : ['Unknown'];
+            prods.forEach(function (p) {
+                p = p.trim() || 'Unknown';
+                if (!groups[p]) groups[p] = { count: 0, amount: 0 };
+                groups[p].count++;
+                groups[p].amount += d.amount;
+            });
+        });
+        renderBreakdownTable('pl-rpt-product', groups, 'Product');
+    }
+
+    function renderOwnerBreakdown() {
+        var groups = {};
+        FILTERED.forEach(function (d) {
+            var key = d.owner || 'Unassigned';
+            if (!groups[key]) groups[key] = { count: 0, amount: 0 };
+            groups[key].count++;
+            groups[key].amount += d.amount;
+        });
+        renderBreakdownTable('pl-rpt-owner', groups, 'Owner');
+    }
+
+    function renderMonthlyChart() {
+        var el = document.getElementById('pl-rpt-monthly');
         if (!el) return;
 
-        // Use hardcoded stale deals data (from original pipeline)
-        var staleDeals = [
-            { name: 'GMC - Evri - Rebate', value: 25000, stage: 'Contract Sent', days: 222, owner: 'Caldon Henson' },
-            { name: 'The Ayurveda Experience - Freight', value: 60000, stage: 'Engaged', days: 67, owner: 'James Carberry' },
-            { name: 'Glow Hub - M&A', value: 10000, stage: 'Engaged', days: 180, owner: 'Josh Elliott' },
-            { name: 'MAYAH - Investment', value: 1, stage: 'Contract Sent', days: 42, owner: 'Anna Younger' },
-            { name: 'Cascadia Capital - CDD', value: 200000, stage: 'Proposal Shared', days: 76, owner: 'Josh Elliott' },
-            { name: 'Nuovaluce Beauty', value: 50000, stage: 'Decision Maker Bought-In', days: 96, owner: 'Anna Younger' },
-            { name: 'Finishing Line', value: 40000, stage: 'Engaged', days: 33, owner: 'James Carberry' }
-        ];
-
-        var html = '<table class="pl-deals-table"><thead><tr>'
-            + '<th>Deal</th><th>Value</th><th>Stage</th><th>Days Stale</th><th>Owner</th>'
-            + '</tr></thead><tbody>';
-
-        staleDeals.forEach(function (d) {
-            var cssClass = STAGE_CSS[d.stage] || 'inbound';
-            html += '<tr>'
-                + '<td class="pl-deal-name">' + d.name + '</td>'
-                + '<td>' + fmtCurrency(d.value) + '</td>'
-                + '<td><span class="pl-deal-stage pl-stage-' + cssClass + '">' + d.stage + '</span></td>'
-                + '<td style="font-weight:700;color:' + (d.days > 60 ? 'var(--danger)' : 'var(--warning)') + '">'
-                + d.days + 'd</td>'
-                + '<td>' + d.owner + '</td>'
-                + '</tr>';
+        var monthly = {};
+        FILTERED.forEach(function (d) {
+            var m = d.created ? d.created.slice(0, 7) : null;
+            if (m) monthly[m] = (monthly[m] || 0) + 1;
         });
 
-        html += '</tbody></table>';
+        var months = Object.keys(monthly).sort().slice(-12);
+        if (!months.length) { el.innerHTML = '<div class="pl-empty">No data</div>'; return; }
+        var max = 0;
+        months.forEach(function (m) { if (monthly[m] > max) max = monthly[m]; });
+        if (!max) max = 1;
+
+        var html = '<div style="display:flex;align-items:flex-end;gap:4px;height:160px;padding-top:20px">';
+        months.forEach(function (m) {
+            var pct = Math.max(2, Math.round(monthly[m] / max * 100));
+            var parts = m.split('-');
+            var label = MONTH_SHORT[parseInt(parts[1], 10) - 1] + ' ' + parts[0].slice(2);
+            html += '<div style="flex:1;display:flex;flex-direction:column;align-items:center">'
+                + '<div style="font-size:10px;color:var(--text-muted);margin-bottom:2px">' + monthly[m] + '</div>'
+                + '<div style="width:100%;height:' + pct + '%;background:var(--accent);border-radius:3px 3px 0 0;min-height:2px"></div>'
+                + '<div style="font-size:9px;color:var(--text-muted);margin-top:4px">' + label + '</div>'
+                + '</div>';
+        });
+        html += '</div>';
+        el.innerHTML = html;
+    }
+
+    function renderWinLoss() {
+        var el = document.getElementById('pl-rpt-winloss');
+        if (!el) return;
+
+        var won = 0, lost = 0, open = 0;
+        FILTERED.forEach(function (d) {
+            if (d.isWon) won++;
+            else if (d.isLost) lost++;
+            else open++;
+        });
+
+        var closed = won + lost;
+        var winRate = closed > 0 ? (won / closed * 100).toFixed(1) : '0';
+        var lossRate = closed > 0 ? (lost / closed * 100).toFixed(1) : '0';
+        var total = won + lost + open || 1;
+        var wonPct = (won / total * 100).toFixed(1);
+        var lostPct = (lost / total * 100).toFixed(1);
+        var openPct = (open / total * 100).toFixed(1);
+
+        var html = '<div class="pl-winloss-grid">'
+            + '<div class="pl-winloss-stat">'
+            + '<div class="pl-winloss-value" style="color:var(--success)">' + winRate + '%</div>'
+            + '<div class="pl-winloss-label">Win Rate (' + won + ' won)</div></div>'
+            + '<div class="pl-winloss-stat">'
+            + '<div class="pl-winloss-value" style="color:var(--danger)">' + lossRate + '%</div>'
+            + '<div class="pl-winloss-label">Loss Rate (' + lost + ' lost)</div></div>'
+            + '</div>'
+            + '<div class="pl-winloss-bar">'
+            + '<div class="pl-winloss-bar-won" style="width:' + wonPct + '%"><span>' + won + '</span></div>'
+            + '<div class="pl-winloss-bar-open" style="width:' + openPct + '%"><span>' + open + '</span></div>'
+            + '<div class="pl-winloss-bar-lost" style="width:' + lostPct + '%"><span>' + lost + '</span></div>'
+            + '</div>'
+            + '<div style="display:flex;justify-content:space-between;margin-top:6px;font-size:10px;color:var(--text-muted);font-weight:600">'
+            + '<span style="color:var(--success)">Won</span>'
+            + '<span style="color:var(--accent)">Open</span>'
+            + '<span style="color:var(--danger)">Lost</span></div>';
+
         el.innerHTML = html;
     }
 
     // ================================================================
-    // Filter Pills — re-render chart for a specific time range
+    // GANTT VIEW
     // ================================================================
-    function rerenderChart(chartId, rangeKey) {
-        var range = getDateRange(rangeKey);
-        switch (chartId) {
-            case 'pl-leads-chart': renderLeadsChart(range); break;
-            case 'pl-pipeline-chart': renderPipelineChart(range); break;
-            case 'pl-revenue-chart': renderRevenueChart(range); break;
+    function renderGantt() {
+        var el = document.getElementById('pl-gantt-chart');
+        if (!el) return;
+
+        var openDeals = FILTERED.filter(function (d) { return !d.isWon && !d.isLost; });
+        if (!openDeals.length) { el.innerHTML = '<div class="pl-empty">No open deals to display</div>'; return; }
+
+        // Sort by create date
+        openDeals.sort(function (a, b) { return new Date(a.created) - new Date(b.created); });
+
+        // Calculate time range
+        var now = new Date();
+        var minDate = new Date(openDeals[0].created);
+        var maxDate = new Date(now);
+        // Extend 30 days into future
+        maxDate.setDate(maxDate.getDate() + 30);
+
+        var totalDays = daysBetween(minDate, maxDate) || 1;
+
+        // Generate month headers
+        var headers = [];
+        var cur = new Date(minDate.getFullYear(), minDate.getMonth(), 1);
+        while (cur <= maxDate) {
+            headers.push({ label: MONTH_SHORT[cur.getMonth()] + ' ' + String(cur.getFullYear()).slice(2), date: new Date(cur) });
+            cur.setMonth(cur.getMonth() + 1);
         }
+
+        var html = '<div class="pl-gantt-header">'
+            + '<div class="pl-gantt-header-cell" style="min-width:180px;text-align:left">Deal</div>';
+        headers.forEach(function (h) {
+            html += '<div class="pl-gantt-header-cell">' + h.label + '</div>';
+        });
+        html += '</div>';
+
+        // Today marker position
+        var todayPct = (daysBetween(minDate, now) / totalDays * 100);
+
+        openDeals.forEach(function (d) {
+            var start = new Date(d.created);
+            var end = d.closed ? new Date(d.closed) : now;
+            var leftPct = (daysBetween(minDate, start) / totalDays * 100);
+            var widthPct = Math.max(1, (daysBetween(start, end) / totalDays * 100));
+            var colour = STAGE_COLOURS[d.stage] || '#3CB4AD';
+
+            html += '<div class="pl-gantt-row">'
+                + '<div class="pl-gantt-label" title="' + esc(d.name) + '">' + esc(d.name) + '</div>'
+                + '<div class="pl-gantt-track">'
+                + '<div class="pl-gantt-bar" style="left:' + leftPct.toFixed(1) + '%;width:' + widthPct.toFixed(1) + '%;background:' + colour + '"'
+                + ' title="' + esc(d.name) + ' — ' + esc(d.stage) + ' — ' + fmtCurrency(d.amount) + '">'
+                + esc(d.stage) + '</div>'
+                + '<div class="pl-gantt-today" style="left:' + todayPct.toFixed(1) + '%"></div>'
+                + '</div></div>';
+        });
+
+        el.innerHTML = html;
     }
 
-    var _pillsInited = false;
-    function initFilterPills() {
-        if (_pillsInited) return;
+    // ================================================================
+    // Populate Filter Dropdowns
+    // ================================================================
+    function populateFilters() {
+        var owners = {}, products = {}, sources = {}, stages = {};
+        DEALS.forEach(function (d) {
+            if (d.owner) owners[d.owner] = true;
+            if (d.product) d.product.split(';').forEach(function (p) { products[p.trim()] = true; });
+            if (d.source) sources[d.source] = true;
+            if (d.stage) stages[d.stage] = true;
+        });
+
+        fillSelect('pl-filter-owner', 'All Owners', Object.keys(owners).sort());
+        fillSelect('pl-filter-product', 'All Products', Object.keys(products).sort());
+        fillSelect('pl-filter-source', 'All Sources', Object.keys(sources).sort());
+        fillSelect('pl-filter-stage', 'All Stages', STAGE_ORDER.filter(function (s) { return stages[s]; }));
+    }
+
+    function fillSelect(id, placeholder, options) {
+        var sel = document.getElementById(id);
+        if (!sel) return;
+        sel.innerHTML = '<option value="">' + placeholder + '</option>';
+        options.forEach(function (o) {
+            sel.innerHTML += '<option value="' + esc(o) + '">' + esc(o) + '</option>';
+        });
+    }
+
+    // ================================================================
+    // Event Wiring
+    // ================================================================
+    function wireEvents() {
+        // View tabs
         var section = document.getElementById('pipeline');
         if (!section) return;
-        _pillsInited = true;
+
         section.addEventListener('click', function (e) {
-            var pill = e.target.closest('.pl-filter-pill');
-            if (!pill) return;
-            // Toggle active within same card
-            var card = pill.closest('.pl-card');
-            if (card) {
-                card.querySelectorAll('.pl-filter-pill').forEach(function (p) { p.classList.remove('active'); });
-                pill.classList.add('active');
+            // View tab click
+            var tab = e.target.closest('.pl-view-tab');
+            if (tab) {
+                section.querySelectorAll('.pl-view-tab').forEach(function (t) {
+                    t.classList.remove('active'); t.setAttribute('aria-selected', 'false');
+                });
+                tab.classList.add('active'); tab.setAttribute('aria-selected', 'true');
+                ACTIVE_VIEW = tab.getAttribute('data-view');
+                section.querySelectorAll('.pl-view-panel').forEach(function (p) { p.classList.remove('active'); });
+                var panel = document.getElementById('pl-view-' + ACTIVE_VIEW);
+                if (panel) panel.classList.add('active');
+                renderActiveView();
+                return;
             }
-            // Re-render the chart in this card
-            var chartWrap = card && card.querySelector('.pl-chart-wrap');
-            if (chartWrap) rerenderChart(chartWrap.id, pill.getAttribute('data-range'));
+
+            // Period pill click
+            var pill = e.target.closest('.pl-period-pill');
+            if (pill) {
+                section.querySelectorAll('.pl-period-pill').forEach(function (p) { p.classList.remove('active'); });
+                pill.classList.add('active');
+                ACTIVE_PERIOD = pill.getAttribute('data-period');
+                applyFilters();
+                return;
+            }
+
+            // Table sort
+            var th = e.target.closest('.pl-deals-table thead th[data-sort]');
+            if (th) {
+                var key = th.getAttribute('data-sort');
+                if (SORT_KEY === key) SORT_DIR = SORT_DIR === 'asc' ? 'desc' : 'asc';
+                else { SORT_KEY = key; SORT_DIR = key === 'amount' ? 'desc' : 'asc'; }
+                // Update sort indicators
+                section.querySelectorAll('.pl-deals-table thead th').forEach(function (h) {
+                    h.classList.remove('sorted-asc', 'sorted-desc');
+                });
+                th.classList.add('sorted-' + SORT_DIR);
+                sortDeals();
+                renderTable();
+            }
+        });
+
+        // Filter selects
+        ['pl-filter-owner', 'pl-filter-product', 'pl-filter-source', 'pl-filter-stage'].forEach(function (id) {
+            var sel = document.getElementById(id);
+            if (sel) sel.addEventListener('change', applyFilters);
         });
     }
 
     // ================================================================
-    // Master render
+    // Render Active View
+    // ================================================================
+    function renderActiveView() {
+        if (ACTIVE_VIEW === 'table') renderTable();
+        else if (ACTIVE_VIEW === 'report') renderReport();
+        else if (ACTIVE_VIEW === 'gantt') renderGantt();
+    }
+
+    function renderAll() {
+        renderSummary();
+        renderFilterCount();
+        renderActiveView();
+    }
+
+    // ================================================================
+    // Data Loading — live API with static fallback
+    // ================================================================
+    function loadDeals(callback) {
+        // Try live API first (Supabase-cached HubSpot data)
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', '/api/deals', true);
+        xhr.timeout = 8000;
+        xhr.onload = function () {
+            if (xhr.status === 200) {
+                try {
+                    var data = JSON.parse(xhr.responseText);
+                    var meta = data.meta || {};
+                    updateSyncBadge(meta.syncedAt, meta.source);
+                    callback(data.deals || []);
+                    return;
+                } catch (e) { /* fall through */ }
+            }
+            loadStaticFallback(callback);
+        };
+        xhr.onerror = function () { loadStaticFallback(callback); };
+        xhr.ontimeout = function () { loadStaticFallback(callback); };
+        xhr.send();
+    }
+
+    function loadStaticFallback(callback) {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', 'data/hubspot-deals.json?t=' + Date.now(), true);
+        xhr.onload = function () {
+            if (xhr.status === 200) {
+                try {
+                    var data = JSON.parse(xhr.responseText);
+                    updateSyncBadge(data.meta && data.meta.syncedAt, 'static');
+                    callback(data.deals || []);
+                    return;
+                } catch (e) { /* empty */ }
+            }
+            callback([]);
+        };
+        xhr.onerror = function () { callback([]); };
+        xhr.send();
+    }
+
+    function updateSyncBadge(syncedAt, source) {
+        var sub = document.querySelector('.section-subtitle');
+        if (!sub) return;
+        var ago = '';
+        if (syncedAt) {
+            var diff = Math.round((Date.now() - new Date(syncedAt).getTime()) / 60000);
+            if (diff < 1) ago = 'just now';
+            else if (diff < 60) ago = diff + ' min ago';
+            else ago = Math.round(diff / 60) + 'h ago';
+        }
+        var label = source === 'hubspot' ? 'Live' : source === 'cache' ? 'Cached' : 'Static';
+        var dot = source === 'hubspot' ? '#22c55e' : source === 'cache' ? '#3CB4AD' : '#f59e0b';
+        sub.innerHTML = 'HubSpot deal pipeline — '
+            + '<span style="display:inline-flex;align-items:center;gap:4px">'
+            + '<span style="width:8px;height:8px;border-radius:50%;background:' + dot + ';display:inline-block"></span>'
+            + label + (ago ? ' · synced ' + ago : '')
+            + '</span>';
+    }
+
+    // ================================================================
+    // Master Render
     // ================================================================
     window.renderPipeline = function () {
-        renderActivityTotals();
-        renderLeadsChart();
-        renderPipelineChart();
-        renderRevenueChart();
-        renderFunnel();
-        renderLeadSource();
-        renderActivityLeaderboard();
-        renderDealTable();
-        renderStaleDealsList();
-        initFilterPills();
+        loadDeals(function (deals) {
+            DEALS = deals;
+            FILTERED = filterByPeriod(DEALS, ACTIVE_PERIOD);
+            populateFilters();
+            sortDeals();
+            renderAll();
+            wireEvents();
+        });
     };
 })();
