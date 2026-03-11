@@ -8,10 +8,14 @@
 .exec-kpi {
     flex: 1 1 0; min-width: 100px;
     background: var(--card); border: 1px solid var(--card-border);
-    border-radius: var(--radius-sm); padding: var(--space-4);
-    text-align: center;
+    border-radius: var(--radius-sm); padding: var(--space-3) var(--space-2);
+    text-align: center; overflow: hidden; min-height: 0;
 }
-.exec-kpi-val { font-family: var(--font-display); font-size: var(--text-3xl); font-weight: 400; line-height: 1.1; }
+.exec-kpi-val {
+    font-family: var(--font-display); font-size: var(--text-3xl); font-weight: 400; line-height: 1.1;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    max-width: 100%;
+}
 .exec-kpi-label {
     font-size: var(--text-xs); color: var(--text-muted);
     text-transform: uppercase; letter-spacing: 0.04em; margin-top: var(--space-1);
@@ -124,7 +128,7 @@
 }
 .ic-detail-row:last-child { border-bottom: none; }
 .ic-detail-row .label { color: var(--text-muted); }
-.ic-detail-row .value { color: var(--text); font-weight: 500; max-width: 60%; text-align: right; }
+.ic-detail-row .value { color: var(--text); font-weight: 500; max-width: 60%; text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* ============================================================
    AI Section (Roadmap)
@@ -140,7 +144,9 @@
     align-items: center; padding: 6px var(--space-3);
     font-size: 12px; border-bottom: 1px solid var(--card-border);
     cursor: pointer; transition: background 0.12s ease;
+    min-width: 0;
 }
+.ai-item-row > * { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
 .ai-item-row:hover { background: rgba(60, 180, 173, 0.04); }
 .ai-item-row:last-child { border-bottom: none; }
 .ai-item-detail {

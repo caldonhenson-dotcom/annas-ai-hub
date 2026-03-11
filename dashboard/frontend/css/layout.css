@@ -129,14 +129,19 @@
 
 /* ── Sidebar Collapse Toggle ── */
 .sidebar-collapse-btn {
-    position: absolute; bottom: 52px; right: -12px;
-    width: 24px; height: 24px; border-radius: 50%;
+    position: absolute; bottom: 52px; right: -14px;
+    width: 28px; height: 28px; border-radius: 50%;
     background: var(--card); border: 1px solid var(--card-border);
     display: flex; align-items: center; justify-content: center;
     cursor: pointer; z-index: var(--z-sidebar-toggle); font-size: 14px; font-weight: 700;
     color: var(--text-muted); box-shadow: var(--shadow);
     opacity: 0; transition: opacity 0.2s;
     line-height: 1; padding: 0;
+    /* Touch target expansion via pseudo-element */
+}
+.sidebar-collapse-btn::before {
+    content: ''; position: absolute;
+    top: -8px; right: -8px; bottom: -8px; left: -8px;
 }
 .sidebar:hover .sidebar-collapse-btn { opacity: 1; }
 .sidebar-collapse-btn:hover {

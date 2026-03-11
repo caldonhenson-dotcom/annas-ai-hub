@@ -240,7 +240,7 @@
     transform: scale(1.05);
     box-shadow: 0 4px 16px rgba(60, 180, 173, 0.12);
 }
-.chain-value { font-family: var(--font-display); font-size: var(--text-xl); font-weight: 400; line-height: 1.2; }
+.chain-value { font-family: var(--font-display); font-size: var(--text-xl); font-weight: 400; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .chain-label {
     font-size: var(--text-xs); color: var(--text-muted);
     text-transform: uppercase; letter-spacing: 0.05em; margin-top: var(--space-1);
@@ -309,8 +309,8 @@
 }
 .btn-ghost:hover { color: var(--accent); background: rgba(60, 180, 173, 0.06); }
 
-.btn-sm { padding: 4px 10px; font-size: 12px; }
+.btn-sm { padding: 4px 10px; font-size: 12px; min-height: var(--touch-compact); }
 .btn-lg { padding: var(--space-3) var(--space-6); font-size: var(--text-md); }
-.btn-icon { padding: 6px; min-width: 32px; min-height: 32px; }
+.btn-icon { padding: 6px; min-width: var(--touch-compact); min-height: var(--touch-compact); }
 .btn-pill { border-radius: 20px; }
 .btn-block { width: 100%; }

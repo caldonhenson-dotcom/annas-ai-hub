@@ -20,9 +20,11 @@
 .top-bar-right { display: flex; align-items: center; gap: var(--space-3); }
 .top-bar-btn {
     background: none; border: none; cursor: pointer;
-    padding: 4px 8px; border-radius: 6px; font-size: 14px;
+    padding: 6px 10px; border-radius: 6px; font-size: 14px;
     color: var(--text-muted); position: relative;
     transition: color 0.2s, background 0.2s;
+    min-width: var(--touch-compact); min-height: var(--touch-compact);
+    display: inline-flex; align-items: center; justify-content: center;
 }
 .top-bar-btn:hover { color: var(--text); background: rgba(0,0,0,0.04); }
 .notif-badge {

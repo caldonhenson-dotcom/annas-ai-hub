@@ -17,6 +17,64 @@ Sales & M&A Intelligence Dashboard powered by HubSpot data, Supabase backend, an
 - **Currency is GBP** — use `fmtCurrency()` which prefixes with £.
 - **No page exceeds 300 lines** — HTML skeletons ~50-75 lines, JS renderers ~200-280 lines.
 
+## UX Framework — Mandatory Rules
+
+These rules MUST be followed on every UI change. Violations are treated as bugs.
+
+### 1. Text Overflow Protection
+Every element displaying dynamic data (values, names, labels) MUST have overflow protection:
+```css
+overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;
+```
+This applies to: KPI values, card titles, table cells, names, currency amounts, percentages, stat values, badge text, and any other element where content length is unpredictable.
+
+### 2. Touch Targets (WCAG 2.5.5)
+All interactive elements MUST meet minimum touch target sizes:
+- **Primary actions** (buttons, nav links, tabs): `min-height: var(--touch-min)` (44px)
+- **Compact UI** (filters, pills, pagination): `min-height: var(--touch-compact)` (36px)
+- **Small buttons** that can't be resized: expand via `::before` pseudo-element hit area
+- Never go below 36px on any clickable/tappable element
+
+### 3. Responsive Breakpoint System
+All pages MUST render correctly at these breakpoints:
+| Breakpoint | Target | Grid Columns |
+|-----------|--------|-------------|
+| 1200px | Widescreen compact | 3-col KPIs |
+| 1100px | Executive pillars | 2-col pillars |
+| 1024px | Tablet | 2-col KPIs, 1-col grids |
+| 900px | Small tablet | 2-col sparkline, full-width panels |
+| 768px | Outreach compact | 1-col pillars, stacked funnels |
+| 640px | Mobile | 1-col everything, compact cards |
+| 600px | Executive mobile | 2-col KPI strip, 1-col sparkline |
+| 480px | Ultra-compact | Minimal padding, smaller fonts |
+
+### 4. Font Scaling
+Large display values (KPI numbers, stat values) MUST scale down at breakpoints:
+- Desktop: `var(--text-3xl)` (36px)
+- 1200px: `var(--text-2xl)` (28px)
+- 1100px: `var(--text-xl)` (24px)
+- 900px: `var(--text-lg)` (20px)
+- 600px: `var(--text-md)` (16px)
+- 480px: `var(--text-base)` (14px)
+
+### 5. No Inline Styles
+Never use `style=""` attributes in HTML templates. All styles go in CSS files using the token system. Inline styles break dark mode, responsive behaviour, and maintainability.
+
+### 6. Token-Only Colours
+Every colour reference MUST use a CSS variable from `css/tokens.css`. No hardcoded hex values in component CSS. The only exceptions are brand-specific gradients (LinkedIn blue, status greens/reds) which should still use tokens where possible.
+
+### 7. Container Overflow
+Every card, panel, and grid item MUST have `overflow: hidden` or appropriate containment. No content should ever visually escape its container boundary.
+
+### 8. Mobile-First Grids
+Grids MUST degrade gracefully. Default to `repeat(auto-fill, minmax(Xpx, 1fr))` where possible. Fixed column counts MUST have responsive overrides.
+
+### 9. Dark Mode Verification
+Every new UI element MUST be verified in dark mode. Use token variables for all colours — tokens automatically switch in `[data-theme="dark"]`.
+
+### 10. Reduced Motion
+Respect `prefers-reduced-motion: reduce`. All new animations/transitions MUST have reduced-motion overrides in `css/base.css`.
+
 ## Business Context
 
 ### Company
