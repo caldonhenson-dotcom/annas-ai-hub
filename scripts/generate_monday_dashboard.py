@@ -1,5 +1,6 @@
 """Generate dashboard/frontend/js/monday-data.js from processed Monday metrics."""
 import json
+from collections import Counter
 from pathlib import Path
 from datetime import datetime, timezone
 
@@ -17,11 +18,39 @@ def main():
     ic = raw.get("ic_metrics", {})
     overview = raw.get("board_overview", {})
 
-    # Filter projects to the primary board
+    # Filter to primary board
     board_projects = [p for p in ma.get("projects", []) if str(p.get("board_id")) == PRIMARY_BOARD]
     ic_items = [i for i in ic.get("items", []) if str(i.get("board_id")) == PRIMARY_BOARD]
 
-    # Find board metadata from overview
+    # Build IC lookup by item ID for column merge
+    ic_lookup = {}
+    for item in ic_items:
+        ic_lookup[str(item.get("id", ""))] = item
+
+    # Merge IC columns + subitems into project records
+    for proj in board_projects:
+        ic_match = ic_lookup.get(str(proj.get("id", "")), {})
+        proj["columns"] = ic_match.get("columns", {})
+        proj["subitems"] = ic_match.get("subitems", [])
+        proj["scores"] = ic_match.get("scores", {})
+        proj["total_score"] = ic_match.get("total_score", 0)
+        proj["avg_score"] = ic_match.get("avg_score", 0)
+
+    # Pre-aggregate status counts for KPIs
+    status_counts = Counter()
+    for p in board_projects:
+        s = (p.get("status") or "").strip()
+        if s:
+            status_counts[s] += 1
+
+    # Pre-aggregate items by creation month
+    items_by_month = Counter()
+    for p in board_projects:
+        ca = p.get("created_at", "")
+        if ca and len(ca) >= 7:
+            items_by_month[ca[:7]] += 1
+
+    # Board metadata from overview
     board_meta = {}
     for ws in overview.get("workspaces", []):
         for b in ws.get("boards", []):
@@ -34,8 +63,9 @@ def main():
         "board": board_meta,
         "projects": board_projects,
         "ic_items": ic_items,
+        "status_counts": dict(status_counts),
+        "items_by_month": dict(sorted(items_by_month.items())),
         "owner_summary": ma.get("owner_summary", []),
-        "funnel": ma.get("funnel", []),
     }
 
     js = "/* Monday.com data — generated {} */\nwindow.MONDAY = {};\n".format(
@@ -47,7 +77,8 @@ def main():
     with open(OUTPUT_PATH, "w", encoding="utf-8") as f:
         f.write(js)
 
-    print(f"Generated {OUTPUT_PATH.relative_to(PROJECT_ROOT)} — {len(board_projects)} projects, {len(ic_items)} IC items")
+    merged = sum(1 for p in board_projects if p.get("columns"))
+    print(f"Generated {OUTPUT_PATH.relative_to(PROJECT_ROOT)} — {len(board_projects)} projects ({merged} with IC columns), {len(ic_items)} IC items")
 
 
 if __name__ == "__main__":

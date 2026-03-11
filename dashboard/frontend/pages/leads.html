@@ -1,8 +1,8 @@
 <section id="leads" class="dashboard-section">
     <div class="section-header">
         <div>
-            <h2 class="section-title">Leads & Conversion</h2>
-            <p class="section-subtitle">Lead sources, marketing funnel, and conversion metrics</p>
+            <h2 class="section-title">Leads, Conversion & Insights</h2>
+            <p class="section-subtitle">Lead sources, marketing funnel, conversion metrics, win/loss analysis & forecasts</p>
         </div>
     </div>
 
@@ -27,7 +27,7 @@
         </div>
     </div>
 
-    <!-- Row 2: Lead Status + Source Effectiveness -->
+    <!-- Row 2: Lead Status + Contacts Trend -->
     <div class="pl-grid-2">
         <div class="pl-card">
             <div class="pl-card-header">
@@ -45,7 +45,7 @@
         </div>
     </div>
 
-    <!-- Row 3: Conversion Funnel (full width) -->
+    <!-- Row 3: Marketing Funnel -->
     <div class="pl-card pl-card-full">
         <div class="pl-card-header">
             <div class="pl-card-title">Marketing Funnel</div>
@@ -54,12 +54,75 @@
         <div id="ld-conversion-funnel"></div>
     </div>
 
-    <!-- Row 4: Source Detail Table (full width) -->
+    <!-- Row 4: Source Effectiveness -->
     <div class="pl-card pl-card-full">
         <div class="pl-card-header">
             <div class="pl-card-title">Source Effectiveness</div>
             <div class="pl-card-meta">Year to date</div>
         </div>
         <div id="ld-source-detail"></div>
+    </div>
+
+    <!-- ── Insights & Forecast ── -->
+    <div style="border-top:1px solid var(--card-border);margin:24px 0 16px;padding-top:16px">
+        <h3 style="font-size:16px;font-weight:700;color:var(--text);margin:0 0 4px">Insights & Forecast</h3>
+        <p class="section-subtitle" style="margin:0">Win/loss analysis, forecasts, sales cycle, and rep performance</p>
+    </div>
+
+    <!-- Forecast KPIs -->
+    <div class="pl-activity-totals" id="ins-kpi-totals" style="grid-template-columns:repeat(3,1fr)"></div>
+
+    <!-- Win/Loss + Sales Cycle -->
+    <div class="pl-grid-2">
+        <div class="pl-card">
+            <div class="pl-card-header">
+                <div class="pl-card-title">Win/Loss Analysis</div>
+                <div class="pl-card-meta">All time</div>
+            </div>
+            <div class="pl-chart-wrap" id="ins-winloss-chart" style="height:280px"></div>
+        </div>
+        <div class="pl-card">
+            <div class="pl-card-header">
+                <div class="pl-card-title">Sales Cycle Trend</div>
+                <div class="pl-card-meta">Average days to close</div>
+            </div>
+            <div class="pl-chart-wrap" id="ins-cycle-chart" style="height:280px"></div>
+        </div>
+    </div>
+
+    <!-- Deal Size + Revenue vs Pipeline -->
+    <div class="pl-grid-2">
+        <div class="pl-card">
+            <div class="pl-card-header">
+                <div class="pl-card-title">Deal Size Distribution</div>
+                <div class="pl-card-meta">All closed deals</div>
+            </div>
+            <div id="ins-deal-size"></div>
+        </div>
+        <div class="pl-card">
+            <div class="pl-card-header">
+                <div class="pl-card-title">Revenue Won vs Pipeline</div>
+                <div class="pl-card-meta">Monthly comparison</div>
+            </div>
+            <div class="pl-chart-wrap" id="ins-rev-pipeline" style="height:260px"></div>
+        </div>
+    </div>
+
+    <!-- Rep Performance -->
+    <div class="pl-card pl-card-full">
+        <div class="pl-card-header">
+            <div class="pl-card-title">Rep Performance Leaderboard</div>
+            <div class="pl-card-meta">Year to date</div>
+        </div>
+        <div id="ins-rep-perf"></div>
+    </div>
+
+    <!-- Cohort Analysis -->
+    <div class="pl-card pl-card-full">
+        <div class="pl-card-header">
+            <div class="pl-card-title">Cohort Analysis</div>
+            <div class="pl-card-meta">Monthly cohorts</div>
+        </div>
+        <div id="ins-cohorts"></div>
     </div>
 </section>

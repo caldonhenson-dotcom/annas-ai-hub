@@ -84,8 +84,7 @@
             <div class="sidebar-group" data-group="sales">
                 <div class="sidebar-group-label" onclick="window.toggleNavGroup(this.parentElement)"><span class="sidebar-group-icon">&#9733;</span> <span class="sidebar-label-text">Sales</span> <span class="sidebar-chevron">&#9660;</span></div>
                 <a href="javascript:void(0)" onclick="showPage('pipeline')" class="sidebar-link" data-page="pipeline"><span class="sidebar-link-icon">&#9881;</span><span class="sidebar-link-text">Deals</span><button class="sidebar-fav" data-fav="pipeline" onclick="event.preventDefault();event.stopPropagation();toggleFav('pipeline')" title="Toggle favourite">&#9733;</button></a>
-                <a href="javascript:void(0)" onclick="showPage('leads')" class="sidebar-link" data-page="leads"><span class="sidebar-link-icon">&#128101;</span><span class="sidebar-link-text">Leads &amp; Conversion</span><button class="sidebar-fav" data-fav="leads" onclick="event.preventDefault();event.stopPropagation();toggleFav('leads')" title="Toggle favourite">&#9733;</button></a>
-                <a href="javascript:void(0)" onclick="showPage('insights')" class="sidebar-link" data-page="insights"><span class="sidebar-link-icon">&#128161;</span><span class="sidebar-link-text">Insights &amp; Forecast</span><button class="sidebar-fav" data-fav="insights" onclick="event.preventDefault();event.stopPropagation();toggleFav('insights')" title="Toggle favourite">&#9733;</button></a>
+                <a href="javascript:void(0)" onclick="showPage('leads')" class="sidebar-link" data-page="leads"><span class="sidebar-link-icon">&#128101;</span><span class="sidebar-link-text">Leads &amp; Insights</span><button class="sidebar-fav" data-fav="leads" onclick="event.preventDefault();event.stopPropagation();toggleFav('leads')" title="Toggle favourite">&#9733;</button></a>
                 <a href="javascript:void(0)" onclick="showPage('targets')" class="sidebar-link" data-page="targets"><span class="sidebar-link-icon">&#127919;</span><span class="sidebar-link-text">Targets &amp; Rev Eng</span><button class="sidebar-fav" data-fav="targets" onclick="event.preventDefault();event.stopPropagation();toggleFav('targets')" title="Toggle favourite">&#9733;</button></a>
             </div>
             <div class="sidebar-group" data-group="team">
@@ -334,6 +333,52 @@
                     Select a prospect to view scoring
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- ═══ New M&A Opportunity Modal ═══ -->
+    <div class="api-settings-overlay hidden" id="ma-new-opp-modal" role="dialog" aria-modal="true" aria-label="New Opportunity" onclick="if(event.target===this)this.classList.add('hidden')">
+        <div class="api-settings-card" style="max-width:440px">
+            <div class="api-settings-header">
+                <h3 class="api-settings-title">&#10010; New Opportunity</h3>
+                <button onclick="document.getElementById('ma-new-opp-modal').classList.add('hidden')" class="api-settings-close">&times;</button>
+            </div>
+            <form id="ma-new-opp-form" autocomplete="off" style="padding:16px;display:flex;flex-direction:column;gap:12px">
+                <label style="font-size:12px;font-weight:600;color:var(--text)">Deal Name
+                    <input type="text" id="ma-opp-name" required placeholder="Project Codename (Company)" style="width:100%;margin-top:4px;padding:8px 10px;border:1px solid var(--card-border);border-radius:6px;background:var(--card);color:var(--text);font-size:13px">
+                </label>
+                <label style="font-size:12px;font-weight:600;color:var(--text)">Deal Source
+                    <select id="ma-opp-source" style="width:100%;margin-top:4px;padding:8px 10px;border:1px solid var(--card-border);border-radius:6px;background:var(--card);color:var(--text);font-size:13px">
+                        <option value="Unknown">Unknown</option>
+                        <option value="Advisor">Advisor</option>
+                        <option value="Direct/Off-market">Direct/Off-market</option>
+                        <option value="PE/Investor">PE/Investor</option>
+                        <option value="Referral (Advisor)">Referral (Advisor)</option>
+                        <option value="Referral (Direct/Off-market)">Referral (Direct/Off-market)</option>
+                    </select>
+                </label>
+                <label style="font-size:12px;font-weight:600;color:var(--text)">Deal Type
+                    <select id="ma-opp-type" style="width:100%;margin-top:4px;padding:8px 10px;border:1px solid var(--card-border);border-radius:6px;background:var(--card);color:var(--text);font-size:13px">
+                        <option value="Unassigned">Unassigned</option>
+                        <option value="Majority Investment">Majority Investment</option>
+                        <option value="Minority Investment">Minority Investment</option>
+                        <option value="Roll-up">Roll-up</option>
+                        <option value="Early Stage">Early Stage</option>
+                    </select>
+                </label>
+                <label style="font-size:12px;font-weight:600;color:var(--text)">Priority
+                    <select id="ma-opp-priority" style="width:100%;margin-top:4px;padding:8px 10px;border:1px solid var(--card-border);border-radius:6px;background:var(--card);color:var(--text);font-size:13px">
+                        <option value="4 - Unassigned">4 - Unassigned</option>
+                        <option value="1 - High">1 - High</option>
+                        <option value="2 - Medium">2 - Medium</option>
+                        <option value="3 - Low">3 - Low</option>
+                    </select>
+                </label>
+                <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:4px">
+                    <button type="button" onclick="document.getElementById('ma-new-opp-modal').classList.add('hidden')" style="padding:8px 16px;border:1px solid var(--card-border);border-radius:6px;background:var(--card);color:var(--text);font-size:13px;cursor:pointer">Cancel</button>
+                    <button type="submit" style="padding:8px 16px;border:none;border-radius:6px;background:var(--accent);color:#fff;font-size:13px;font-weight:600;cursor:pointer">Create in Monday.com</button>
+                </div>
+            </form>
         </div>
     </div>
 

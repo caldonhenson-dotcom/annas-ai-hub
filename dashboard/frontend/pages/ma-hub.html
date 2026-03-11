@@ -2,42 +2,58 @@
 <div class="section-header" style="display:flex;justify-content:space-between;align-items:flex-start">
     <div>
         <h1 class="section-title">M&amp;A Hub</h1>
-        <p class="section-subtitle">Pipeline deals and Investment Committee scorecards — Monday.com</p>
+        <p class="section-subtitle">Monday.com &mdash; Status Board (M&amp;A - DD)</p>
     </div>
-    <a href="https://ecomplete-hq.monday.com/boards/1674745475" target="_blank" rel="noopener"
-       class="pl-filter-pill" style="text-decoration:none;font-size:12px;font-weight:600;gap:4px">
-       &#128279; Open in Monday.com
-    </a>
+    <div style="display:flex;gap:8px">
+        <button class="pl-filter-pill" id="ma-new-opp-btn" style="font-size:12px;font-weight:600;cursor:pointer">
+            &#10010; New Opportunity
+        </button>
+        <a href="https://ecomplete-hq.monday.com/boards/1674745475" target="_blank" rel="noopener"
+           class="pl-filter-pill" style="text-decoration:none;font-size:12px;font-weight:600">
+           &#128279; Open in Monday.com
+        </a>
+    </div>
 </div>
 
 <div class="ma-hub-tabs" id="ma-hub-tabs">
-    <button class="ma-hub-tab active" data-matab="pipeline" onclick="window.switchMATab('pipeline')">
-        &#128188; Pipeline
+    <button class="ma-hub-tab active" data-matab="main-table" onclick="window.switchMATab('main-table')">
+        Main Table
     </button>
-    <button class="ma-hub-tab" data-matab="ic" onclick="window.switchMATab('ic')">
-        &#128203; IC Scorecards
+    <button class="ma-hub-tab" data-matab="performance" onclick="window.switchMATab('performance')">
+        Deal Flow Performance
+    </button>
+    <button class="ma-hub-tab" data-matab="scorecards" onclick="window.switchMATab('scorecards')">
+        Complete Scorecards
     </button>
 </div>
 
-<!-- Pipeline Tab -->
-<div class="ma-hub-panel active" id="ma-panel-pipeline">
+<!-- Tab 1: Main Table -->
+<div class="ma-hub-panel active" id="ma-panel-main-table">
     <div class="dashboard-section">
-        <div id="ma-kpi-totals" class="kpi-grid"></div>
-        <div class="pl-grid-2">
-            <div class="pl-card"><div class="card-title">Deal Flow by Stage</div><div id="ma-funnel"></div></div>
-            <div class="pl-card"><div class="card-title">Status Breakdown</div><div id="ma-status-bars"></div></div>
-        </div>
-        <div class="pl-card"><div class="card-title">Active Deals</div><div id="ma-deals-table"></div></div>
+        <div id="ma-main-table"></div>
     </div>
 </div>
 
-<!-- IC Scorecards Tab -->
-<div class="ma-hub-panel" id="ma-panel-ic">
+<!-- Tab 2: Deal Flow Performance -->
+<div class="ma-hub-panel" id="ma-panel-performance">
+    <div class="dashboard-section">
+        <div id="ma-perf-kpis" class="kpi-grid"></div>
+        <div class="pl-grid-2">
+            <div class="pl-card"><div class="card-title">IMs Received</div><div class="pl-chart-wrap" id="ma-ims-chart"></div></div>
+            <div class="pl-card"><div class="card-title">Deal Flow Status</div><div class="pl-chart-wrap" id="ma-status-chart"></div></div>
+        </div>
+        <div class="pl-card"><div class="card-title">All Scores</div><div id="ma-scores-bars"></div></div>
+    </div>
+</div>
+
+<!-- Tab 3: Complete Scorecards -->
+<div class="ma-hub-panel" id="ma-panel-scorecards">
     <div class="dashboard-section">
         <div id="ma-ic-kpis" class="kpi-grid"></div>
+        <div class="pl-card"><div class="card-title">IC Scorecard Rankings</div><div id="ma-ic-table"></div></div>
         <div class="pl-grid-2">
-            <div class="pl-card"><div class="card-title">IC Scorecard Rankings</div><div id="ma-ic-table"></div></div>
             <div class="pl-card"><div class="card-title">Score Distribution</div><div id="ma-ic-dist"></div></div>
+            <div class="pl-card"><div class="card-title">CDD Progress</div><div id="ma-cdd-progress"></div></div>
         </div>
     </div>
 </div>

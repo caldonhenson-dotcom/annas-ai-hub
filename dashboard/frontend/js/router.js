@@ -12,9 +12,8 @@
         'ai-roadmap': ['js/ai-roadmap.js'],
         'executive': ['js/pages/render-executive.js'],
         'pipeline': ['js/pages/render-pipeline.js', 'js/pages/pipeline-reports.js', 'js/pages/pipeline-export.js'],
-        'leads': ['js/pages/render-leads.js'],
+        'leads': ['js/pages/render-leads.js', 'js/pages/render-insights.js'],
         'activities': ['js/pages/render-activities.js'],
-        'insights': ['js/pages/render-insights.js'],
         'targets': ['js/pages/render-targets.js'],
         'inbound-queue': ['js/pages/render-inbound.js'],
         'skills': [
@@ -41,7 +40,6 @@
         'pipeline': 'renderPipeline',
         'leads': 'renderLeads',
         'activities': 'renderActivities',
-        'insights': 'renderInsights',
         'targets': 'renderTargets',
         'inbound-queue': 'renderInbound',
         'ma-hub': 'renderMAHub',
@@ -130,6 +128,9 @@
     // SPA page switcher
     // ------------------------------------------------------------------
     window.showPage = function (pageId) {
+        // Insights merged into Leads
+        if (pageId === 'insights') pageId = 'leads';
+
         // Hide all pages
         document.querySelectorAll('.dash-page').forEach(function (page) {
             page.classList.remove('active');

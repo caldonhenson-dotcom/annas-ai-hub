@@ -587,14 +587,33 @@
         var openDeals = FILTERED.filter(function (d) { return !d.isWon && !d.isLost; });
         if (!openDeals.length) { el.innerHTML = '<div class="pl-empty">No open deals to display</div>'; return; }
 
-        // Sort by create date
-        openDeals.sort(function (a, b) { return new Date(a.created) - new Date(b.created); });
+        // Group by department (product), splitting semicolon-separated values
+        var deptMap = {};
+        var DEPT_COLORS = ['#3CB4AD','#334FB4','#a78bfa','#f59e0b','#f472b6','#34d399','#60a5fa','#ef4444'];
+        openDeals.forEach(function (d) {
+            var prods = d.product ? d.product.split(';').map(function (p) { return p.trim(); }).filter(Boolean) : ['Unassigned'];
+            prods.forEach(function (dept) {
+                if (!deptMap[dept]) deptMap[dept] = [];
+                deptMap[dept].push(d);
+            });
+        });
+        // Sort departments alphabetically, Unassigned last
+        var deptNames = Object.keys(deptMap).sort(function (a, b) {
+            if (a === 'Unassigned') return 1;
+            if (b === 'Unassigned') return -1;
+            return a.localeCompare(b);
+        });
 
-        // Calculate time range
+        // Sort deals within each group by create date
+        deptNames.forEach(function (dept) {
+            deptMap[dept].sort(function (a, b) { return new Date(a.created) - new Date(b.created); });
+        });
+
+        // Calculate time range across all deals
+        var allSorted = openDeals.slice().sort(function (a, b) { return new Date(a.created) - new Date(b.created); });
         var now = new Date();
-        var minDate = new Date(openDeals[0].created);
+        var minDate = new Date(allSorted[0].created);
         var maxDate = new Date(now);
-        // Extend 30 days into future
         maxDate.setDate(maxDate.getDate() + 30);
 
         var totalDays = daysBetween(minDate, maxDate) || 1;
@@ -617,21 +636,33 @@
         // Today marker position
         var todayPct = (daysBetween(minDate, now) / totalDays * 100);
 
-        openDeals.forEach(function (d) {
-            var start = new Date(d.created);
-            var end = d.closed ? new Date(d.closed) : now;
-            var leftPct = (daysBetween(minDate, start) / totalDays * 100);
-            var widthPct = Math.max(1, (daysBetween(start, end) / totalDays * 100));
-            var colour = STAGE_COLOURS[d.stage] || '#3CB4AD';
+        // Render grouped by department
+        deptNames.forEach(function (dept, di) {
+            var deals = deptMap[dept];
+            var dotColor = DEPT_COLORS[di % DEPT_COLORS.length];
 
-            html += '<div class="pl-gantt-row">'
-                + '<div class="pl-gantt-label" title="' + esc(d.name) + '">' + esc(d.name) + '</div>'
-                + '<div class="pl-gantt-track">'
-                + '<div class="pl-gantt-bar" style="left:' + leftPct.toFixed(1) + '%;width:' + widthPct.toFixed(1) + '%;background:' + colour + '"'
-                + ' title="' + esc(d.name) + ' — ' + esc(d.stage) + ' — ' + fmtCurrency(d.amount) + '">'
-                + esc(d.stage) + '</div>'
-                + '<div class="pl-gantt-today" style="left:' + todayPct.toFixed(1) + '%"></div>'
-                + '</div></div>';
+            html += '<div class="pl-gantt-dept-header">'
+                + '<span class="pl-gantt-dept-dot" style="background:' + dotColor + '"></span>'
+                + '<span>' + esc(dept) + '</span>'
+                + '<span style="color:var(--text-muted);font-weight:400">' + deals.length + ' deals</span>'
+                + '</div>';
+
+            deals.forEach(function (d) {
+                var start = new Date(d.created);
+                var end = d.closed ? new Date(d.closed) : now;
+                var leftPct = (daysBetween(minDate, start) / totalDays * 100);
+                var widthPct = Math.max(1, (daysBetween(start, end) / totalDays * 100));
+                var colour = STAGE_COLOURS[d.stage] || '#3CB4AD';
+
+                html += '<div class="pl-gantt-row">'
+                    + '<div class="pl-gantt-label" title="' + esc(d.name) + '">' + esc(d.name) + '</div>'
+                    + '<div class="pl-gantt-track">'
+                    + '<div class="pl-gantt-bar" style="left:' + leftPct.toFixed(1) + '%;width:' + widthPct.toFixed(1) + '%;background:' + colour + '"'
+                    + ' title="' + esc(d.name) + ' \u2014 ' + esc(d.stage) + ' \u2014 ' + fmtCurrency(d.amount) + '">'
+                    + esc(d.stage) + '</div>'
+                    + '<div class="pl-gantt-today" style="left:' + todayPct.toFixed(1) + '%"></div>'
+                    + '</div></div>';
+            });
         });
 
         el.innerHTML = html;

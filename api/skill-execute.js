@@ -132,13 +132,24 @@ async function handleApiCall(body, res) {
     var mondayKey = process.env.MONDAY_API_KEY;
     if (!mondayKey) return errorResponse(res, 500, "Monday.com not configured");
 
+    var gql = body.query || "";
+
+    // Mutation whitelist: only create_item / create_subitem on board 1674745475
+    if (/mutation\b/i.test(gql)) {
+      var allowedMutation = /\b(create_item|create_subitem)\b/.test(gql)
+        && /1674745475/.test(gql);
+      if (!allowedMutation) {
+        return res.status(403).json({ error: "Monday mutation not allowed — only create_item/create_subitem on board 1674745475" });
+      }
+    }
+
     var mondayResp = await fetch("https://api.monday.com/v2", {
       method: "POST",
       headers: {
         Authorization: mondayKey,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ query: body.query }),
+      body: JSON.stringify({ query: gql }),
     });
 
     var mondayData;

@@ -334,5 +334,7 @@
         renderContactsTrend();
         renderConversionFunnel();
         renderSourceDetail();
+        // Insights & Forecast sections are merged into this page
+        if (typeof window.renderInsights === 'function') window.renderInsights();
     };
 })();
