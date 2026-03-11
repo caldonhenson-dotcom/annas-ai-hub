@@ -45,9 +45,9 @@
     .pl-grid-3 { grid-template-columns: 1fr 1fr; }
 
     /* Content */
-    .main-content { padding: var(--space-4) var(--space-5); }
+    .main-content { padding: var(--space-3) var(--space-4); }
     .volume-chain { gap: var(--space-2); }
-    .chain-item { min-width: 80px; padding: var(--space-3); }
+    .chain-item { min-width: 80px; padding: var(--space-2); }
 
     /* Monday boards */
     .rc-board-row, .rc-board-header {
@@ -92,11 +92,11 @@
     /* Grids */
     .kpi-grid { grid-template-columns: 1fr; }
     .kpi-grid-3 { grid-template-columns: 1fr; }
-    .main-content { padding: var(--space-3) var(--space-4); }
+    .main-content { padding: var(--space-2) var(--space-3); }
 
     /* Cards */
-    .glass-card { padding: var(--space-4); }
-    .stat-card { padding: var(--space-4); }
+    .glass-card { padding: var(--space-3); }
+    .stat-card { padding: var(--space-3); }
     .section-title { font-size: 18px; }
 
     /* Volume chain */
@@ -142,16 +142,18 @@
 
 /* ---- 480px: Ultra-compact mobile ---- */
 @media (max-width: 480px) {
-    .main-content { padding: var(--space-2) var(--space-3); }
+    .main-content { padding: var(--space-2) var(--space-2); }
     .section-title { font-size: 16px; }
-    .glass-card { padding: var(--space-3); }
-    .stat-card { padding: var(--space-3); }
+    .glass-card { padding: var(--space-2); }
+    .stat-card { padding: var(--space-2); }
     .card-title { font-size: var(--text-md); }
     .chain-value { font-size: var(--text-lg); }
-    .chain-item { min-width: 60px; padding: var(--space-2); }
-    .exec-kpi { padding: var(--space-2) var(--space-1); }
+    .chain-item { min-width: 60px; padding: var(--space-1); }
+    .exec-kpi { padding: var(--space-1) var(--space-1); }
     .exec-kpi-val { font-size: var(--text-base); }
-    .skill-stat-pill { min-width: 80px; padding: 10px 12px; }
+    .skill-stat-pill { min-width: 80px; padding: 8px 10px; }
+    .stat-mini-grid { gap: 4px; }
+    .stat-mini-item { padding: 6px 4px; }
     .skill-stat-value { font-size: var(--text-lg); }
     /* M&A Hub tabs scroll */
     .ma-hub-tabs { overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; }

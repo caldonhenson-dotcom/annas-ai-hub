@@ -4,20 +4,20 @@
 
 /* Stats row */
 .skills-stats-row {
-    display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px;
+    display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px;
 }
 .skill-stat-pill {
-    flex: 1; min-width: 120px; background: var(--card, #fff);
-    border: 1px solid var(--card-border, #e5e7eb); border-radius: 12px;
-    padding: 14px 16px; text-align: center;
+    flex: 1; min-width: 100px; background: var(--card, #fff);
+    border: 1px solid var(--card-border, #e5e7eb); border-radius: 10px;
+    padding: 10px 12px; text-align: center;
 }
 .skill-stat-value { font-family: var(--font-display); font-size: var(--text-xl); font-weight: 400; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .skill-stat-label { font-size: 11px; color: var(--text-muted, #6b7280); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
 
 /* Toolbar */
-.skills-toolbar { margin-bottom: 20px; }
+.skills-toolbar { margin-bottom: 12px; }
 .skills-search-wrap {
-    position: relative; margin-bottom: 12px;
+    position: relative; margin-bottom: 8px;
 }
 .skills-search-icon {
     position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
@@ -44,8 +44,8 @@
 
 /* Grid */
 .skills-grid {
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 14px;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 10px;
 }
 .skills-empty {
     grid-column: 1 / -1; text-align: center; padding: 60px 20px;
@@ -55,8 +55,8 @@
 /* Skill card */
 .skill-card {
     background: var(--card, #fff); border: 1px solid var(--card-border, #e5e7eb);
-    border-radius: 14px; padding: 16px; display: flex; flex-direction: column;
-    gap: 8px; transition: transform 0.15s, box-shadow 0.15s; cursor: pointer;
+    border-radius: 12px; padding: 12px; display: flex; flex-direction: column;
+    gap: 6px; transition: transform 0.15s, box-shadow 0.15s; cursor: pointer;
     overflow: hidden;
 }
 .skill-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg, 0 4px 12px rgba(0,0,0,0.08)); }

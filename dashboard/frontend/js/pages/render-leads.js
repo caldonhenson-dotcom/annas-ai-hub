@@ -180,13 +180,13 @@
             var val = entry[1];
             var pct = Math.max(2, (val / maxVal) * 100);
             var color = PALETTE[i % PALETTE.length];
-            html += '<div style="margin-bottom:8px">'
-                + '<div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:13px">'
-                + '<span style="color:var(--text-muted)">' + label + '</span>'
-                + '<span style="color:var(--text);font-weight:600">' + fmtNum(val) + '</span></div>'
-                + '<div style="height:8px;background:var(--surface2);border-radius:4px;overflow:hidden">'
-                + '<div style="height:100%;width:' + pct.toFixed(1) + '%;background:' + color
-                + ';border-radius:4px;transition:width 0.6s cubic-bezier(.25,.1,.25,1)"></div></div></div>';
+            html += '<div class="stat-bar-item">'
+                + '<div class="stat-bar-header">'
+                + '<span class="stat-bar-label">' + label + '</span>'
+                + '<span class="stat-bar-value">' + fmtNum(val) + '</span></div>'
+                + '<div class="stat-bar-track">'
+                + '<div class="stat-bar-fill" style="width:' + pct.toFixed(1) + '%;background:' + color
+                + '"></div></div></div>';
         });
         el.innerHTML = html;
     }
@@ -249,8 +249,8 @@
 
         var html = '<div class="pl-funnel-head">'
             + '<div>Stage</div><div>Count</div>'
-            + '<div style="text-align:center">Conversion</div>'
-            + '<div style="text-align:center">vs Prev 30d</div></div>';
+            + '<div class="text-center">Conversion</div>'
+            + '<div class="text-center">vs Prev 30d</div></div>';
 
         stages.forEach(function (s, i) {
             var barPct = Math.max(2, (s.cur / (maxVal || 1)) * 100);
@@ -269,7 +269,7 @@
                 + (s.cur > 0 ? s.cur : '') + '</div></div>'
                 + '<span class="pl-funnel-bar-label">' + fmtNum(s.cur) + '</span></div>'
                 + '<div class="pl-funnel-pct">' + convPct.toFixed(1) + '%</div>'
-                + '<div class="pl-funnel-pct"><span class="pl-act-change ' + cls + '" style="font-size:11px">'
+                + '<div class="pl-funnel-pct"><span class="pl-act-change text-muted-sm ' + cls + '">'
                 + arrow + ' ' + Math.abs(changePct).toFixed(1) + '%</span></div>'
                 + '</div>';
         });

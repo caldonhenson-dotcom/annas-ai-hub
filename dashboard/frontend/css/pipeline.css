@@ -5,7 +5,7 @@
 /* ── View Bar (tabs + period pills) ── */
 .pl-view-bar {
     display: flex; justify-content: space-between; align-items: center;
-    margin-bottom: var(--space-4); flex-wrap: wrap; gap: 8px;
+    margin-bottom: var(--space-3); flex-wrap: wrap; gap: 8px;
 }
 .pl-view-tabs {
     display: flex; gap: 2px;
@@ -49,9 +49,9 @@
 }
 .pl-sum-card {
     background: var(--card); border: 1px solid var(--card-border);
-    border-radius: var(--radius); padding: 16px; text-align: center;
+    border-radius: var(--radius); padding: 10px 8px; text-align: center;
     transition: all 0.25s cubic-bezier(.25,.1,.25,1);
-    position: relative;
+    position: relative; overflow: hidden;
 }
 .pl-sum-card--clickable {
     cursor: pointer; user-select: none;
@@ -79,8 +79,9 @@
     text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px;
 }
 .pl-sum-value {
-    font-family: var(--font-display); font-size: var(--text-2xl);
+    font-family: var(--font-display); font-size: var(--text-xl);
     font-weight: 400; color: var(--text); line-height: 1.1;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .pl-sum-sub {
     font-size: 11px; color: var(--text-muted); margin-top: 4px;
@@ -96,7 +97,7 @@
 /* ── Filters Row ── */
 .pl-filters-row {
     display: flex; gap: 12px; align-items: center;
-    margin-bottom: var(--space-4); flex-wrap: wrap;
+    margin-bottom: var(--space-3); flex-wrap: wrap;
 }
 .pl-filter-group { display: flex; flex-direction: column; gap: 2px; }
 .pl-filter-label {
@@ -168,14 +169,14 @@
 /* ── Card System ── */
 .pl-card {
     background: var(--card); border: 1px solid var(--card-border);
-    border-radius: var(--radius); padding: var(--space-4);
+    border-radius: var(--radius); padding: var(--space-3);
     transition: var(--transition); overflow: hidden;
 }
 .pl-card:hover {
     border-color: rgba(60, 180, 173, 0.2);
     box-shadow: var(--shadow);
 }
-.pl-card-full { margin-bottom: var(--space-4); }
+.pl-card-full { margin-bottom: var(--space-3); }
 .pl-card-header {
     display: flex; justify-content: space-between; align-items: center;
     margin-bottom: var(--space-3);
@@ -191,7 +192,7 @@
 /* ── Grid Layouts ── */
 .pl-grid-2 {
     display: grid; grid-template-columns: 1fr 1fr;
-    gap: var(--space-4); margin-bottom: var(--space-4);
+    gap: var(--space-3); margin-bottom: var(--space-3);
 }
 
 /* ── Chart Container ── */
@@ -320,11 +321,11 @@
 
 /* ── Report: Win/Loss ── */
 .pl-winloss-grid {
-    display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4);
+    display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3);
 }
 .pl-winloss-stat { text-align: center; }
 .pl-winloss-value {
-    font-family: var(--font-display); font-size: 36px;
+    font-family: var(--font-display); font-size: 28px;
     font-weight: 400; line-height: 1;
 }
 .pl-winloss-label {
@@ -387,7 +388,7 @@
 
 /* ── Department Breakdown ── */
 .pl-dept-section {
-    margin-bottom: var(--space-4);
+    margin-bottom: var(--space-3);
     border: 1px solid var(--card-border); border-radius: var(--radius);
     background: var(--card); overflow: hidden;
 }
@@ -411,7 +412,7 @@
 }
 .pl-dept-grid.collapsed { display: none; }
 .pl-dept-card {
-    background: var(--card); padding: 14px 16px;
+    background: var(--card); padding: 10px 12px;
     transition: all 0.2s;
 }
 .pl-dept-card--clickable { cursor: pointer; }
@@ -448,16 +449,41 @@
 .pl-yoy.down { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
 .pl-yoy.flat { background: rgba(107, 114, 128, 0.1); color: var(--text-muted); }
 
+/* ── Report Metric Strip (Pipeline Health etc.) ── */
+.pl-metric-strip {
+    display: grid; grid-template-columns: repeat(6, 1fr);
+    gap: 8px; margin-bottom: var(--space-3);
+}
+.pl-metric {
+    text-align: center; padding: 8px 6px;
+    background: var(--surface2); border-radius: var(--radius-sm);
+    overflow: hidden;
+}
+.pl-metric-label {
+    font-size: 9px; font-weight: 600; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.04em;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.pl-metric-value {
+    font-family: var(--font-display); font-size: var(--text-lg);
+    font-weight: 400; line-height: 1.2;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.pl-metric-sub {
+    font-size: 9px; color: var(--text-muted); margin-top: 1px;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
 /* ── Report Grid ── */
 .pl-report-grid {
     display: grid; grid-template-columns: 1fr 1fr;
-    gap: var(--space-4); margin-bottom: var(--space-4);
+    gap: var(--space-3); margin-bottom: var(--space-3);
 }
 .pl-report-full { grid-column: 1 / -1; }
 
 /* ── Export View ── */
 .pl-export-options {
-    display: flex; gap: 12px; margin-bottom: var(--space-4); flex-wrap: wrap;
+    display: flex; gap: 10px; margin-bottom: var(--space-3); flex-wrap: wrap;
 }
 .pl-export-btn {
     display: flex; align-items: center; gap: 8px;
@@ -528,9 +554,10 @@
 
 /* ── Responsive ── */
 @media (max-width: 900px) {
-    .pl-summary-row { grid-template-columns: repeat(3, 1fr); gap: 8px; }
-    .pl-sum-card { padding: 12px; }
-    .pl-sum-value { font-size: 20px; }
+    .pl-summary-row { grid-template-columns: repeat(3, 1fr); gap: 6px; }
+    .pl-sum-card { padding: 8px 6px; }
+    .pl-sum-value { font-size: 18px; }
+    .pl-metric-strip { grid-template-columns: repeat(3, 1fr); }
     .pl-grid-2, .pl-report-grid { grid-template-columns: 1fr; }
     .pl-report-full { grid-column: 1; }
     .pl-view-bar { flex-direction: column; align-items: stretch; gap: 8px; }
@@ -546,10 +573,12 @@
 }
 
 @media (max-width: 600px) {
-    .pl-summary-row { grid-template-columns: repeat(2, 1fr); gap: 6px; }
-    .pl-sum-card { padding: 10px 8px; }
-    .pl-sum-label { font-size: 9px; margin-bottom: 4px; }
-    .pl-sum-value { font-size: 18px; }
+    .pl-summary-row { grid-template-columns: repeat(2, 1fr); gap: 4px; }
+    .pl-sum-card { padding: 8px 6px; }
+    .pl-sum-label { font-size: 9px; margin-bottom: 2px; }
+    .pl-sum-value { font-size: 16px; }
+    .pl-metric-strip { grid-template-columns: repeat(2, 1fr); gap: 4px; }
+    .pl-metric-value { font-size: var(--text-md); }
     .pl-sum-sub { font-size: 10px; }
     .pl-yoy { font-size: 9px; padding: 1px 5px; }
     .pl-view-tabs { width: 100%; }

@@ -211,12 +211,12 @@
    ============================================================ */
 .main-content {
     max-width: 1440px; margin: 0 auto;
-    padding: var(--space-6) var(--space-8);
+    padding: var(--space-4) var(--space-6);
 }
 
 /* Sections */
-.dashboard-section { margin-bottom: var(--space-6); }
-.section-header { margin-bottom: var(--space-3); padding-bottom: var(--space-2); border-bottom: 1px solid var(--card-border); }
+.dashboard-section { margin-bottom: var(--space-4); }
+.section-header { margin-bottom: var(--space-2); padding-bottom: var(--space-2); border-bottom: 1px solid var(--card-border); }
 .section-title { font-family: var(--font-display); font-size: var(--text-xl); font-weight: 400; color: var(--text); letter-spacing: -0.01em; }
 .section-subtitle { font-size: var(--text-sm); color: var(--text-muted); margin-top: 2px; }
 

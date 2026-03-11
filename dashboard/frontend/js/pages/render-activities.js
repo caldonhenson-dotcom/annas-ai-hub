@@ -203,12 +203,12 @@
         }
 
         var html = '<div class="pl-leader-head">'
-            + '<div>Rep</div><div style="text-align:center">Calls</div>'
-            + '<div style="text-align:center">Emails</div>'
-            + '<div style="text-align:center">Meetings</div>'
-            + '<div style="text-align:center">Tasks</div>'
-            + '<div style="text-align:center">Notes</div>'
-            + '<div style="text-align:center">Total</div></div>';
+            + '<div>Rep</div><div class="text-center">Calls</div>'
+            + '<div class="text-center">Emails</div>'
+            + '<div class="text-center">Meetings</div>'
+            + '<div class="text-center">Tasks</div>'
+            + '<div class="text-center">Notes</div>'
+            + '<div class="text-center">Total</div></div>';
 
         sorted.forEach(function (rep) {
             var initials = rep.name.split(' ').map(function (w) { return w[0]; }).join('');
@@ -246,12 +246,11 @@
             { label: 'Companies', value: fmtNum(companies), color: '#a78bfa' }
         ];
 
-        var html = '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px">';
+        var html = '<div class="stat-mini-grid" style="grid-template-columns:repeat(3,1fr)">';
         items.forEach(function (item) {
-            html += '<div style="text-align:center;padding:12px;background:var(--surface2);border-radius:var(--radius)">'
-                + '<div style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:4px">'
-                + item.label + '</div>'
-                + '<div style="font-family:var(--font-display);font-size:20px;font-weight:400;color:' + item.color + '">'
+            html += '<div class="stat-mini-item">'
+                + '<div class="stat-mini-label">' + item.label + '</div>'
+                + '<div class="stat-mini-value" style="color:' + item.color + '">'
                 + item.value + '</div></div>';
         });
         html += '</div>';
@@ -260,19 +259,19 @@
         var monthly = filterDailyToMonthly(TS.contacts_created_by_day, null);
         var entries = Object.entries(monthly).sort().slice(-6);
         if (entries.length) {
-            html += '<div style="font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:8px">Recent Contact Creation</div>';
+            html += '<div class="text-label" style="margin-bottom:6px">Recent Contact Creation</div>';
             var maxVal = Math.max.apply(null, entries.map(function (e) { return e[1]; })) || 1;
             entries.forEach(function (entry, i) {
                 var p = entry[0].split('-');
                 var label = MONTH_SHORT[parseInt(p[1], 10) - 1] + ' ' + p[0].slice(2);
                 var pct = Math.max(2, (entry[1] / maxVal) * 100);
-                html += '<div style="margin-bottom:5px">'
-                    + '<div style="display:flex;justify-content:space-between;margin-bottom:3px;font-size:12px">'
-                    + '<span style="color:var(--text-muted)">' + label + '</span>'
-                    + '<span style="color:var(--text);font-weight:600">' + fmtNum(entry[1]) + '</span></div>'
-                    + '<div style="height:6px;background:var(--surface2);border-radius:3px;overflow:hidden">'
-                    + '<div style="height:100%;width:' + pct.toFixed(1) + '%;background:' + PALETTE[i % PALETTE.length]
-                    + ';border-radius:3px;transition:width 0.6s cubic-bezier(.25,.1,.25,1)"></div></div></div>';
+                html += '<div class="stat-bar-item">'
+                    + '<div class="stat-bar-header">'
+                    + '<span class="stat-bar-label">' + label + '</span>'
+                    + '<span class="stat-bar-value">' + fmtNum(entry[1]) + '</span></div>'
+                    + '<div class="stat-bar-track">'
+                    + '<div class="stat-bar-fill" style="width:' + pct.toFixed(1) + '%;background:' + PALETTE[i % PALETTE.length]
+                    + '"></div></div></div>';
             });
         }
 

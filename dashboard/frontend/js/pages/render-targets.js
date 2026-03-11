@@ -53,7 +53,7 @@
             html += '<div class="pl-act-card">'
                 + '<div class="pl-act-label">' + c.label + '</div>'
                 + '<div class="pl-act-value">' + c.value + '</div>'
-                + (c.sub ? '<span style="font-size:11px;color:var(--text-muted);margin-top:2px">' + c.sub + '</span>' : '')
+                + (c.sub ? '<span class="text-muted-sm" style="margin-top:2px">' + c.sub + '</span>' : '')
                 + '</div>';
         });
         el.innerHTML = html;
@@ -192,17 +192,17 @@
             { label: 'Deals', required: reqDeals, actual: dealsWon, color: '#34d399' }
         ];
 
-        var html = '<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px">';
+        var html = '<div class="stat-mini-grid" style="grid-template-columns:repeat(5,1fr)">';
         metrics.forEach(function (m) {
             var gap = m.actual - m.required;
             var gapColor = gap >= 0 ? 'var(--success)' : 'var(--danger)';
             var gapSign = gap >= 0 ? '+' : '';
-            html += '<div style="text-align:center;padding:10px">'
-                + '<div style="font-size:10px;text-transform:uppercase;letter-spacing:0.04em;color:var(--text-muted);margin-bottom:4px">' + m.label + '</div>'
-                + '<div style="font-size:20px;font-weight:800;color:' + m.color + '">' + fmtNum(m.required) + '</div>'
-                + '<div style="font-size:11px;color:var(--text-muted)">required</div>'
-                + '<div style="font-size:14px;font-weight:700;color:var(--text);margin-top:4px">' + fmtNum(m.actual) + '</div>'
-                + '<div style="font-size:11px;color:' + gapColor + ';font-weight:600">' + gapSign + fmtNum(gap) + ' gap</div>'
+            html += '<div class="stat-mini-item">'
+                + '<div class="stat-mini-label">' + m.label + '</div>'
+                + '<div class="stat-mini-value" style="color:' + m.color + ';font-weight:800">' + fmtNum(m.required) + '</div>'
+                + '<div class="stat-mini-sub">required</div>'
+                + '<div class="text-value" style="margin-top:4px">' + fmtNum(m.actual) + '</div>'
+                + '<div class="text-muted-sm" style="color:' + gapColor + ';font-weight:600">' + gapSign + fmtNum(gap) + ' gap</div>'
                 + '</div>';
         });
         html += '</div>';
@@ -239,9 +239,9 @@
             var color = g.value >= 0 ? 'var(--success)' : 'var(--danger)';
             var prefix = g.value >= 0 ? '+' : '';
             var displayVal = Math.abs(g.value) >= 1000 ? prefix + fmtCurrency(g.value) : prefix + fmtNum(g.value);
-            html += '<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--card-border);font-size:13px">'
-                + '<span style="color:var(--text-muted)">' + g.label + '</span>'
-                + '<span style="color:' + color + ';font-weight:600">' + displayVal + '</span></div>';
+            html += '<div class="stat-row">'
+                + '<span class="stat-row-label">' + g.label + '</span>'
+                + '<span class="stat-row-value" style="color:' + color + '">' + displayVal + '</span></div>';
         });
         el.innerHTML = html;
     }
@@ -274,9 +274,9 @@
 
         var html = '';
         items.forEach(function (item) {
-            html += '<div style="display:flex;justify-content:space-between;padding:5px 0;font-size:13px;border-bottom:1px solid var(--card-border)">'
-                + '<span style="color:var(--text-muted)">' + item.label + '</span>'
-                + '<span style="color:var(--text);font-weight:600">' + item.value + '</span></div>';
+            html += '<div class="stat-row">'
+                + '<span class="stat-row-label">' + item.label + '</span>'
+                + '<span class="stat-row-value">' + item.value + '</span></div>';
         });
         el.innerHTML = html;
     }

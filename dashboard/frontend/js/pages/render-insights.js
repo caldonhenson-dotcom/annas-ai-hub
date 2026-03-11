@@ -46,7 +46,7 @@
             html += '<div class="pl-act-card">'
                 + '<div class="pl-act-label">' + c.label + '</div>'
                 + '<div class="pl-act-value">' + c.value + '</div>'
-                + '<span style="font-size:11px;color:var(--text-muted);margin-top:2px">' + c.sub + '</span>'
+                + '<span class="text-muted-sm" style="margin-top:2px">' + c.sub + '</span>'
                 + '</div>';
         });
         el.innerHTML = html;
@@ -220,13 +220,13 @@
         var html = '';
         sorted.forEach(function (entry, i) {
             var pct = Math.max(2, (entry[1] / maxVal) * 100);
-            html += '<div style="margin-bottom:8px">'
-                + '<div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:13px">'
-                + '<span style="color:var(--text-muted)">' + entry[0] + '</span>'
-                + '<span style="color:var(--text);font-weight:600">' + entry[1] + ' deals</span></div>'
-                + '<div style="height:8px;background:var(--surface2);border-radius:4px;overflow:hidden">'
-                + '<div style="height:100%;width:' + pct.toFixed(1) + '%;background:' + colors[i]
-                + ';border-radius:4px;transition:width 0.6s cubic-bezier(.25,.1,.25,1)"></div></div></div>';
+            html += '<div class="stat-bar-item">'
+                + '<div class="stat-bar-header">'
+                + '<span class="stat-bar-label">' + entry[0] + '</span>'
+                + '<span class="stat-bar-value">' + entry[1] + ' deals</span></div>'
+                + '<div class="stat-bar-track">'
+                + '<div class="stat-bar-fill" style="width:' + pct.toFixed(1) + '%;background:' + colors[i]
+                + '"></div></div></div>';
         });
         el.innerHTML = html || '<div class="pl-empty">No deal data</div>';
     }

@@ -72,12 +72,10 @@
         var winRate = (won.length + lost.length) > 0 ? (won.length / (won.length + lost.length) * 100).toFixed(1) : '0';
         var avgDealSize = deals.length > 0 ? deals.reduce(function(s,d){return s+d.amount;},0) / deals.length : 0;
 
-        return '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:16px">'
+        return '<div class="pl-metric-strip">'
             + metric('Coverage Ratio', coverage + 'x', 'Pipeline ÷ Won')
             + metric('Win Rate', winRate + '%', won.length + ' won / ' + (won.length+lost.length) + ' closed')
             + metric('Avg Deal Size', fmtK(avgDealSize), deals.length + ' total deals')
-            + '</div>'
-            + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px">'
             + metric('Open Pipeline', fmtK(openVal), open.length + ' deals', 'var(--accent)')
             + metric('Closed Won', fmtK(wonVal), won.length + ' deals', 'var(--success)')
             + metric('Closed Lost', fmtK(lost.reduce(function(s,d){return s+d.amount;},0)), lost.length + ' deals', 'var(--danger)')
@@ -356,10 +354,10 @@
 
     // ── Metric helper ──
     function metric(label, value, sub, color) {
-        return '<div style="text-align:center;padding:12px;background:var(--surface2);border-radius:var(--radius)">'
-            + '<div style="font-size:10px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.04em">' + label + '</div>'
-            + '<div style="font-family:var(--font-display);font-size:24px;font-weight:400;color:' + (color||'var(--text)') + ';line-height:1.2">' + value + '</div>'
-            + '<div style="font-size:10px;color:var(--text-muted);margin-top:2px">' + sub + '</div></div>';
+        return '<div class="pl-metric">'
+            + '<div class="pl-metric-label">' + label + '</div>'
+            + '<div class="pl-metric-value"' + (color ? ' style="color:' + color + '"' : '') + '>' + value + '</div>'
+            + '<div class="pl-metric-sub">' + sub + '</div></div>';
     }
 
     // ================================================================

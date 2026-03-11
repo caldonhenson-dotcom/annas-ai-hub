@@ -8,18 +8,14 @@
     var esc = window.escHtml || function (s) { return s; };
 
     function renderKPIs(kpis) {
-        var html = '<div class="kpi-grid" style="grid-template-columns:repeat(4,1fr)">';
+        var html = '<div class="kpi-grid">';
         kpis.forEach(function (k) {
             html += '<div class="stat-card" style="--accent:' + k.accent + '">'
-                + '<div style="width:22px;height:22px;border-radius:5px;'
+                + '<div class="exec-pillar-icon" style="width:20px;height:20px;border-radius:5px;'
                 + 'background:linear-gradient(135deg,' + k.accent + '22,' + k.accent + '11);'
-                + 'display:flex;align-items:center;justify-content:center;'
-                + 'font-size:11px;flex-shrink:0;margin-bottom:2px;'
-                + 'border:1px solid ' + k.accent + '33">' + k.icon + '</div>'
-                + '<div class="text-muted-xs" style="text-transform:uppercase;letter-spacing:0.05em;margin-bottom:1px">'
-                + esc(k.label) + '</div>'
-                + '<div data-role="stat-value" style="font-size:17px;font-weight:800;color:var(--text);'
-                + 'line-height:1.1;margin-bottom:1px">' + k.value + '</div>'
+                + 'border:1px solid ' + k.accent + '33;font-size:11px;margin-bottom:2px">' + k.icon + '</div>'
+                + '<div class="pl-act-label">' + esc(k.label) + '</div>'
+                + '<div class="pl-act-value">' + k.value + '</div>'
                 + '<div class="text-muted-sm">' + esc(k.subtitle) + '</div>'
                 + '</div>';
         });
@@ -28,10 +24,9 @@
 
     function renderCategories(cats) {
         var html = '<div class="glass-card"><div class="card-title">Signal Categories</div>'
-            + '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px">';
+            + '<div class="pl-active-chips" style="margin-top:6px">';
         cats.forEach(function (c) {
-            html += '<span style="font-size:11px;font-weight:600;color:' + c.color + ';'
-                + 'background:' + c.color + '12;padding:4px 10px;border-radius:6px;'
+            html += '<span class="pl-chip" style="color:' + c.color + ';background:' + c.color + '12;'
                 + 'border:1px solid ' + c.color + '30">'
                 + esc(c.label) + ': ' + c.count + '</span>';
         });
@@ -40,13 +35,12 @@
 
     function renderSources(sources) {
         var html = '<div class="glass-card"><div class="card-title">By Source</div>'
-            + '<div style="display:flex;gap:16px;margin-top:6px">';
+            + '<div class="stat-mini-grid" style="grid-template-columns:repeat(' + sources.length + ',1fr);margin-top:6px">';
         sources.forEach(function (s) {
-            html += '<div style="text-align:center;padding:10px 16px;background:var(--surface2);'
-                + 'border-radius:8px;flex:1;min-width:80px">'
-                + '<div style="font-size:18px">' + s.icon + '</div>'
-                + '<div style="font-size:18px;font-weight:700;color:var(--text);margin:4px 0">' + s.count + '</div>'
-                + '<div class="text-muted-xs" style="text-transform:capitalize">' + esc(s.label) + '</div>'
+            html += '<div class="stat-mini-item">'
+                + '<div style="font-size:16px">' + s.icon + '</div>'
+                + '<div class="stat-mini-value" style="font-weight:700">' + s.count + '</div>'
+                + '<div class="stat-mini-sub cell-pad-cap">' + esc(s.label) + '</div>'
                 + '</div>';
         });
         return html + '</div></div>';

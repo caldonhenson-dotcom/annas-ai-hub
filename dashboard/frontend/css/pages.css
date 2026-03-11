@@ -3,7 +3,7 @@
    ============================================================ */
 .exec-kpi-strip {
     display: flex; gap: var(--space-2);
-    margin-bottom: var(--space-4); flex-wrap: wrap;
+    margin-bottom: var(--space-3); flex-wrap: wrap;
 }
 .exec-kpi {
     flex: 1 1 0; min-width: 100px;
@@ -12,7 +12,7 @@
     text-align: center; overflow: hidden; min-height: 0;
 }
 .exec-kpi-val {
-    font-family: var(--font-display); font-size: var(--text-3xl); font-weight: 400; line-height: 1.1;
+    font-family: var(--font-display); font-size: var(--text-2xl); font-weight: 400; line-height: 1.1;
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     max-width: 100%;
 }
@@ -22,11 +22,11 @@
 }
 .exec-pillars {
     display: grid; grid-template-columns: repeat(4, 1fr);
-    gap: var(--space-4); margin-bottom: var(--space-4);
+    gap: var(--space-3); margin-bottom: var(--space-3);
 }
 .exec-pillar {
     background: var(--card); border: 1px solid var(--card-border);
-    border-radius: var(--radius); padding: var(--space-4) var(--space-5);
+    border-radius: var(--radius); padding: var(--space-3) var(--space-4);
     transition: var(--transition); cursor: pointer; overflow: hidden;
 }
 .exec-pillar:hover {
@@ -37,7 +37,7 @@
 .exec-pillar:focus-visible {
     outline: 2px solid var(--accent); outline-offset: 2px;
 }
-.exec-pillar-header { display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-2); }
+.exec-pillar-header { display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-1); }
 .exec-pillar-icon {
     width: 28px; height: 28px; border-radius: 6px;
     display: flex; align-items: center; justify-content: center;
@@ -135,7 +135,7 @@
    ============================================================ */
 .ai-board-card {
     background: var(--card); border: 1px solid var(--card-border);
-    border-radius: var(--radius-sm); padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-sm); padding: var(--space-2) var(--space-3);
     transition: var(--transition);
 }
 .ai-board-card:hover { border-color: rgba(60, 180, 173, 0.25); }

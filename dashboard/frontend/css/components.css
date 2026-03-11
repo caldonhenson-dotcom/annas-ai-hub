@@ -7,7 +7,7 @@
     background: var(--card);
     border: 1px solid var(--card-border);
     border-radius: var(--radius);
-    padding: var(--space-4) var(--space-5);
+    padding: var(--space-3) var(--space-4);
     box-shadow: var(--shadow);
     transition: var(--transition);
     overflow: hidden;
@@ -44,8 +44,8 @@
 .kpi-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: var(--space-4);
-    margin-bottom: var(--space-4);
+    gap: var(--space-3);
+    margin-bottom: var(--space-3);
 }
 .kpi-grid-3 { grid-template-columns: repeat(3, 1fr); }
 
@@ -54,7 +54,7 @@
     border: 1px solid var(--card-border);
     border-left: 3px solid var(--accent, var(--card-border));
     border-radius: var(--radius);
-    padding: var(--space-4);
+    padding: var(--space-3);
     transition: var(--transition);
     position: relative;
     overflow: hidden;
@@ -81,8 +81,8 @@
 /* ============================================================
    Grid Layouts
    ============================================================ */
-.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); }
-.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: var(--space-4); }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: var(--space-3); }
 
 /* ============================================================
    Data Tables — Enhanced
@@ -230,7 +230,7 @@
     gap: 0; flex-wrap: wrap; padding: var(--space-2) 0;
 }
 .chain-item {
-    text-align: center; padding: var(--space-3) var(--space-4);
+    text-align: center; padding: var(--space-2) var(--space-3);
     border: 2px solid var(--card-border);
     border-radius: var(--radius);
     background: var(--surface2); min-width: 80px;
@@ -314,3 +314,57 @@
 .btn-icon { padding: 6px; min-width: var(--touch-compact); min-height: var(--touch-compact); }
 .btn-pill { border-radius: 20px; }
 .btn-block { width: 100%; }
+
+/* ============================================================
+   Stat Bars & Rows (shared across renderers)
+   ============================================================ */
+
+/* Horizontal bar rows — leads, activities, insights, etc. */
+.stat-bar-item { margin-bottom: 5px; }
+.stat-bar-header {
+    display: flex; justify-content: space-between;
+    margin-bottom: 3px; font-size: 13px;
+}
+.stat-bar-label { color: var(--text-muted); }
+.stat-bar-value { color: var(--text); font-weight: 600; }
+.stat-bar-track {
+    height: 6px; background: var(--surface2);
+    border-radius: 3px; overflow: hidden;
+}
+.stat-bar-fill {
+    height: 100%; border-radius: 3px;
+    transition: width 0.6s cubic-bezier(.25,.1,.25,1);
+}
+
+/* Simple label-value rows — targets, gap analysis, etc. */
+.stat-row {
+    display: flex; justify-content: space-between;
+    padding: 4px 0; font-size: 13px;
+    border-bottom: 1px solid var(--card-border);
+}
+.stat-row:last-child { border-bottom: none; }
+.stat-row-label { color: var(--text-muted); }
+.stat-row-value { color: var(--text); font-weight: 600; }
+
+/* Mini metric grid — 3-6 column compact stats */
+.stat-mini-grid {
+    display: grid; gap: 8px;
+}
+.stat-mini-item {
+    text-align: center; padding: 8px 6px;
+    background: var(--surface2); border-radius: var(--radius-sm);
+    overflow: hidden;
+}
+.stat-mini-label {
+    font-size: 9px; font-weight: 600; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.04em;
+    margin-bottom: 2px;
+}
+.stat-mini-value {
+    font-family: var(--font-display); font-size: var(--text-lg);
+    font-weight: 400; line-height: 1.2;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.stat-mini-sub {
+    font-size: 10px; color: var(--text-muted); margin-top: 1px;
+}
