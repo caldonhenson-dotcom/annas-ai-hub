@@ -50,12 +50,29 @@
 .pl-sum-card {
     background: var(--card); border: 1px solid var(--card-border);
     border-radius: var(--radius); padding: 16px; text-align: center;
-    transition: var(--transition);
+    transition: all 0.25s cubic-bezier(.25,.1,.25,1);
+    position: relative;
 }
-.pl-sum-card:hover {
-    border-color: rgba(60, 180, 173, 0.3);
+.pl-sum-card--clickable {
+    cursor: pointer; user-select: none;
+}
+.pl-sum-card--clickable:hover {
+    border-color: rgba(60, 180, 173, 0.35);
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+}
+.pl-sum-card--clickable:active { transform: translateY(0); }
+.pl-sum-card--active {
+    border-color: var(--accent) !important;
+    background: rgba(60, 180, 173, 0.06);
+    box-shadow: 0 0 0 2px rgba(60, 180, 173, 0.2), 0 4px 16px rgba(0,0,0,0.06);
+}
+.pl-sum-card--active::after {
+    content: ''; position: absolute; bottom: -1px; left: 50%; transform: translateX(-50%);
+    width: 24px; height: 3px; border-radius: 3px 3px 0 0; background: var(--accent);
+}
+.pl-sum-card--clickable:focus-visible {
+    outline: 2px solid var(--accent); outline-offset: 2px;
 }
 .pl-sum-label {
     font-size: 10px; font-weight: 600; color: var(--text-muted);
@@ -102,7 +119,46 @@
 }
 .pl-filter-count {
     font-size: 12px; color: var(--text-muted); font-weight: 500;
-    margin-left: auto; white-space: nowrap;
+    margin-left: auto; display: flex; align-items: center; gap: 8px;
+    flex-wrap: wrap; justify-content: flex-end;
+}
+.pl-filter-count-text { white-space: nowrap; }
+.pl-active-chips { display: inline-flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+.pl-chip {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600;
+    background: rgba(60, 180, 173, 0.1); color: var(--accent);
+    cursor: pointer; transition: all 0.15s; white-space: nowrap;
+}
+.pl-chip:hover { background: rgba(60, 180, 173, 0.2); }
+.pl-chip-x {
+    font-size: 13px; font-weight: 700; line-height: 1; opacity: 0.7;
+    margin-left: 2px;
+}
+.pl-chip:hover .pl-chip-x { opacity: 1; }
+.pl-clear-all {
+    font-size: 11px; font-weight: 600; color: var(--text-muted);
+    background: none; border: none; cursor: pointer; padding: 3px 6px;
+    text-decoration: underline; font-family: var(--font);
+}
+.pl-clear-all:hover { color: var(--danger); }
+
+/* ── Inline clickable filters in table ── */
+.pl-deal-stage--clickable {
+    cursor: pointer; transition: all 0.15s;
+}
+.pl-deal-stage--clickable:hover {
+    filter: brightness(0.9); transform: scale(1.05);
+}
+.pl-deal-stage--clickable:focus-visible {
+    outline: 2px solid var(--accent); outline-offset: 1px;
+}
+.pl-inline-filter {
+    cursor: pointer; border-bottom: 1px dashed transparent;
+    transition: all 0.15s;
+}
+.pl-inline-filter:hover {
+    color: var(--accent); border-bottom-color: var(--accent);
 }
 
 /* ── View Panels ── */
@@ -356,6 +412,18 @@
 .pl-dept-grid.collapsed { display: none; }
 .pl-dept-card {
     background: var(--card); padding: 14px 16px;
+    transition: all 0.2s;
+}
+.pl-dept-card--clickable { cursor: pointer; }
+.pl-dept-card--clickable:hover {
+    background: rgba(60, 180, 173, 0.04);
+}
+.pl-dept-card--active {
+    background: rgba(60, 180, 173, 0.08) !important;
+    box-shadow: inset 3px 0 0 var(--accent);
+}
+.pl-dept-card--clickable:focus-visible {
+    outline: 2px solid var(--accent); outline-offset: -2px;
 }
 .pl-dept-name {
     font-size: 12px; font-weight: 700; color: var(--text);
@@ -418,6 +486,13 @@
     letter-spacing: 0.04em;
 }
 
+/* ── Reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+    .pl-sum-card, .pl-sum-card--clickable:hover, .pl-deal-stage--clickable:hover,
+    .pl-dept-card, .pl-chip, .pl-export-btn { transition: none; transform: none; }
+    .pl-sum-card--active::after { display: none; }
+}
+
 /* ── Empty State ── */
 .pl-empty {
     text-align: center; padding: 48px 24px;
@@ -428,8 +503,18 @@
 [data-theme="dark"] .pl-card:hover {
     box-shadow: 0 4px 16px rgba(0,0,0,0.25);
 }
-[data-theme="dark"] .pl-sum-card:hover {
+[data-theme="dark"] .pl-sum-card--clickable:hover {
     box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+}
+[data-theme="dark"] .pl-sum-card--active {
+    background: rgba(60, 180, 173, 0.1);
+    box-shadow: 0 0 0 2px rgba(60, 180, 173, 0.3), 0 4px 16px rgba(0,0,0,0.2);
+}
+[data-theme="dark"] .pl-dept-card--active {
+    background: rgba(60, 180, 173, 0.12) !important;
+}
+[data-theme="dark"] .pl-chip {
+    background: rgba(60, 180, 173, 0.15);
 }
 [data-theme="dark"] .pl-deals-table tbody tr:hover,
 [data-theme="dark"] .pl-breakdown-table tr:hover {
@@ -443,24 +528,64 @@
 
 /* ── Responsive ── */
 @media (max-width: 900px) {
-    .pl-summary-row { grid-template-columns: repeat(3, 1fr); }
+    .pl-summary-row { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .pl-sum-card { padding: 12px; }
+    .pl-sum-value { font-size: 20px; }
     .pl-grid-2, .pl-report-grid { grid-template-columns: 1fr; }
     .pl-report-full { grid-column: 1; }
-    .pl-view-bar { flex-direction: column; align-items: flex-start; }
+    .pl-view-bar { flex-direction: column; align-items: stretch; gap: 8px; }
+    .pl-bar-right { width: 100%; }
+    .pl-period-pills { width: 100%; justify-content: stretch; }
+    .pl-period-pill { flex: 1; text-align: center; padding: 8px 6px; }
     .pl-funnel-row,
     .pl-funnel-head { grid-template-columns: 140px 1fr 60px 60px; }
     .pl-gantt-label { width: 120px; min-width: 120px; }
     .pl-dept-grid { grid-template-columns: repeat(2, 1fr); }
     .pl-export-options { flex-direction: column; }
+    .pl-filter-count { justify-content: flex-start; margin-left: 0; }
 }
+
 @media (max-width: 600px) {
-    .pl-summary-row { grid-template-columns: repeat(2, 1fr); }
-    .pl-filters-row { flex-direction: column; align-items: stretch; }
-    .pl-filter-select { min-width: 100%; }
+    .pl-summary-row { grid-template-columns: repeat(2, 1fr); gap: 6px; }
+    .pl-sum-card { padding: 10px 8px; }
+    .pl-sum-label { font-size: 9px; margin-bottom: 4px; }
+    .pl-sum-value { font-size: 18px; }
+    .pl-sum-sub { font-size: 10px; }
+    .pl-yoy { font-size: 9px; padding: 1px 5px; }
+    .pl-view-tabs { width: 100%; }
+    .pl-view-tab { flex: 1; text-align: center; padding: 8px 8px; font-size: 12px; }
     .pl-period-pills { flex-wrap: wrap; }
+    .pl-period-pill { font-size: 10px; padding: 8px 10px; flex: 1; min-width: calc(50% - 4px); text-align: center; }
+    .pl-filters-row { flex-direction: column; align-items: stretch; gap: 8px; }
+    .pl-filter-group { width: 100%; }
+    .pl-filter-select { width: 100%; min-width: 100%; min-height: var(--touch-min); font-size: 14px; }
+    .pl-filter-count { flex-direction: column; align-items: flex-start; gap: 6px; }
     .pl-funnel-row,
-    .pl-funnel-head { grid-template-columns: 120px 1fr 50px; }
+    .pl-funnel-head { grid-template-columns: 100px 1fr 40px; gap: 6px; }
     .pl-funnel-head > :nth-child(4),
     .pl-funnel-row > :nth-child(4) { display: none; }
+    .pl-funnel-stage { font-size: 11px; }
+    .pl-funnel-bar-label { font-size: 11px; min-width: 20px; }
+    .pl-funnel-pct { font-size: 11px; }
     .pl-dept-grid { grid-template-columns: 1fr; }
+    .pl-dept-header { padding: 10px 12px; }
+    .pl-dept-card { padding: 10px 12px; }
+    .pl-breakdown-table th { padding: 6px 6px; font-size: 9px; }
+    .pl-breakdown-table td { padding: 6px 6px; font-size: 12px; }
+    .pl-winloss-value { font-size: 28px; }
+    .pl-winloss-bar { height: 28px; }
+    .pl-gantt-label { width: 80px; min-width: 80px; font-size: 10px; padding: 4px 6px; }
+    .pl-gantt-bar { font-size: 8px; height: 16px; top: 8px; padding: 0 4px; }
+    .pl-gantt-header-cell { font-size: 8px; padding: 4px 2px; min-width: 40px; }
+    .pl-export-btn { padding: 12px 16px; font-size: 13px; }
+    .pl-card { padding: var(--space-3); }
+    .pl-deals-table { min-width: 700px; }
+}
+
+@media (max-width: 400px) {
+    .pl-summary-row { grid-template-columns: 1fr 1fr; gap: 4px; }
+    .pl-sum-card { padding: 8px 6px; }
+    .pl-sum-value { font-size: 16px; }
+    .pl-sum-label { font-size: 8px; letter-spacing: 0.03em; }
+    .pl-view-tab { padding: 8px 6px; font-size: 11px; }
 }

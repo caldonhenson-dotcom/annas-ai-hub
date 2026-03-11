@@ -11,6 +11,7 @@
     var SORT_DIR = 'desc';
     var ACTIVE_PERIOD = 'ytd';
     var ACTIVE_VIEW = 'table';
+    var QUICK_FILTER = null; // {type:'status',value:'won'} or {type:'product',value:'CDD'} etc.
     var HUB_DOMAIN = 'app-eu1.hubspot.com';
     var HUB_ID = '26931451';
 
@@ -109,8 +110,45 @@
         if (sv) FILTERED = FILTERED.filter(function (d) { return d.source === sv; });
         if (stv) FILTERED = FILTERED.filter(function (d) { return d.stage === stv; });
 
+        // Quick filter from card/badge clicks
+        if (QUICK_FILTER) {
+            var qf = QUICK_FILTER;
+            if (qf.type === 'status') {
+                if (qf.value === 'won') FILTERED = FILTERED.filter(function (d) { return d.isWon; });
+                else if (qf.value === 'lost') FILTERED = FILTERED.filter(function (d) { return d.isLost; });
+                else if (qf.value === 'open') FILTERED = FILTERED.filter(function (d) { return !d.isWon && !d.isLost; });
+            } else if (qf.type === 'stage') {
+                FILTERED = FILTERED.filter(function (d) { return d.stage === qf.value; });
+            } else if (qf.type === 'product') {
+                FILTERED = FILTERED.filter(function (d) { return d.product && d.product.indexOf(qf.value) !== -1; });
+            } else if (qf.type === 'owner') {
+                FILTERED = FILTERED.filter(function (d) { return d.owner === qf.value; });
+            } else if (qf.type === 'source') {
+                FILTERED = FILTERED.filter(function (d) { return d.source === qf.value; });
+            }
+        }
+
         sortDeals();
         renderAll();
+    }
+
+    function setQuickFilter(type, value, label) {
+        if (QUICK_FILTER && QUICK_FILTER.type === type && QUICK_FILTER.value === value) {
+            QUICK_FILTER = null; // toggle off
+        } else {
+            QUICK_FILTER = { type: type, value: value, label: label || value };
+        }
+        applyFilters();
+    }
+
+    function clearAllFilters() {
+        QUICK_FILTER = null;
+        var ids = ['pl-filter-owner', 'pl-filter-product', 'pl-filter-source', 'pl-filter-stage'];
+        ids.forEach(function (id) {
+            var sel = document.getElementById(id);
+            if (sel) sel.value = '';
+        });
+        applyFilters();
     }
 
     function sortDeals() {
@@ -195,17 +233,21 @@
         var yCount = hasYoY ? calcYoY(cur.count, prev.count) : null;
 
         var cards = [
-            { label: 'Total Deal Amount', value: fmtCurrencyK(cur.total), sub: 'Avg ' + fmtCurrencyK(avgDeal) + ' per deal', yoy: yTotal },
-            { label: 'Weighted Amount', value: fmtCurrencyK(cur.weighted), sub: cur.count + ' deals' + (hasYoY ? ' (was ' + prev.count + ')' : ''), yoy: yWeighted },
-            { label: 'Open Deal Amount', value: fmtCurrencyK(cur.open), sub: cur.openCount + ' open deals', yoy: yOpen },
-            { label: 'Closed Won', value: fmtCurrencyK(cur.won), sub: cur.wonCount + ' won', cls: 'color:var(--success)', yoy: yWon },
-            { label: 'Closed Lost', value: fmtCurrencyK(cur.lost), sub: cur.lostCount + ' lost', cls: 'color:var(--danger)', yoy: yLost },
-            { label: 'Avg Deal Age', value: cur.avgAge + ' mo', sub: 'Open deals', yoy: null }
+            { label: 'Total Deal Amount', value: fmtCurrencyK(cur.total), sub: 'Avg ' + fmtCurrencyK(avgDeal) + ' per deal', yoy: yTotal, filter: null },
+            { label: 'Weighted Amount', value: fmtCurrencyK(cur.weighted), sub: cur.count + ' deals' + (hasYoY ? ' (was ' + prev.count + ')' : ''), yoy: yWeighted, filter: null },
+            { label: 'Open Pipeline', value: fmtCurrencyK(cur.open), sub: cur.openCount + ' open deals', yoy: yOpen, filter: { type: 'status', value: 'open', label: 'Open Deals' } },
+            { label: 'Closed Won', value: fmtCurrencyK(cur.won), sub: cur.wonCount + ' won', cls: 'color:var(--success)', yoy: yWon, filter: { type: 'status', value: 'won', label: 'Closed Won' } },
+            { label: 'Closed Lost', value: fmtCurrencyK(cur.lost), sub: cur.lostCount + ' lost', cls: 'color:var(--danger)', yoy: yLost, filter: { type: 'status', value: 'lost', label: 'Closed Lost' } },
+            { label: 'Avg Deal Age', value: cur.avgAge + ' mo', sub: 'Open deals', yoy: null, filter: { type: 'status', value: 'open', label: 'Open Deals' } }
         ];
 
         var html = '';
         cards.forEach(function (c) {
-            html += '<div class="pl-sum-card">'
+            var isActive = QUICK_FILTER && c.filter && QUICK_FILTER.type === c.filter.type && QUICK_FILTER.value === c.filter.value;
+            var clickable = c.filter ? ' pl-sum-card--clickable' : '';
+            var active = isActive ? ' pl-sum-card--active' : '';
+            var dataAttr = c.filter ? ' data-qf-type="' + c.filter.type + '" data-qf-value="' + c.filter.value + '" data-qf-label="' + c.filter.label + '"' : '';
+            html += '<div class="pl-sum-card' + clickable + active + '"' + dataAttr + ' role="' + (c.filter ? 'button' : 'status') + '" tabindex="' + (c.filter ? '0' : '-1') + '">'
                 + '<div class="pl-sum-label">' + c.label + '</div>'
                 + '<div class="pl-sum-value"' + (c.cls ? ' style="' + c.cls + '"' : '') + '>' + c.value + '</div>'
                 + '<div class="pl-sum-sub">' + c.sub + '</div>'
@@ -244,9 +286,8 @@
         var html = '';
         sorted.forEach(function (name) {
             var d = depts[name];
-            var winRate = (d.wonCount + (d.count - d.wonCount - (d.count - d.wonCount))) > 0
-                ? (d.wonCount / d.count * 100).toFixed(0) : '0';
-            html += '<div class="pl-dept-card">'
+            var isActive = QUICK_FILTER && QUICK_FILTER.type === 'product' && QUICK_FILTER.value === name;
+            html += '<div class="pl-dept-card pl-dept-card--clickable' + (isActive ? ' pl-dept-card--active' : '') + '" data-qf-type="product" data-qf-value="' + esc(name) + '" data-qf-label="' + esc(name) + '" role="button" tabindex="0">'
                 + '<div class="pl-dept-name">' + esc(name) + '</div>'
                 + '<div class="pl-dept-stats">'
                 + '<div class="pl-dept-stat"><span class="pl-dept-stat-label">Deals</span><span class="pl-dept-stat-value">' + d.count + '</span></div>'
@@ -270,11 +311,35 @@
     }
 
     // ================================================================
-    // Filter Count
+    // Filter Count + Active Filter Chips
     // ================================================================
     function renderFilterCount() {
         var el = document.getElementById('pl-filter-count');
-        if (el) el.textContent = 'Showing ' + FILTERED.length + ' of ' + DEALS.length + ' deals';
+        if (!el) return;
+
+        var chips = [];
+        var owner = document.getElementById('pl-filter-owner');
+        var product = document.getElementById('pl-filter-product');
+        var source = document.getElementById('pl-filter-source');
+        var stage = document.getElementById('pl-filter-stage');
+        if (owner && owner.value) chips.push({ label: 'Owner: ' + owner.value, clear: 'pl-filter-owner' });
+        if (product && product.value) chips.push({ label: 'Product: ' + product.value, clear: 'pl-filter-product' });
+        if (source && source.value) chips.push({ label: 'Source: ' + source.value, clear: 'pl-filter-source' });
+        if (stage && stage.value) chips.push({ label: 'Stage: ' + stage.value, clear: 'pl-filter-stage' });
+        if (QUICK_FILTER) chips.push({ label: QUICK_FILTER.label, clear: 'quick' });
+
+        var hasFilters = chips.length > 0;
+        var html = '<span class="pl-filter-count-text">Showing ' + FILTERED.length + ' of ' + filterByPeriod(DEALS, ACTIVE_PERIOD).length + ' deals</span>';
+
+        if (hasFilters) {
+            html += '<span class="pl-active-chips">';
+            chips.forEach(function (c) {
+                html += '<span class="pl-chip" data-clear="' + c.clear + '">' + esc(c.label) + ' <span class="pl-chip-x">&times;</span></span>';
+            });
+            html += '<button class="pl-clear-all" id="pl-clear-all">Clear all</button>';
+            html += '</span>';
+        }
+        el.innerHTML = html;
     }
 
     // ================================================================
@@ -295,12 +360,12 @@
             var dealUrl = 'https://' + HUB_DOMAIN + '/contacts/' + HUB_ID + '/record/0-3/' + d.id;
             html += '<tr>'
                 + '<td class="pl-deal-name"><a href="' + dealUrl + '" target="_blank" rel="noopener">' + esc(d.name) + '</a></td>'
-                + '<td><span class="pl-deal-stage pl-stage-' + cssClass + '">' + esc(d.stage) + '</span></td>'
+                + '<td><span class="pl-deal-stage pl-stage-' + cssClass + ' pl-deal-stage--clickable" data-qf-type="stage" data-qf-value="' + esc(d.stage) + '" data-qf-label="Stage: ' + esc(d.stage) + '" role="button" tabindex="0">' + esc(d.stage) + '</span></td>'
                 + '<td>' + fmtDateShort(d.created) + '</td>'
-                + '<td>' + esc(d.product || '—') + '</td>'
-                + '<td>' + esc(d.source || '—') + '</td>'
+                + '<td>' + (d.product ? '<span class="pl-inline-filter" data-qf-type="product" data-qf-value="' + esc(d.product) + '" data-qf-label="' + esc(d.product) + '">' + esc(d.product) + '</span>' : '—') + '</td>'
+                + '<td>' + (d.source ? '<span class="pl-inline-filter" data-qf-type="source" data-qf-value="' + esc(d.source) + '" data-qf-label="Source: ' + esc(d.source) + '">' + esc(d.source) + '</span>' : '—') + '</td>'
                 + '<td class="pl-deal-amt">' + fmtCurrency(d.amount) + '</td>'
-                + '<td>' + esc(d.owner) + '</td>'
+                + '<td>' + (d.owner ? '<span class="pl-inline-filter" data-qf-type="owner" data-qf-value="' + esc(d.owner) + '" data-qf-label="Owner: ' + esc(d.owner) + '">' + esc(d.owner) + '</span>' : '—') + '</td>'
                 + '<td class="pl-deal-muted">' + esc(d.lostReason || '—') + '</td>'
                 + '<td class="pl-deal-muted">' + esc(d.wonReason || '—') + '</td>'
                 + '</tr>';
@@ -603,12 +668,37 @@
     // Event Wiring
     // ================================================================
     function wireEvents() {
-        // View tabs
         var section = document.getElementById('pipeline');
         if (!section) return;
 
         section.addEventListener('click', function (e) {
-            // View tab click
+            // ── Quick filter click (summary cards, dept cards, stage badges, inline filters) ──
+            var qfEl = e.target.closest('[data-qf-type]');
+            if (qfEl) {
+                e.preventDefault();
+                e.stopPropagation();
+                setQuickFilter(qfEl.getAttribute('data-qf-type'), qfEl.getAttribute('data-qf-value'), qfEl.getAttribute('data-qf-label'));
+                // Scroll table into view if switching from a card
+                if (ACTIVE_VIEW === 'table') {
+                    var tbl = document.getElementById('pl-view-table');
+                    if (tbl) tbl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+                return;
+            }
+
+            // ── Filter chip dismiss ──
+            var chip = e.target.closest('.pl-chip');
+            if (chip) {
+                var clearTarget = chip.getAttribute('data-clear');
+                if (clearTarget === 'quick') { QUICK_FILTER = null; applyFilters(); }
+                else { var sel = document.getElementById(clearTarget); if (sel) { sel.value = ''; applyFilters(); } }
+                return;
+            }
+
+            // ── Clear all button ──
+            if (e.target.closest('#pl-clear-all')) { clearAllFilters(); return; }
+
+            // ── View tab click ──
             var tab = e.target.closest('.pl-view-tab');
             if (tab) {
                 section.querySelectorAll('.pl-view-tab').forEach(function (t) {
@@ -623,7 +713,7 @@
                 return;
             }
 
-            // Period pill click
+            // ── Period pill click ──
             var pill = e.target.closest('.pl-period-pill');
             if (pill) {
                 section.querySelectorAll('.pl-period-pill').forEach(function (p) { p.classList.remove('active'); });
@@ -633,13 +723,12 @@
                 return;
             }
 
-            // Table sort
+            // ── Table sort ──
             var th = e.target.closest('.pl-deals-table thead th[data-sort]');
             if (th) {
                 var key = th.getAttribute('data-sort');
                 if (SORT_KEY === key) SORT_DIR = SORT_DIR === 'asc' ? 'desc' : 'asc';
                 else { SORT_KEY = key; SORT_DIR = key === 'amount' ? 'desc' : 'asc'; }
-                // Update sort indicators
                 section.querySelectorAll('.pl-deals-table thead th').forEach(function (h) {
                     h.classList.remove('sorted-asc', 'sorted-desc');
                 });
@@ -649,10 +738,18 @@
             }
         });
 
-        // Filter selects
+        // Keyboard support for quick filter elements
+        section.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                var qfEl = e.target.closest('[data-qf-type]');
+                if (qfEl) { e.preventDefault(); qfEl.click(); }
+            }
+        });
+
+        // Filter selects — clear quick filter when dropdown used
         ['pl-filter-owner', 'pl-filter-product', 'pl-filter-source', 'pl-filter-stage'].forEach(function (id) {
             var sel = document.getElementById(id);
-            if (sel) sel.addEventListener('change', applyFilters);
+            if (sel) sel.addEventListener('change', function () { QUICK_FILTER = null; applyFilters(); });
         });
     }
 
