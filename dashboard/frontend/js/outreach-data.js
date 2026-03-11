@@ -4,10 +4,8 @@
 (function () {
     'use strict';
 
-    'use strict';
-
     // ── API endpoints ─────────────────────────────────────
-    var API = {
+    window.API = {
         session: '/api/linkedin-session',
         research: '/api/prospect-research',
         draft: '/api/draft-message',

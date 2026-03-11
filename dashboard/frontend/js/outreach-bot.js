@@ -83,7 +83,6 @@
     };
 
     // Override renderers to make names clickable
-    var _origApprovals = renderApprovals;
     renderApprovals = function() {
         var tbody = document.getElementById('approval-tbody');
         if (!tbody) return;
@@ -114,7 +113,6 @@
         tbody.innerHTML = html;
     };
 
-    var _origLeaderboard = renderLeaderboard;
     renderLeaderboard = function() {
         var tbody = document.getElementById('leaderboard-tbody');
         if (!tbody) return;

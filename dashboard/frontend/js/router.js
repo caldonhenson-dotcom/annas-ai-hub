@@ -173,15 +173,12 @@
         // Stop particles when leaving Anna page
         if (pageId !== 'anna' && window.AIParticles) window.AIParticles.stop();
 
-        // Hide chat FAB + top bar on Anna page; hide filter bar on non-report pages
+        // Hide chat FAB + top bar on Anna page
         var isAnna = (pageId === 'anna');
-        var noFilterPages = ['anna', 'skills', 'ai-roadmap', 'inbound-queue'];
         var fab = document.getElementById('chat-fab');
         var topBar = document.getElementById('top-bar');
-        var filterBar = document.getElementById('filter-bar');
         if (fab) fab.style.display = isAnna ? 'none' : '';
         if (topBar) topBar.style.display = isAnna ? 'none' : '';
-        if (filterBar) filterBar.style.display = noFilterPages.indexOf(pageId) !== -1 ? 'none' : '';
 
         // Persist last page
         window.savePrefs({ lastPage: pageId });
