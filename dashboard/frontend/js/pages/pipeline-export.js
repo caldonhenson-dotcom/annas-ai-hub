@@ -76,14 +76,44 @@
     }
 
     // ================================================================
+    // PDF Library Loader — retry on demand if CDN failed at page load
+    // ================================================================
+    function loadScript(src) {
+        return new Promise(function (resolve, reject) {
+            var s = document.createElement('script');
+            s.src = src;
+            s.onload = resolve;
+            s.onerror = reject;
+            document.head.appendChild(s);
+        });
+    }
+
+    function ensurePDFLibs() {
+        if (window.jspdf && window.jspdf.jsPDF) return Promise.resolve();
+        return loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js')
+            .then(function () {
+                return loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.4/jspdf.plugin.autotable.min.js');
+            });
+    }
+
+    // ================================================================
     // PDF Export — Marketing Report
     // ================================================================
     function exportPDF(filtered, allDeals, period) {
-        if (!window.jspdf || !window.jspdf.jsPDF) {
-            alert('PDF library not loaded. Please try again in a moment.');
-            return;
-        }
+        ensurePDFLibs().then(function () {
+            if (!window.jspdf || !window.jspdf.jsPDF) {
+                if (window.Toast) Toast.error('PDF library failed to load — check your network or ad blocker.');
+                else alert('PDF library failed to load. Check your network connection or ad blocker.');
+                return;
+            }
+            _generatePDF(filtered, allDeals, period);
+        }).catch(function () {
+            if (window.Toast) Toast.error('Could not download PDF library — check your connection.');
+            else alert('Could not download PDF library. Check your internet connection.');
+        });
+    }
 
+    function _generatePDF(filtered, allDeals, period) {
         var jsPDF = window.jspdf.jsPDF;
         var doc = new jsPDF('p', 'mm', 'a4');
         var pageW = doc.internal.pageSize.getWidth();
