@@ -1,7 +1,13 @@
-<!-- M&A Hub — Combined Pipeline + IC Scorecards -->
-<div class="section-header">
-    <h1 class="section-title">M&amp;A Hub</h1>
-    <p class="section-subtitle">Pipeline deals and Investment Committee scorecards in one view</p>
+<!-- M&A Hub — Monday.com Board 1674745475 -->
+<div class="section-header" style="display:flex;justify-content:space-between;align-items:flex-start">
+    <div>
+        <h1 class="section-title">M&amp;A Hub</h1>
+        <p class="section-subtitle">Pipeline deals and Investment Committee scorecards — Monday.com</p>
+    </div>
+    <a href="https://ecomplete-hq.monday.com/boards/1674745475" target="_blank" rel="noopener"
+       class="pl-filter-pill" style="text-decoration:none;font-size:12px;font-weight:600;gap:4px">
+       &#128279; Open in Monday.com
+    </a>
 </div>
 
 <div class="ma-hub-tabs" id="ma-hub-tabs">
@@ -13,17 +19,25 @@
     </button>
 </div>
 
+<!-- Pipeline Tab -->
 <div class="ma-hub-panel active" id="ma-panel-pipeline">
-    <div class="page-loading">
-        <div class="skeleton-line" style="width:40%"></div>
-        <div class="skeleton-card"></div>
-        <div class="skeleton-card"></div>
+    <div class="dashboard-section">
+        <div id="ma-kpi-totals" class="kpi-grid"></div>
+        <div class="pl-grid-2">
+            <div class="pl-card"><div class="card-title">Deal Flow by Stage</div><div id="ma-funnel"></div></div>
+            <div class="pl-card"><div class="card-title">Status Breakdown</div><div id="ma-status-bars"></div></div>
+        </div>
+        <div class="pl-card"><div class="card-title">Active Deals</div><div id="ma-deals-table"></div></div>
     </div>
 </div>
+
+<!-- IC Scorecards Tab -->
 <div class="ma-hub-panel" id="ma-panel-ic">
-    <div class="page-loading">
-        <div class="skeleton-line" style="width:40%"></div>
-        <div class="skeleton-card"></div>
-        <div class="skeleton-card"></div>
+    <div class="dashboard-section">
+        <div id="ma-ic-kpis" class="kpi-grid"></div>
+        <div class="pl-grid-2">
+            <div class="pl-card"><div class="card-title">IC Scorecard Rankings</div><div id="ma-ic-table"></div></div>
+            <div class="pl-card"><div class="card-title">Score Distribution</div><div id="ma-ic-dist"></div></div>
+        </div>
     </div>
 </div>
